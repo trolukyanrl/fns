@@ -107,8 +107,7 @@ export default function InspectionFormScreen({ navigation, route }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <TouchableWithoutFeedback onPress={() => {}}>
-        <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -320,7 +319,6 @@ export default function InspectionFormScreen({ navigation, route }) {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-    </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }

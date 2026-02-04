@@ -12,10 +12,15 @@ import SICAssignTask from './screens/SICAssignTask';
 import SICProfile from './screens/SICProfile';
 import TADashboard from './screens/TADashboard';
 import TasksScreen from './screens/TasksScreen';
+import TaskDetailsScreen from './screens/TaskDetailsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import QRScannerScreen from './screens/QRScannerScreen';
 import LocationQRScannerScreen from './screens/LocationQRScannerScreen';
 import InspectionFormScreen from './screens/InspectionFormScreen';
+import PendingApprovalsScreen from './screens/PendingApprovalsScreen';
+import ApprovalReviewScreen from './screens/ApprovalReviewScreen';
+import ApprovalStatusScreen from './screens/ApprovalStatusScreen';
+import OverdueTasksScreen from './screens/OverdueTasksScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -39,10 +44,17 @@ export default function App() {
           {/* TA Screens */}
           <Stack.Screen name="TADashboard" component={TADashboard} />
           <Stack.Screen name="Tasks" component={TasksScreen} />
+          <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="QRScanner" component={QRScannerScreen} />
           <Stack.Screen name="LocationQRScanner" component={LocationQRScannerScreen} />
           <Stack.Screen name="InspectionForm" component={InspectionFormScreen} />
+
+          {/* SIC Screens */}
+          <Stack.Screen name="PendingApprovals" component={PendingApprovalsScreen} />
+          <Stack.Screen name="ApprovalStatus" component={ApprovalStatusScreen} />
+          <Stack.Screen name="ApprovalReview" component={ApprovalReviewScreen} />
+          <Stack.Screen name="OverdueTasks" component={OverdueTasksScreen} />
         </Stack.Navigator>
 
         <StatusBar style="dark" />

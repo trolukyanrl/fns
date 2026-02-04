@@ -47,7 +47,10 @@ export default function TasksScreen({ navigation }) {
   const completedTasks = TASKS.filter(task => task.status === 'Completed');
 
   const TaskCard = ({ task }) => (
-    <View style={styles.taskCard}>
+    <TouchableOpacity 
+      style={styles.taskCard}
+      onPress={() => navigation.navigate('TaskDetails', { task })}
+    >
       <View style={styles.taskHeader}>
         <Text style={styles.taskId}>{task.id}</Text>
         <View style={[
@@ -83,7 +86,7 @@ export default function TasksScreen({ navigation }) {
           <Text style={styles.progressText}>{task.progress}%</Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 
   return (

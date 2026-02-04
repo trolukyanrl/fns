@@ -1,0 +1,545 @@
+import React from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  SafeAreaView,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const BLUE = '#4285F4';
+const DARK_GREY = '#333333';
+const LIGHT_GREY = '#666666';
+const GREEN = '#4CAF50';
+const ORANGE = '#F9A825';
+const RED = '#E53935';
+
+export default function TaskDetailsScreen({ navigation, route }) {
+  const { task } = route.params;
+
+  // Mock inspection data - in a real app, this would come from your data source
+  const inspectionData = {
+    taskId: 'INS-2024-0847',
+    assetId: task.id,
+    location: task.location,
+    cylinderNumbers: 'CYL-8847, CYL-8848',
+    lastHydrotest: '15 Jan 2024',
+    nextHydrotest: '15 Jan 2025',
+    cylinder1Pressure: '300',
+    cylinder2Pressure: '280', // Lower pressure
+    flowRate: '35', // Lower flow rate
+    faceMaskCondition: 'NOT OK', // Issue found
+    harnessStraps: 'OK',
+    cylinderValves: 'OK',
+    pressureGauge: 'N/A', // Not applicable for this model
+    demandValve: 'OK',
+    warningWhistle: 'NOT OK', // Issue found
+    gpsLocation: '40.7128° N, 74.0060° W',
+    generalRemark: 'Face mask shows signs of wear and tear. Warning whistle not functioning properly. Pressure gauge not applicable for this model. Cylinder 2 pressure is lower than optimal. Flow rate below standard. Equipment requires maintenance before next use.',
+    isLocationCaptured: true,
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Pending':
+        return ORANGE;
+      case 'Pending for Approval':
+        return '#7B1FA2';
+      case 'Completed':
+        return GREEN;
+      default:
+        return LIGHT_GREY;
+    }
+  };
+
+  const getStatusTextColor = (status) => {
+    switch (status) {
+      case 'Pending':
+        return '#F57F17';
+      case 'Pending for Approval':
+        return '#7B1FA2';
+      case 'Completed':
+        return '#2E7D32';
+      default:
+        return LIGHT_GREY;
+    }
+  };
+
+  const getChecklistIcon = (value) => {
+    switch (value) {
+      case 'OK':
+        return { name: 'checkmark-circle', color: GREEN };
+      case 'NOT OK':
+        return { name: 'close-circle', color: RED };
+      case 'N/A':
+        return { name: 'help-circle', color: LIGHT_GREY };
+      default:
+        return { name: 'help-circle', color: LIGHT_GREY };
+    }
+  };
+
+  const handleStartInspection = () => {
+    navigation.navigate('InspectionForm', {
+      baSetId: task.id,
+      location: task.location,
+    });
+  };
+
+  const handleEditInspection = () => {
+    navigation.navigate('InspectionForm', {
+      baSetId: task.id,
+      location: task.location,
+      // Pass existing data for editing
+      inspectionData,
+    });
+  };
+
+  const TaskDetailRow = ({ label, value, icon }) => (
+    <View style={styles.detailRow}>
+      <View style={styles.detailLeft}>
+        <Ionicons name={icon} size={16} color={LIGHT_GREY} />
+        <Text style={styles.detailLabel}>{label}</Text>
+      </View>
+      <Text style={styles.detailValue}>{value}</Text>
+    </View>
+  );
+
+  const ChecklistItem = ({ label, description, value }) => {
+    const iconData = getChecklistIcon(value);
+    return (
+      <View style={styles.checklistItem}>
+        <View style={styles.checklistItemHeader}>
+          <Text style={styles.checklistLabel}>{label}</Text>
+          {description && <Text style={styles.checklistDescription}>{description}</Text>}
+        </View>
+        <View style={styles.checklistStatus}>
+          <Ionicons name={iconData.name} size={20} color={iconData.color} />
+          <Text style={[styles.checklistStatusText, { color: iconData.color }]}>
+            {value}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={28} color={DARK_GREY} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Task Details</Text>
+        <TouchableOpacity>
+          <Ionicons name="ellipsis-vertical" size={24} color={DARK_GREY} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Task Overview Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Task Overview</Text>
+          
+          <View style={styles.taskOverview}>
+            <View style={styles.taskIdContainer}>
+              <Text style={styles.taskIdLabel}>Task ID</Text>
+              <Text style={styles.taskId}>{inspectionData.taskId}</Text>
+            </View>
+            
+            <View style={[
+              styles.statusBadge,
+              { backgroundColor: `${getStatusColor(task.status)}20`, borderColor: getStatusColor(task.status) }
+            ]}>
+              <Text style={[styles.statusText, { color: getStatusTextColor(task.status) }]}>
+                {task.status}
+              </Text>
+            </View>
+          </View>
+
+          <TaskDetailRow label="Asset ID" value={inspectionData.assetId} icon="cube" />
+          <TaskDetailRow label="Location" value={inspectionData.location} icon="location-outline" />
+          <TaskDetailRow label="Cylinder Numbers" value={inspectionData.cylinderNumbers} icon="barbell" />
+          <TaskDetailRow label="Last Hydrotest" value={inspectionData.lastHydrotest} icon="calendar-outline" />
+          <TaskDetailRow label="Next Hydrotest Due" value={inspectionData.nextHydrotest} icon="calendar-outline" />
+        </View>
+
+        {/* Pressure Readings Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pressure Readings</Text>
+          
+          <View style={styles.pressureGrid}>
+            <View style={styles.pressureCard}>
+              <Text style={styles.pressureLabel}>CYLINDER 1</Text>
+              <Text style={styles.pressureValue}>{inspectionData.cylinder1Pressure}</Text>
+              <Text style={styles.pressureUnit}>BAR</Text>
+            </View>
+            <View style={styles.pressureCard}>
+              <Text style={styles.pressureLabel}>CYLINDER 2</Text>
+              <Text style={styles.pressureValue}>{inspectionData.cylinder2Pressure}</Text>
+              <Text style={styles.pressureUnit}>BAR</Text>
+            </View>
+            <View style={styles.pressureCard}>
+              <Text style={styles.pressureLabel}>FLOW RATE</Text>
+              <Text style={styles.pressureValue}>{inspectionData.flowRate}</Text>
+              <Text style={styles.pressureUnit}>L/MIN</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Inspection Checklist Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Inspection Checklist</Text>
+
+          <ChecklistItem
+            label="Face Mask Condition"
+            description="Check for cracks, tears, and seal integrity"
+            value={inspectionData.faceMaskCondition}
+          />
+
+          <ChecklistItem
+            label="Harness & Straps"
+            description="Inspect webbing, buckles, and attachment points"
+            value={inspectionData.harnessStraps}
+          />
+
+          <ChecklistItem
+            label="Cylinder Valves"
+            description="Check operation, leaks, and thread condition"
+            value={inspectionData.cylinderValves}
+          />
+
+          <ChecklistItem
+            label="Pressure Gauge"
+            description="Verify accuracy and readability"
+            value={inspectionData.pressureGauge}
+          />
+
+          <ChecklistItem
+            label="Demand Valve"
+            description="Test airflow response and seal"
+            value={inspectionData.demandValve}
+          />
+
+          <ChecklistItem
+            label="Warning Whistle"
+            description="Ensure audible alarm at correct pressure"
+            value={inspectionData.warningWhistle}
+          />
+        </View>
+
+        {/* GPS Location Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>GPS Location</Text>
+          
+          <View style={styles.gpsCard}>
+            {inspectionData.isLocationCaptured ? (
+              <>
+                <Ionicons name="checkmark-circle" size={48} color={GREEN} />
+                <Text style={styles.gpsLocationText}>{inspectionData.gpsLocation}</Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="location-outline" size={48} color="#CCC" />
+                <Text style={styles.noLocationText}>No location captured yet</Text>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* General Remarks Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>General Remarks</Text>
+          
+          <View style={styles.remarksCard}>
+            <Text style={styles.remarksText}>
+              {inspectionData.generalRemark || 'No remarks provided.'}
+            </Text>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Bottom Action Buttons */}
+      <View style={styles.bottomActions}>
+        {task.status === 'Pending' ? (
+          <TouchableOpacity style={styles.startBtn} onPress={handleStartInspection}>
+            <Ionicons name="play-circle" size={18} color="#fff" />
+            <Text style={styles.startBtnText}>Start Inspection</Text>
+          </TouchableOpacity>
+        ) : task.status === 'Pending for Approval' ? (
+          <TouchableOpacity style={styles.editBtn} onPress={handleEditInspection}>
+            <Ionicons name="create" size={18} color="#fff" />
+            <Text style={styles.editBtnText}>Edit Inspection</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={styles.viewBtn} onPress={() => Alert.alert('Info', 'Inspection completed')}>
+            <Ionicons name="eye" size={18} color="#fff" />
+            <Text style={styles.viewBtnText}>View Report</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F5F5F5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DARK_GREY,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+  },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: DARK_GREY,
+    marginBottom: 16,
+  },
+  
+  // Task Overview Styles
+  taskOverview: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+  },
+  taskIdContainer: {
+    flex: 1,
+  },
+  taskIdLabel: {
+    fontSize: 12,
+    color: LIGHT_GREY,
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  taskId: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: DARK_GREY,
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  
+  // Detail Row Styles
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  detailLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: LIGHT_GREY,
+    fontWeight: '500',
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: DARK_GREY,
+  },
+
+  // Pressure Readings Styles
+  pressureGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  pressureCard: {
+    flex: 1,
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  pressureLabel: {
+    fontSize: 12,
+    color: LIGHT_GREY,
+    fontWeight: '500',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  pressureValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: DARK_GREY,
+    marginBottom: 2,
+  },
+  pressureUnit: {
+    fontSize: 12,
+    color: LIGHT_GREY,
+    fontWeight: '500',
+  },
+
+  // Checklist Styles
+  checklistItem: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  checklistItemHeader: {
+    marginBottom: 12,
+  },
+  checklistLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: DARK_GREY,
+    marginBottom: 4,
+  },
+  checklistDescription: {
+    fontSize: 13,
+    color: LIGHT_GREY,
+  },
+  checklistStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  checklistStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // GPS Location Styles
+  gpsCard: {
+    backgroundColor: '#F5F5F5',
+    borderRadius: 12,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 180,
+  },
+  gpsLocationText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: DARK_GREY,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  noLocationText: {
+    fontSize: 16,
+    color: LIGHT_GREY,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+
+  // Remarks Styles
+  remarksCard: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  remarksText: {
+    fontSize: 14,
+    color: DARK_GREY,
+    lineHeight: 20,
+  },
+
+  // Bottom Actions Styles
+  bottomActions: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E8E8E8',
+  },
+  startBtn: {
+    backgroundColor: BLUE,
+    flexDirection: 'row',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  startBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  editBtn: {
+    backgroundColor: ORANGE,
+    flexDirection: 'row',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  editBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  viewBtn: {
+    backgroundColor: GREEN,
+    flexDirection: 'row',
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  viewBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+});

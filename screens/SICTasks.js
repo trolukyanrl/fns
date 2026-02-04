@@ -8,6 +8,7 @@ import {
   ScrollView,
   FlatList,
   Alert,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
@@ -25,10 +26,26 @@ const RED = '#EF4444';
 export default function SICTasks({ navigation }) {
   const { tasks, deleteTask } = useTaskContext();
   const [activeTab, setActiveTab] = useState('Tasks');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     setActiveTab('Tasks');
   }, []);
+
+  // Filter tasks based on search query
+  const filteredTasks = tasks.filter(task => {
+    const query = searchQuery.toLowerCase();
+    return (
+      task.description.toLowerCase().includes(query) ||
+      task.assignedTo.toLowerCase().includes(query) ||
+      task.assignedToDept.toLowerCase().includes(query) ||
+      task.dueDate.toLowerCase().includes(query) ||
+      (task.baSets && task.baSets.some(baSet => 
+        baSet.name.toLowerCase().includes(query) ||
+        baSet.id.toLowerCase().includes(query)
+      ))
+    );
+  });
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -117,19 +134,22 @@ export default function SICTasks({ navigation }) {
           </View>
         </View>
 
-        {/* Assign New Task Button */}
-        <TouchableOpacity 
-          style={styles.assignButton}
-          onPress={() => navigation.navigate('SICAssignTask')}
-        >
-          <Ionicons name="add-circle" size={20} color={WHITE} />
-          <Text style={styles.assignButtonText}>Assign New Task</Text>
-        </TouchableOpacity>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color={LIGHT_GREY} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search tasks by description, assignee..."
+            placeholderTextColor={LIGHT_GREY}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
 
         {/* Tasks List */}
-        {tasks.length > 0 ? (
+        {filteredTasks.length > 0 ? (
           <FlatList
-            data={tasks}
+            data={filteredTasks}
             renderItem={renderTaskCard}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
@@ -138,9 +158,13 @@ export default function SICTasks({ navigation }) {
           />
         ) : (
           <View style={styles.emptyState}>
-            <Ionicons name="clipboard-outline" size={64} color={LIGHT_GREY} />
-            <Text style={styles.emptyStateText}>No tasks assigned yet</Text>
-            <Text style={styles.emptyStateSubtext}>Create a new task to get started</Text>
+            <Ionicons name={searchQuery ? "search-outline" : "clipboard-outline"} size={64} color={LIGHT_GREY} />
+            <Text style={styles.emptyStateText}>
+              {searchQuery ? 'No tasks found' : 'No tasks assigned yet'}
+            </Text>
+            <Text style={styles.emptyStateSubtext}>
+              {searchQuery ? 'Try adjusting your search terms' : 'Create a new task to get started'}
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -183,6 +207,9 @@ const styles = StyleSheet.create({
   logo: { width: 48, height: 48, borderRadius: 12, backgroundColor: LIGHT_BLUE, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },
   headerSubtitle: { fontSize: 12, color: GREY, marginTop: 4 },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 24 },
+  searchIcon: { marginRight: 12 },
+  searchInput: { flex: 1, fontSize: 16, color: DARK },
   assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: BLUE, borderRadius: 12, paddingVertical: 14, marginBottom: 24 },
   assignButtonText: { fontSize: 16, fontWeight: '600', color: WHITE, marginLeft: 8 },
   cardsContainer: { marginBottom: 24 },

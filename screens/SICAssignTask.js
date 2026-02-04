@@ -134,7 +134,19 @@ export default function SICAssignTask({ navigation, route }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
+
+  // Filter BA sets based on search query
+  const filteredBASets = BA_SETS.filter(baSet => {
+    const query = searchQuery.toLowerCase();
+    return (
+      baSet.id.toLowerCase().includes(query) ||
+      baSet.name.toLowerCase().includes(query) ||
+      baSet.zone.toLowerCase().includes(query) ||
+      baSet.cylinderNo.toLowerCase().includes(query)
+    );
+  });
 
   const handleAssignTask = () => {
     if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedBASets.length === 0) {
@@ -318,9 +330,7 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
         </View>
         {selectedBASets.includes(baSet.id) && (
-          <View style={styles.checkmark}>
-            <Ionicons name="checkmark" size={24} color={BLUE} />
-          </View>
+          <Ionicons name="checkmark-circle" size={20} color="#93C5FD" />
         )}
       </View>
 
@@ -420,22 +430,33 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
         </View>
 
-        {/* BA Sets Selection Card */}
-        <View style={styles.baSetCardContainer}>
+        {/* BA Sets Selection Section */}
+        <View style={styles.baSetSection}>
           <Text style={styles.baSetSectionTitle}>Select BA Sets</Text>
           <Text style={styles.baSetSectionSubtitle}>Choose equipment for this task</Text>
           
-          <View style={styles.baSetSection}>
-            <FlatList
-              data={BA_SETS}
-              renderItem={({ item }) => renderBASetCard(item)}
-              keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={false}
-              style={styles.baSetList}
+          {/* Search Bar */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color={LIGHT_GREY} style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search BA sets by ID, name, or zone..."
+              placeholderTextColor={LIGHT_GREY}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
           </View>
+          
+          {/* BA Sets List */}
+          <FlatList
+            data={filteredBASets}
+            renderItem={({ item }) => renderBASetCard(item)}
+            keyExtractor={(item) => item.id}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={false}
+            style={styles.baSetList}
+          />
         </View>
       </ScrollView>
 
@@ -655,11 +676,11 @@ const styles = StyleSheet.create({
   dateWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14 },
   selectText: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
   dateText: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
-  assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: BLUE, borderRadius: 12, paddingVertical: 16, flex: 1, marginLeft: 8 },
+  assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: BLUE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, flex: 1, marginLeft: 8 },
   buttonIcon: { marginRight: 12 },
   assignButtonText: { fontSize: 16, fontWeight: '700', color: WHITE },
   buttonsContainer: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 24, backgroundColor: WHITE, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
-  cancelButton: { backgroundColor: WHITE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, borderWidth: 1, borderColor: BLUE, flex: 1 },
+  cancelButton: { backgroundColor: WHITE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, borderWidth: 1, borderColor: BLUE, flex: 1, alignItems: 'center', justifyContent: 'center' },
   cancelButtonText: { fontSize: 16, fontWeight: '700', color: BLUE, textAlign: 'center' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: WHITE, borderRadius: 16, width: '80%', maxHeight: '60%', padding: 20 },
@@ -676,6 +697,9 @@ const styles = StyleSheet.create({
   baSetSectionTitle: { fontSize: 14, fontWeight: '700', color: DARK, marginBottom: 4 },
   baSetSectionSubtitle: { fontSize: 12, color: GREY, marginBottom: 16 },
   baSetSection: { marginTop: 16, paddingTop: 0, borderTopWidth: 0 },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16 },
+  searchIcon: { marginRight: 12 },
+  searchInput: { flex: 1, fontSize: 16, color: DARK },
   baSetList: { flex: 1 },
   baSetCard: { 
     backgroundColor: WHITE, 
@@ -694,7 +718,7 @@ const styles = StyleSheet.create({
   baSetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
   baSetTitleSection: { flex: 1 },
   baSetId: { fontSize: 12, fontWeight: '600', color: GREY, marginBottom: 4 },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F0FDF4', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, width: 'auto' },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, width: 'auto' },
   statusText: { fontSize: 11, fontWeight: '600', color: GREEN, marginLeft: 4 },
   checkmark: { width: 32, height: 32, borderRadius: 16, backgroundColor: BLUE, alignItems: 'center', justifyContent: 'center' },
   baSetName: { fontSize: 16, fontWeight: '700', color: DARK, marginBottom: 8 },

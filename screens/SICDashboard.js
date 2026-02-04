@@ -76,30 +76,18 @@ export default function SICDashboard({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Equipment Management */}
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: '#E0F2FE' }]}>
-            <Ionicons name="shield-checkmark" size={24} color="#0284C7" />
-            <Text style={styles.statLabel}>Add BA Set Details</Text>
-          </View>
-
-          <View style={[styles.statCard, { backgroundColor: '#F0F9FF' }]}>
-            <Ionicons name="construct" size={24} color="#0369A1" />
-            <Text style={styles.statLabel}>Add SK Details</Text>
-          </View>
-        </View>
 
         {/* Pending Approvals */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, { backgroundColor: '#FEE2E2' }]}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2' }]} onPress={() => navigation.navigate('PendingApprovals')}>
             <Ionicons name="document-text-outline" size={24} color="#DC2626" />
             <Text style={styles.statLabel}>Pending Approvals</Text>
-          </View>
+          </TouchableOpacity>
 
-          <View style={[styles.statCard, { backgroundColor: '#F3E8FF' }]}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF' }]} onPress={() => navigation.navigate('OverdueTasks')}>
             <Ionicons name="time-outline" size={24} color="#7C3AED" />
             <Text style={styles.statLabel}>Overdue Tasks</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
       </ScrollView>
