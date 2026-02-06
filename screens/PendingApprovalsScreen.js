@@ -90,9 +90,118 @@ const PENDING_APPROVALS = [
   },
 ];
 
+const APPROVED_APPROVALS = [
+  {
+    id: 'APP-2024-004',
+    taskId: 'INS-2024-0850',
+    assetId: 'BA-SET-048',
+    inspector: 'Priya M.',
+    department: 'Safety',
+    submittedDate: 'Today, 10:15 AM',
+    approvedDate: 'Today, 10:45 AM',
+    location: 'Zone D-1',
+    status: 'Approved',
+    approvedBy: 'SIC Manager',
+    approvalNote: 'All safety checks passed. Equipment cleared for use.',
+    inspectionData: {
+      cylinder1Pressure: '300',
+      cylinder2Pressure: '300',
+      flowRate: '40',
+      faceMaskCondition: 'OK',
+      harnessStraps: 'OK',
+      cylinderValves: 'OK',
+      pressureGauge: 'OK',
+      demandValve: 'OK',
+      warningWhistle: 'OK',
+      generalRemark: 'Excellent condition. No issues found during inspection.',
+    }
+  },
+  {
+    id: 'APP-2024-005',
+    taskId: 'INS-2024-0851',
+    assetId: 'SK-018',
+    inspector: 'David L.',
+    department: 'Operations',
+    submittedDate: 'Yesterday, 3:30 PM',
+    approvedDate: 'Today, 9:00 AM',
+    location: 'Zone A-2',
+    status: 'Approved',
+    approvedBy: 'Shift Supervisor',
+    approvalNote: 'Minor maintenance completed. Equipment ready for deployment.',
+    inspectionData: {
+      cylinder1Pressure: '305',
+      cylinder2Pressure: '305',
+      flowRate: '41',
+      faceMaskCondition: 'OK',
+      harnessStraps: 'OK',
+      cylinderValves: 'OK',
+      pressureGauge: 'OK',
+      demandValve: 'OK',
+      warningWhistle: 'OK',
+      generalRemark: 'After minor adjustments to pressure settings, equipment is now optimal.',
+    }
+  },
+];
+
+const REJECTED_APPROVALS = [
+  {
+    id: 'APP-2024-006',
+    taskId: 'INS-2024-0852',
+    assetId: 'BA-SET-049',
+    inspector: 'Mike R.',
+    department: 'Maintenance',
+    submittedDate: 'Today, 1:00 PM',
+    rejectedDate: 'Today, 1:30 PM',
+    location: 'Zone B-3',
+    status: 'Rejected',
+    rejectedBy: 'Safety Manager',
+    rejectionReason: 'Critical safety issues found. Equipment requires immediate repair.',
+    rejectionNote: 'Face mask seal compromised, cylinder valve leaking. Do not use until repaired.',
+    inspectionData: {
+      cylinder1Pressure: '250',
+      cylinder2Pressure: '240',
+      flowRate: '25',
+      faceMaskCondition: 'NOT OK',
+      harnessStraps: 'NOT OK',
+      cylinderValves: 'NOT OK',
+      pressureGauge: 'NOT OK',
+      demandValve: 'NOT OK',
+      warningWhistle: 'NOT OK',
+      generalRemark: 'Multiple critical failures detected. Equipment unsafe for use.',
+    }
+  },
+  {
+    id: 'APP-2024-007',
+    taskId: 'INS-2024-0853',
+    assetId: 'SK-019',
+    inspector: 'Anna K.',
+    department: 'Safety',
+    submittedDate: 'Yesterday, 5:00 PM',
+    rejectedDate: 'Today, 8:15 AM',
+    location: 'Zone C-1',
+    status: 'Rejected',
+    rejectedBy: 'Operations Manager',
+    rejectionReason: 'Maintenance overdue. Equipment not serviceable.',
+    rejectionNote: 'Last hydrotest expired. Requires immediate servicing before approval.',
+    inspectionData: {
+      cylinder1Pressure: '280',
+      cylinder2Pressure: '285',
+      flowRate: '35',
+      faceMaskCondition: 'OK',
+      harnessStraps: 'OK',
+      cylinderValves: 'OK',
+      pressureGauge: 'OK',
+      demandValve: 'OK',
+      warningWhistle: 'OK',
+      generalRemark: 'Equipment functional but maintenance schedule not followed.',
+    }
+  },
+];
+
 export default function PendingApprovalsScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
   const [searchText, setSearchText] = useState('');
+  const [filterStatus, setFilterStatus] = useState('pending'); // Add filter state
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -105,6 +214,32 @@ export default function PendingApprovalsScreen({ navigation }) {
     navigation.navigate('ApprovalReview', { approval });
   };
 
+  const getStatusBadgeStyle = (status) => {
+    switch (status) {
+      case 'Pending':
+        return { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' };
+      case 'Approved':
+        return { backgroundColor: '#D1FAE5', borderColor: '#34D399' };
+      case 'Rejected':
+        return { backgroundColor: '#FEE2E2', borderColor: '#EF4444' };
+      default:
+        return { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB' };
+    }
+  };
+
+  const getStatusTextStyle = (status) => {
+    switch (status) {
+      case 'Pending':
+        return { color: '#DC2626' };
+      case 'Approved':
+        return { color: '#16A34A' };
+      case 'Rejected':
+        return { color: '#DC2626' };
+      default:
+        return { color: '#6B7280' };
+    }
+  };
+
   const ApprovalCard = ({ approval }) => (
     <View style={styles.approvalCard}>
       <View style={styles.approvalHeader}>
@@ -112,8 +247,8 @@ export default function PendingApprovalsScreen({ navigation }) {
           <Text style={styles.approvalId}>{approval.id}</Text>
           <Text style={styles.approvalAsset}>{approval.assetId}</Text>
         </View>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusText}>{approval.status}</Text>
+        <View style={[styles.statusBadge, getStatusBadgeStyle(approval.status)]}>
+          <Text style={[styles.statusText, getStatusTextStyle(approval.status)]}>{approval.status}</Text>
         </View>
       </View>
 
@@ -171,18 +306,21 @@ export default function PendingApprovalsScreen({ navigation }) {
         </View>
       </View>
 
-      <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.reviewButton} onPress={() => handleReview(approval)}>
-          <Ionicons name="eye-outline" size={18} color={WHITE} />
-          <Text style={styles.reviewButtonText}>Review</Text>
-        </TouchableOpacity>
-      </View>
+      {approval.status === 'Pending' && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.reviewButton} onPress={() => handleReview(approval)}>
+            <Ionicons name="eye-outline" size={18} color={WHITE} />
+            <Text style={styles.reviewButtonText}>Review</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+      {/* Fixed Header Section */}
+      <View style={styles.fixedHeader}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -194,17 +332,26 @@ export default function PendingApprovalsScreen({ navigation }) {
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('ApprovalStatus', { statusType: 'pending' })}>
-            <Ionicons name="document-text-outline" size={24} color="#DC2626" />
-            <Text style={styles.statLabel}>Pending</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, filterStatus === 'pending' && styles.statCardActive]} 
+            onPress={() => setFilterStatus('pending')}
+          >
+            <Ionicons name="document-text-outline" size={24} color={filterStatus === 'pending' ? "#DC2626" : GREY} />
+            <Text style={[styles.statLabel, filterStatus === 'pending' && styles.statLabelActive]}>Pending</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('ApprovalStatus', { statusType: 'approved' })}>
-            <Ionicons name="checkmark-circle-outline" size={24} color="#22C55E" />
-            <Text style={styles.statLabel}>APPROVED</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, filterStatus === 'approved' && styles.statCardActive]} 
+            onPress={() => setFilterStatus('approved')}
+          >
+            <Ionicons name="checkmark-circle-outline" size={24} color={filterStatus === 'approved' ? "#22C55E" : GREY} />
+            <Text style={[styles.statLabel, filterStatus === 'approved' && styles.statLabelActive]}>Approved</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.statCard} onPress={() => navigation.navigate('ApprovalStatus', { statusType: 'rejected' })}>
-            <Ionicons name="close-circle-outline" size={24} color="#EF4444" />
-            <Text style={styles.statLabel}>Rejected</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, filterStatus === 'rejected' && styles.statCardActive]} 
+            onPress={() => setFilterStatus('rejected')}
+          >
+            <Ionicons name="close-circle-outline" size={24} color={filterStatus === 'rejected' ? "#EF4444" : GREY} />
+            <Text style={[styles.statLabel, filterStatus === 'rejected' && styles.statLabelActive]}>Rejected</Text>
           </TouchableOpacity>
         </View>
 
@@ -221,30 +368,55 @@ export default function PendingApprovalsScreen({ navigation }) {
             />
           </View>
         </View>
+      </View>
 
+      {/* Scrollable Content Section */}
+      <ScrollView 
+        style={styles.scrollableContent}
+        contentContainerStyle={styles.scrollableContentContainer}
+      >
         {/* Filtered Approvals List */}
         {(() => {
-          const filteredApprovals = PENDING_APPROVALS.filter(approval => {
-            const searchLower = searchText.toLowerCase();
-            return (
-              approval.id.toLowerCase().includes(searchLower) ||
-              approval.assetId.toLowerCase().includes(searchLower) ||
-              approval.inspector.toLowerCase().includes(searchLower) ||
-              approval.department.toLowerCase().includes(searchLower) ||
-              approval.location.toLowerCase().includes(searchLower) ||
-              approval.inspectionData.generalRemark.toLowerCase().includes(searchLower)
-            );
-          });
+          let filteredApprovals = [];
+          
+          // Get the appropriate data based on filter status
+          if (filterStatus === 'pending') {
+            filteredApprovals = PENDING_APPROVALS;
+          } else if (filterStatus === 'approved') {
+            filteredApprovals = APPROVED_APPROVALS;
+          } else if (filterStatus === 'rejected') {
+            filteredApprovals = REJECTED_APPROVALS;
+          }
 
-          return filteredApprovals.length > 0 ? (
-            filteredApprovals.map((approval) => (
+          // Filter by search text
+          const searchLower = searchText.toLowerCase();
+          const searchFilteredApprovals = filteredApprovals.filter(approval =>
+            approval.id.toLowerCase().includes(searchLower) ||
+            approval.assetId.toLowerCase().includes(searchLower) ||
+            approval.inspector.toLowerCase().includes(searchLower) ||
+            approval.department.toLowerCase().includes(searchLower) ||
+            approval.location.toLowerCase().includes(searchLower) ||
+            approval.inspectionData.generalRemark.toLowerCase().includes(searchLower) ||
+            (approval.approvedBy && approval.approvedBy.toLowerCase().includes(searchLower)) ||
+            (approval.rejectedBy && approval.rejectedBy.toLowerCase().includes(searchLower)) ||
+            (approval.approvalNote && approval.approvalNote.toLowerCase().includes(searchLower)) ||
+            (approval.rejectionReason && approval.rejectionReason.toLowerCase().includes(searchLower)) ||
+            (approval.rejectionNote && approval.rejectionNote.toLowerCase().includes(searchLower))
+          );
+
+          return searchFilteredApprovals.length > 0 ? (
+            searchFilteredApprovals.map((approval) => (
               <ApprovalCard key={approval.id} approval={approval} />
             ))
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="search-outline" size={64} color={GREY} />
-              <Text style={styles.emptyStateText}>No matching approvals found</Text>
-              <Text style={styles.emptyStateSubtext}>Try adjusting your search criteria</Text>
+              <Text style={styles.emptyStateText}>
+                {searchText ? 'No matching approvals found' : 'No approvals available'}
+              </Text>
+              <Text style={styles.emptyStateSubtext}>
+                {searchText ? 'Try adjusting your search criteria' : 'No approvals match the selected filter'}
+              </Text>
             </View>
           );
         })()}
@@ -283,23 +455,27 @@ export default function PendingApprovalsScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { paddingHorizontal: 20, paddingTop: 40, paddingBottom: 100 },
+  fixedHeader: { backgroundColor: '#F9FAFB', paddingTop: 40, paddingHorizontal: 20, zIndex: 10 },
+  scrollableContent: { flex: 1, paddingHorizontal: 20 },
+  scrollableContentContainer: { paddingTop: 24, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },
   searchContainer: { marginBottom: 24 },
-  searchInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: WHITE, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, elevation: 2 },
+  searchInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: WHITE, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
   searchInput: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
   statsContainer: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statCard: { flex: 1, backgroundColor: WHITE, borderRadius: 12, padding: 16, alignItems: 'center' },
+  statCard: { flex: 1, backgroundColor: WHITE, borderRadius: 12, padding: 16, alignItems: 'center', elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2 },
+  statCardActive: { borderWidth: 2, borderColor: BLUE },
   statNumber: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 4 },
   statLabel: { fontSize: 12, color: GREY },
-  approvalCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2 },
+  statLabelActive: { fontWeight: '700', color: BLUE },
+  approvalCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
   approvalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   approvalInfo: { flex: 1 },
   approvalId: { fontSize: 12, fontWeight: '600', color: GREY, marginBottom: 2 },
   approvalAsset: { fontSize: 16, fontWeight: '700', color: DARK },
-  statusBadge: { backgroundColor: '#FEE2E2', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  statusText: { fontSize: 11, fontWeight: '600', color: RED },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  statusText: { fontSize: 11, fontWeight: '600', color: WHITE },
   inspectorInfo: { marginBottom: 12 },
   inspectorName: { fontSize: 14, fontWeight: '600', color: DARK },
   inspectorDept: { fontSize: 12, color: GREY },
@@ -330,7 +506,7 @@ const styles = StyleSheet.create({
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
   emptyStateText: { fontSize: 16, fontWeight: '600', color: DARK, marginTop: 16 },
   emptyStateSubtext: { fontSize: 14, color: GREY, marginTop: 8 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: WHITE, paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8' },
+  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: WHITE, paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8', elevation: 10 },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   navLabel: { fontSize: 12, color: GREY, marginTop: 4 },
   navLabelActive: { color: BLUE, fontWeight: '600' },

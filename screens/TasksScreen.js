@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal, Dimensions, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const BLUE = '#4285F4';
@@ -10,17 +10,22 @@ const ORANGE = '#F9A825';
 const PURPLE = '#9C27B0';
 
 const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0 },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0 },
+  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
   { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending for Approval', progress: 100 },
   { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending for Approval', progress: 100 },
   { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
   { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
+  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Rejected', progress: 100, rejectionReason: 'Missing safety documentation and improper storage conditions' },
+  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Rejected', progress: 100, rejectionReason: 'Exit route blocked and emergency lighting not functioning' },
+  { id: 'BA-SET-039', title: 'Electrical Panel Inspection', time: '3 days ago', location: 'Zone B-4', status: 'Rejected', progress: 100, rejectionReason: 'Improper wiring and missing protective covers' },
 ];
 
 export default function TasksScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Tasks');
   const [filter, setFilter] = useState('All'); // New state for filtering
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     pending: true,
     approval: true,
@@ -45,6 +50,7 @@ export default function TasksScreen({ navigation }) {
   const pendingTasks = TASKS.filter(task => task.status === 'Pending');
   const pendingApprovalTasks = TASKS.filter(task => task.status === 'Pending for Approval');
   const completedTasks = TASKS.filter(task => task.status === 'Completed');
+  const rejectedTasks = TASKS.filter(task => task.status === 'Rejected');
 
   const TaskCard = ({ task }) => (
     <TouchableOpacity 
@@ -58,12 +64,14 @@ export default function TasksScreen({ navigation }) {
           task.status === 'Pending' && styles.statusPending,
           task.status === 'Pending for Approval' && styles.statusApproval,
           task.status === 'Completed' && styles.statusCompleted,
+          task.status === 'Rejected' && styles.statusRejected,
         ]}>
           <Text style={[
             styles.statusText,
             task.status === 'Pending' && styles.statusTextPending,
             task.status === 'Pending for Approval' && styles.statusTextApproval,
             task.status === 'Completed' && styles.statusTextCompleted,
+            task.status === 'Rejected' && styles.statusTextRejected,
           ]}>
             {task.status}
           </Text>
@@ -86,6 +94,12 @@ export default function TasksScreen({ navigation }) {
           <Text style={styles.progressText}>{task.progress}%</Text>
         </View>
       )}
+      {task.status === 'Rejected' && task.rejectionReason && (
+        <View style={styles.rejectionContainer}>
+          <Ionicons name="alert-circle-outline" size={14} color="#D32F2F" />
+          <Text style={styles.rejectionText}>{task.rejectionReason}</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 
@@ -96,33 +110,66 @@ export default function TasksScreen({ navigation }) {
         <Text style={styles.pageTitle}>My Tasks</Text>
       </View>
 
-      {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
+      {/* Search Bar and Filter Icon */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <Ionicons name="search-outline" size={20} color={LIGHT_GREY} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search tasks..."
+            placeholderTextColor={LIGHT_GREY}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+        </View>
         <TouchableOpacity
-          style={[styles.filterButton, filter === 'All' && styles.filterButtonActive]}
-          onPress={() => setFilter('All')}
+          style={styles.filterIcon}
+          onPress={() => setFilterModalVisible(true)}
         >
-          <Text style={[styles.filterButtonText, filter === 'All' && styles.filterButtonTextActive]}>All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, filter === 'Pending Task' && styles.filterButtonActive]}
-          onPress={() => setFilter('Pending Task')}
-        >
-          <Text style={[styles.filterButtonText, filter === 'Pending Task' && styles.filterButtonTextActive]}>Pending Task</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, filter === 'Pending for Approval' && styles.filterButtonActive]}
-          onPress={() => setFilter('Pending for Approval')}
-        >
-          <Text style={[styles.filterButtonText, filter === 'Pending for Approval' && styles.filterButtonTextActive]}>Pending for Approval</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterButton, filter === 'Task Completed' && styles.filterButtonActive]}
-          onPress={() => setFilter('Task Completed')}
-        >
-          <Text style={[styles.filterButtonText, filter === 'Task Completed' && styles.filterButtonTextActive]}>Task Completed</Text>
+          <Ionicons name="filter-outline" size={24} color={DARK_GREY} />
         </TouchableOpacity>
       </View>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={filterModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setFilterModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setFilterModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Filter Tasks</Text>
+            {['All', 'Pending Task', 'Pending for Approval', 'Task Completed', 'Rejected'].map((filterOption) => (
+              <TouchableOpacity
+                key={filterOption}
+                style={[
+                  styles.modalOption,
+                  filter === filterOption && styles.modalOptionActive
+                ]}
+                onPress={() => {
+                  setFilter(filterOption);
+                  setFilterModalVisible(false);
+                }}
+              >
+                <Text style={[
+                  styles.modalOptionText,
+                  filter === filterOption && styles.modalOptionTextActive
+                ]}>
+                  {filterOption}
+                </Text>
+                {filter === filterOption && (
+                  <Ionicons name="checkmark" size={20} color={BLUE} />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <View style={styles.mainContent}>
         {/* Show Filtered Tasks */}
@@ -130,6 +177,7 @@ export default function TasksScreen({ navigation }) {
           let tasksToShow = [];
           let emptyMessage = '';
           
+          // Apply filter first
           if (filter === 'All') {
             tasksToShow = TASKS;
           } else if (filter === 'Pending Task') {
@@ -141,6 +189,22 @@ export default function TasksScreen({ navigation }) {
           } else if (filter === 'Task Completed') {
             tasksToShow = completedTasks;
             emptyMessage = 'No task completed tasks found';
+          } else if (filter === 'Rejected') {
+            tasksToShow = rejectedTasks;
+            emptyMessage = 'No rejected tasks found';
+          }
+
+          // Then apply search filter
+          if (searchText.trim() !== '') {
+            const searchLower = searchText.toLowerCase();
+            tasksToShow = tasksToShow.filter(task => 
+              task.id.toLowerCase().includes(searchLower) ||
+              task.title.toLowerCase().includes(searchLower) ||
+              task.location.toLowerCase().includes(searchLower)
+            );
+            if (tasksToShow.length === 0) {
+              emptyMessage = 'No tasks found matching your search';
+            }
           }
 
           if (tasksToShow.length > 0) {
@@ -320,6 +384,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8F5E9',
     borderColor: '#C8E6C9'
   },
+  statusRejected: { 
+    backgroundColor: '#FFEBEE',
+    borderColor: '#FFCDD2'
+  },
   
   statusText: { 
     fontSize: 11, 
@@ -334,6 +402,9 @@ const styles = StyleSheet.create({
   },
   statusTextCompleted: { 
     color: '#2E7D32' 
+  },
+  statusTextRejected: { 
+    color: '#D32F2F' 
   },
   
   taskTitle: { 
@@ -423,38 +494,116 @@ const styles = StyleSheet.create({
     fontWeight: '700' 
   },
   
-  filterContainer: {
+  searchContainer: {
     flexDirection: 'row',
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#E8E8E8',
-    gap: 8,
+    gap: 12,
   },
-  filterButton: {
+  searchInputContainer: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#F9F9F9',
-    borderWidth: 1,
-    borderColor: '#E8E8E8',
     borderRadius: 8,
-    paddingVertical: 8,
     paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: DARK_GREY,
+    marginLeft: 8,
+  },
+  filterIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#F9F9F9',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  filterButtonActive: {
-    backgroundColor: '#E3F2FD',
-    borderColor: '#BBDEFB',
+  filterDropdown: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 0,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
-  filterButtonText: {
-    fontSize: 12,
+  filterDropdownText: {
+    fontSize: 14,
     fontWeight: '600',
-    color: LIGHT_GREY,
+    color: DARK_GREY,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    width: Dimensions.get('window').width - 60,
+    maxHeight: Dimensions.get('window').height * 0.6,
+    padding: 16,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DARK_GREY,
+    marginBottom: 16,
     textAlign: 'center',
   },
-  filterButtonTextActive: {
+  modalOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    backgroundColor: '#F9F9F9',
+  },
+  modalOptionActive: {
+    backgroundColor: '#E3F2FD',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: DARK_GREY,
+  },
+  modalOptionTextActive: {
     color: BLUE,
     fontWeight: '700',
+  },
+  rejectionContainer: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: '#FFF3F3',
+    borderRadius: 6,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#FFCDD2',
+  },
+  rejectionText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#D32F2F',
+    lineHeight: 16,
   },
 });

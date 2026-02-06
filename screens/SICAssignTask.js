@@ -366,8 +366,8 @@ export default function SICAssignTask({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header */}
+      {/* Fixed Header - Outside ScrollView */}
+      <View style={styles.fixedHeader}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={DARK} />
@@ -377,7 +377,10 @@ export default function SICAssignTask({ navigation, route }) {
             <Text style={styles.headerSubtitle}>SITE IN-CHARGE</Text>
           </View>
         </View>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         {/* Task Assignment Card */}
         <View style={styles.taskAssignmentCard}>
 
@@ -657,8 +660,16 @@ export default function SICAssignTask({ navigation, route }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { paddingHorizontal: 20, paddingTop: 48, paddingBottom: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  fixedHeader: { 
+    backgroundColor: '#F9FAFB', 
+    paddingHorizontal: 20, 
+    paddingTop: 48, 
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  container: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
+  header: { flexDirection: 'row', alignItems: 'center' },
   backButton: { width: 40, height: 40, borderRadius: 8, backgroundColor: WHITE, alignItems: 'center', justifyContent: 'center', elevation: 2 },
   headerContent: { flex: 1, marginLeft: 16 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },

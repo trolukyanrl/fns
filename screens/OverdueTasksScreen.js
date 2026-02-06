@@ -163,7 +163,8 @@ export default function OverdueTasksScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+      {/* Fixed Header Section */}
+      <View style={styles.fixedHeader}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -186,8 +187,13 @@ export default function OverdueTasksScreen({ navigation }) {
             />
           </View>
         </View>
+      </View>
 
-
+      {/* Scrollable Content Section */}
+      <ScrollView 
+        style={styles.scrollableContent}
+        contentContainerStyle={styles.scrollableContentContainer}
+      >
         {/* Filtered Overdue Tasks List */}
         {(() => {
           const filteredTasks = OVERDUE_TASKS.filter(task => {
@@ -249,17 +255,19 @@ export default function OverdueTasksScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { paddingHorizontal: 20, paddingTop: 40, paddingBottom: 100 },
+  fixedHeader: { backgroundColor: '#F9FAFB', paddingTop: 40, paddingHorizontal: 20, zIndex: 10 },
+  scrollableContent: { flex: 1, paddingHorizontal: 20 },
+  scrollableContentContainer: { paddingTop: 24, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },
   searchContainer: { marginBottom: 24 },
-  searchInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: WHITE, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, elevation: 2 },
+  searchInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: WHITE, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3 },
   searchInput: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
   statsContainer: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   statCard: { flex: 1, backgroundColor: WHITE, borderRadius: 12, padding: 16, alignItems: 'center' },
   statNumber: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 4 },
   statLabel: { fontSize: 12, color: GREY },
-  taskCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2 },
+  taskCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
   taskHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   taskInfo: { flex: 1 },
   taskId: { fontSize: 12, fontWeight: '600', color: GREY, marginBottom: 2 },
@@ -289,7 +297,7 @@ const styles = StyleSheet.create({
   emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 },
   emptyStateText: { fontSize: 16, fontWeight: '600', color: DARK, marginTop: 16 },
   emptyStateSubtext: { fontSize: 14, color: GREY, marginTop: 8 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: WHITE, paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8' },
+  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: WHITE, paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8', elevation: 10 },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   navLabel: { fontSize: 12, color: GREY, marginTop: 4 },
   navLabelActive: { color: BLUE, fontWeight: '600' },

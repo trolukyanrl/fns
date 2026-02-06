@@ -13,8 +13,10 @@ const DARK_GREY = '#333333';
 const LIGHT_GREY = '#666666';
 
 const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0 },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0 },
+  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
 ];
 
 export default function TADashboard({ navigation }) {
@@ -36,8 +38,8 @@ export default function TADashboard({ navigation }) {
             <Ionicons name="shield-checkmark" size={24} color="#fff" />
           </View>
           <View>
-            <Text style={styles.headerTitle}>Safety Inspector</Text>
-            <Text style={styles.headerSubtitle}>FNS Safety Manager</Text>
+            <Text style={styles.headerTitle}>Welcome back, Rajesh</Text>
+            <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
           </View>
         </View>
         <TouchableOpacity style={styles.bellButton}>
@@ -50,17 +52,6 @@ export default function TADashboard({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <View style={styles.profileCircle}>
-            <Ionicons name="person" size={32} color={BLUE} />
-          </View>
-          <View style={styles.welcomeText}>
-            <Text style={styles.welcomeTitle}>Welcome back, Rajesh</Text>
-            <Text style={styles.welcomeSubtitle}>Ready for today's inspections?</Text>
-          </View>
-        </View>
-
         {/* Stats Cards */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statPending]}>
@@ -71,9 +62,17 @@ export default function TADashboard({ navigation }) {
             <Text style={styles.statNumber}>24</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
+        </View>
+
+        {/* Approval Status Cards */}
+        <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statReview]}>
             <Text style={styles.statNumber}>3</Text>
-            <Text style={styles.statLabel}>Review</Text>
+            <Text style={styles.statLabel}>Pending for Approval</Text>
+          </View>
+          <View style={[styles.statCard, styles.statRejected]}>
+            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statLabel}>Rejected</Text>
           </View>
         </View>
 
@@ -103,27 +102,69 @@ export default function TADashboard({ navigation }) {
         </View>
 
         {TASKS.map((task) => (
-          <View key={task.id} style={styles.taskCard}>
+          <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
             <View style={styles.taskHeader}>
               <Text style={styles.taskId}>{task.id}</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>{task.status}</Text>
+              <View style={[
+                styles.statusBadge,
+                task.status === 'Pending' && styles.statusPending,
+                task.status === 'Pending for Approval' && styles.statusApproval,
+                task.status === 'Completed' && styles.statusCompleted,
+                task.status === 'Rejected' && styles.statusRejected,
+              ]}>
+                <Text style={[
+                  styles.statusText,
+                  task.status === 'Pending' && styles.statusTextPending,
+                  task.status === 'Pending for Approval' && styles.statusTextApproval,
+                  task.status === 'Completed' && styles.statusTextCompleted,
+                  task.status === 'Rejected' && styles.statusTextRejected,
+                ]}>
+                  {task.status}
+                </Text>
               </View>
             </View>
-            <Text style={styles.taskTitle}>{task.title}</Text>
-            <View style={styles.taskDetails}>
-              <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-              <Text style={styles.taskDetailText}>{task.time}</Text>
-            </View>
-            <View style={styles.taskDetails}>
-              <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-              <Text style={styles.taskDetailText}>{task.location}</Text>
-            </View>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
-            </View>
-            <Text style={styles.progressText}>{task.progress}%</Text>
-          </View>
+            
+            {/* Assignment Details for Pending Tasks */}
+            {task.status === 'Pending' ? (
+              <>
+                <Text style={styles.taskTitle}>BA Set Inspection</Text>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>Assigned to: Rajesh Kumar</Text>
+                </View>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>Due: 15 Feb 2024</Text>
+                </View>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="cube-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>BA Set: {task.id}</Text>
+                </View>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>{task.location}</Text>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.taskTitle}>{task.title}</Text>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>{task.time}</Text>
+                </View>
+                <View style={styles.taskDetails}>
+                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>{task.location}</Text>
+                </View>
+                {task.progress > 0 && (
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
+                  </View>
+                )}
+                {task.progress > 0 && <Text style={styles.progressText}>{task.progress}%</Text>}
+              </>
+            )}
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
@@ -166,16 +207,12 @@ const styles = StyleSheet.create({
   bellButton: { padding: 8 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 100 },
-  welcomeSection: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  profileCircle: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#E8F0FE', alignItems: 'center', justifyContent: 'center', marginRight: 16 },
-  welcomeText: {},
-  welcomeTitle: { fontSize: 18, fontWeight: '600', color: DARK_GREY },
-  welcomeSubtitle: { fontSize: 14, color: LIGHT_GREY, marginTop: 4 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
   statCard: { flex: 1, padding: 16, borderRadius: 12 },
   statPending: { backgroundColor: '#E3F2FD' },
   statCompleted: { backgroundColor: '#E8F5E9' },
   statReview: { backgroundColor: '#FFF8E1' },
+  statRejected: { backgroundColor: '#FFE8E8' },
   statNumber: { fontSize: 24, fontWeight: '700', color: DARK_GREY },
   statLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK_GREY, marginBottom: 12 },
@@ -191,6 +228,14 @@ const styles = StyleSheet.create({
   taskId: { fontSize: 12, fontWeight: '600', color: LIGHT_GREY },
   statusBadge: { backgroundColor: '#FFF8E1', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: '600', color: '#F9A825' },
+  statusPending: { backgroundColor: '#FFF8E1', borderColor: '#FFE0B2' },
+  statusTextPending: { color: '#F57F17' },
+  statusApproval: { backgroundColor: '#F3E5F5', borderColor: '#E1BEE7' },
+  statusTextApproval: { color: '#7B1FA2' },
+  statusCompleted: { backgroundColor: '#E8F5E9', borderColor: '#C8E6C9' },
+  statusTextCompleted: { color: '#2E7D32' },
+  statusRejected: { backgroundColor: '#FFEBEE', borderColor: '#FFCDD2' },
+  statusTextRejected: { color: '#D32F2F' },
   taskTitle: { fontSize: 16, fontWeight: '600', color: DARK_GREY, marginBottom: 12 },
   taskDetails: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
   taskDetailText: { fontSize: 14, color: LIGHT_GREY, marginLeft: 8 },

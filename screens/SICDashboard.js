@@ -35,14 +35,8 @@ export default function SICDashboard({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Extra top spacing for status bar / header */}
-        <View style={{ height: 20 }} />
-
-        {/* Header */}
+      {/* Fixed Header - Outside ScrollView */}
+      <View style={styles.fixedHeader}>
         <View style={styles.header}>
           <View style={styles.logo}>
             <Ionicons name="shield-checkmark" size={26} color="#fff" />
@@ -61,8 +55,13 @@ export default function SICDashboard({ navigation }) {
             onPress={handleLogout}
           />
         </View>
+      </View>
 
-
+      {/* Scrollable Content */}
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Stats */}
         <View style={styles.statsRow}>
           <TouchableOpacity style={[styles.statCard, { backgroundColor: LIGHT_BLUE }]} onPress={() => navigation.navigate('SICAssignTask')}>
@@ -72,7 +71,7 @@ export default function SICDashboard({ navigation }) {
 
           <TouchableOpacity style={[styles.statCard, { backgroundColor: YELLOW }]} onPress={() => navigation.navigate('SICTasks')}>
             <Ionicons name="list-outline" size={24} color="#F59E0B" />
-            <Text style={styles.statLabel}>View Tasks</Text>
+            <Text style={styles.statLabel}>View Pending Tasks</Text>
           </TouchableOpacity>
         </View>
 
@@ -125,8 +124,16 @@ export default function SICDashboard({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { paddingHorizontal: 20, paddingTop: 32, paddingBottom: 100 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 28 },
+  fixedHeader: { 
+    backgroundColor: '#F9FAFB', 
+    paddingHorizontal: 20, 
+    paddingTop: 52, 
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  container: { paddingHorizontal: 20, paddingTop: 28, paddingBottom: 100 },
+  header: { flexDirection: 'row', alignItems: 'center' },
   logo: {
     width: 44,
     height: 44,

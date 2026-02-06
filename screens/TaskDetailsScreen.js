@@ -20,6 +20,16 @@ const RED = '#E53935';
 export default function TaskDetailsScreen({ navigation, route }) {
   const { task } = route.params;
 
+  // Mock assignment data for pending tasks
+  const assignmentData = {
+    assignee: 'Rajesh Kumar',
+    dueDate: '15 Feb 2024',
+    taskDescription: 'Complete inspection of BA Set equipment in Zone A-3',
+    baSetDetails: 'BA-SET-042 - Zone A-3',
+    assignedBy: 'SIC',
+    priority: 'High',
+  };
+
   // Mock inspection data - in a real app, this would come from your data source
   const inspectionData = {
     taskId: 'INS-2024-0847',
@@ -82,7 +92,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
   };
 
   const handleStartInspection = () => {
-    navigation.navigate('InspectionForm', {
+    navigation.navigate('QRScanner', {
       baSetId: task.id,
       location: task.location,
     });
@@ -139,126 +149,184 @@ export default function TaskDetailsScreen({ navigation, route }) {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Task Overview Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Task Overview</Text>
-          
-          <View style={styles.taskOverview}>
-            <View style={styles.taskIdContainer}>
-              <Text style={styles.taskIdLabel}>Task ID</Text>
-              <Text style={styles.taskId}>{inspectionData.taskId}</Text>
+        {/* Assignment Details Section for Pending Tasks */}
+        {task.status === 'Pending' ? (
+          <>
+            {/* Task Assignment Overview */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Task Assignment</Text>
+              
+              <View style={styles.assignmentOverview}>
+                <View style={styles.taskIdContainer}>
+                  <Text style={styles.taskIdLabel}>Task ID</Text>
+                  <Text style={styles.taskId}>{task.id}</Text>
+                </View>
+                
+                <View style={[
+                  styles.statusBadge,
+                  { backgroundColor: `${getStatusColor(task.status)}20`, borderColor: getStatusColor(task.status) }
+                ]}>
+                  <Text style={[styles.statusText, { color: getStatusTextColor(task.status) }]}>
+                    {task.status}
+                  </Text>
+                </View>
+              </View>
+
+              <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
+              <TaskDetailRow label="Due Date" value={assignmentData.dueDate} icon="calendar-outline" />
+              <TaskDetailRow label="Priority" value={assignmentData.priority} icon="alert-circle" />
+              <TaskDetailRow label="Assigned By" value={assignmentData.assignedBy} icon="shield-checkmark" />
             </View>
-            
-            <View style={[
-              styles.statusBadge,
-              { backgroundColor: `${getStatusColor(task.status)}20`, borderColor: getStatusColor(task.status) }
-            ]}>
-              <Text style={[styles.statusText, { color: getStatusTextColor(task.status) }]}>
-                {task.status}
-              </Text>
+
+            {/* Task Description Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Task Description</Text>
+              
+              <View style={styles.descriptionCard}>
+                <Text style={styles.descriptionText}>
+                  {assignmentData.taskDescription}
+                </Text>
+              </View>
             </View>
-          </View>
 
-          <TaskDetailRow label="Asset ID" value={inspectionData.assetId} icon="cube" />
-          <TaskDetailRow label="Location" value={inspectionData.location} icon="location-outline" />
-          <TaskDetailRow label="Cylinder Numbers" value={inspectionData.cylinderNumbers} icon="barbell" />
-          <TaskDetailRow label="Last Hydrotest" value={inspectionData.lastHydrotest} icon="calendar-outline" />
-          <TaskDetailRow label="Next Hydrotest Due" value={inspectionData.nextHydrotest} icon="calendar-outline" />
-        </View>
-
-        {/* Pressure Readings Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pressure Readings</Text>
-          
-          <View style={styles.pressureGrid}>
-            <View style={styles.pressureCard}>
-              <Text style={styles.pressureLabel}>CYLINDER 1</Text>
-              <Text style={styles.pressureValue}>{inspectionData.cylinder1Pressure}</Text>
-              <Text style={styles.pressureUnit}>BAR</Text>
+            {/* BA Set Details Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>BA Set Details</Text>
+              
+              <View style={styles.baSetCard}>
+                <Ionicons name="cube" size={24} color={BLUE} />
+                <View style={styles.baSetInfo}>
+                  <Text style={styles.baSetTitle}>{assignmentData.baSetDetails}</Text>
+                  <Text style={styles.baSetLocation}>{task.location}</Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.pressureCard}>
-              <Text style={styles.pressureLabel}>CYLINDER 2</Text>
-              <Text style={styles.pressureValue}>{inspectionData.cylinder2Pressure}</Text>
-              <Text style={styles.pressureUnit}>BAR</Text>
+          </>
+        ) : (
+          // Detailed inspection view for non-pending tasks
+          <>
+            {/* Task Overview Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Task Overview</Text>
+              
+              <View style={styles.taskOverview}>
+                <View style={styles.taskIdContainer}>
+                  <Text style={styles.taskIdLabel}>Task ID</Text>
+                  <Text style={styles.taskId}>{inspectionData.taskId}</Text>
+                </View>
+                
+                <View style={[
+                  styles.statusBadge,
+                  { backgroundColor: `${getStatusColor(task.status)}20`, borderColor: getStatusColor(task.status) }
+                ]}>
+                  <Text style={[styles.statusText, { color: getStatusTextColor(task.status) }]}>
+                    {task.status}
+                  </Text>
+                </View>
+              </View>
+
+              <TaskDetailRow label="Asset ID" value={inspectionData.assetId} icon="cube" />
+              <TaskDetailRow label="Location" value={inspectionData.location} icon="location-outline" />
+              <TaskDetailRow label="Cylinder Numbers" value={inspectionData.cylinderNumbers} icon="barbell" />
+              <TaskDetailRow label="Last Hydrotest" value={inspectionData.lastHydrotest} icon="calendar-outline" />
+              <TaskDetailRow label="Next Hydrotest Due" value={inspectionData.nextHydrotest} icon="calendar-outline" />
             </View>
-            <View style={styles.pressureCard}>
-              <Text style={styles.pressureLabel}>FLOW RATE</Text>
-              <Text style={styles.pressureValue}>{inspectionData.flowRate}</Text>
-              <Text style={styles.pressureUnit}>L/MIN</Text>
+
+            {/* Pressure Readings Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Pressure Readings</Text>
+              
+              <View style={styles.pressureGrid}>
+                <View style={styles.pressureCard}>
+                  <Text style={styles.pressureLabel}>CYLINDER 1</Text>
+                  <Text style={styles.pressureValue}>{inspectionData.cylinder1Pressure}</Text>
+                  <Text style={styles.pressureUnit}>BAR</Text>
+                </View>
+                <View style={styles.pressureCard}>
+                  <Text style={styles.pressureLabel}>CYLINDER 2</Text>
+                  <Text style={styles.pressureValue}>{inspectionData.cylinder2Pressure}</Text>
+                  <Text style={styles.pressureUnit}>BAR</Text>
+                </View>
+                <View style={styles.pressureCard}>
+                  <Text style={styles.pressureLabel}>FLOW RATE</Text>
+                  <Text style={styles.pressureValue}>{inspectionData.flowRate}</Text>
+                  <Text style={styles.pressureUnit}>L/MIN</Text>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
 
-        {/* Inspection Checklist Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inspection Checklist</Text>
+            {/* Inspection Checklist Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Inspection Checklist</Text>
 
-          <ChecklistItem
-            label="Face Mask Condition"
-            description="Check for cracks, tears, and seal integrity"
-            value={inspectionData.faceMaskCondition}
-          />
+              <ChecklistItem
+                label="Face Mask Condition"
+                description="Check for cracks, tears, and seal integrity"
+                value={inspectionData.faceMaskCondition}
+              />
 
-          <ChecklistItem
-            label="Harness & Straps"
-            description="Inspect webbing, buckles, and attachment points"
-            value={inspectionData.harnessStraps}
-          />
+              <ChecklistItem
+                label="Harness & Straps"
+                description="Inspect webbing, buckles, and attachment points"
+                value={inspectionData.harnessStraps}
+              />
 
-          <ChecklistItem
-            label="Cylinder Valves"
-            description="Check operation, leaks, and thread condition"
-            value={inspectionData.cylinderValves}
-          />
+              <ChecklistItem
+                label="Cylinder Valves"
+                description="Check operation, leaks, and thread condition"
+                value={inspectionData.cylinderValves}
+              />
 
-          <ChecklistItem
-            label="Pressure Gauge"
-            description="Verify accuracy and readability"
-            value={inspectionData.pressureGauge}
-          />
+              <ChecklistItem
+                label="Pressure Gauge"
+                description="Verify accuracy and readability"
+                value={inspectionData.pressureGauge}
+              />
 
-          <ChecklistItem
-            label="Demand Valve"
-            description="Test airflow response and seal"
-            value={inspectionData.demandValve}
-          />
+              <ChecklistItem
+                label="Demand Valve"
+                description="Test airflow response and seal"
+                value={inspectionData.demandValve}
+              />
 
-          <ChecklistItem
-            label="Warning Whistle"
-            description="Ensure audible alarm at correct pressure"
-            value={inspectionData.warningWhistle}
-          />
-        </View>
+              <ChecklistItem
+                label="Warning Whistle"
+                description="Ensure audible alarm at correct pressure"
+                value={inspectionData.warningWhistle}
+              />
+            </View>
 
-        {/* GPS Location Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>GPS Location</Text>
-          
-          <View style={styles.gpsCard}>
-            {inspectionData.isLocationCaptured ? (
-              <>
-                <Ionicons name="checkmark-circle" size={48} color={GREEN} />
-                <Text style={styles.gpsLocationText}>{inspectionData.gpsLocation}</Text>
-              </>
-            ) : (
-              <>
-                <Ionicons name="location-outline" size={48} color="#CCC" />
-                <Text style={styles.noLocationText}>No location captured yet</Text>
-              </>
-            )}
-          </View>
-        </View>
+            {/* GPS Location Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>GPS Location</Text>
+              
+              <View style={styles.gpsCard}>
+                {inspectionData.isLocationCaptured ? (
+                  <>
+                    <Ionicons name="checkmark-circle" size={48} color={GREEN} />
+                    <Text style={styles.gpsLocationText}>{inspectionData.gpsLocation}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Ionicons name="location-outline" size={48} color="#CCC" />
+                    <Text style={styles.noLocationText}>No location captured yet</Text>
+                  </>
+                )}
+              </View>
+            </View>
 
-        {/* General Remarks Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>General Remarks</Text>
-          
-          <View style={styles.remarksCard}>
-            <Text style={styles.remarksText}>
-              {inspectionData.generalRemark || 'No remarks provided.'}
-            </Text>
-          </View>
-        </View>
+            {/* General Remarks Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>General Remarks</Text>
+              
+              <View style={styles.remarksCard}>
+                <Text style={styles.remarksText}>
+                  {inspectionData.generalRemark || 'No remarks provided.'}
+                </Text>
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {/* Bottom Action Buttons */}
@@ -326,6 +394,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   
+  // Assignment Overview Styles
+  assignmentOverview: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+  },
+  
   // Task Overview Styles
   taskOverview: {
     flexDirection: 'row',
@@ -362,6 +441,45 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   
+  // Description Card Styles
+  descriptionCard: {
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: DARK_GREY,
+    lineHeight: 20,
+  },
+
+  // BA Set Card Styles
+  baSetCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9F9F9',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  baSetInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  baSetTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: DARK_GREY,
+    marginBottom: 4,
+  },
+  baSetLocation: {
+    fontSize: 14,
+    color: LIGHT_GREY,
+  },
+
   // Detail Row Styles
   detailRow: {
     flexDirection: 'row',

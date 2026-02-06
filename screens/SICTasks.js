@@ -122,7 +122,8 @@ export default function SICTasks({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+      {/* Fixed Header - Outside ScrollView */}
+      <View style={styles.fixedHeader}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.logo}>
@@ -145,7 +146,10 @@ export default function SICTasks({ navigation }) {
             onChangeText={setSearchQuery}
           />
         </View>
+      </View>
 
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.container}>
         {/* Tasks List */}
         {filteredTasks.length > 0 ? (
           <FlatList
@@ -202,12 +206,20 @@ export default function SICTasks({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
-  container: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 40, paddingBottom: 100 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  fixedHeader: { 
+    backgroundColor: '#F9FAFB', 
+    paddingHorizontal: 20, 
+    paddingTop: 40, 
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  container: { flexGrow: 1, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 100 },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   logo: { width: 48, height: 48, borderRadius: 12, backgroundColor: LIGHT_BLUE, alignItems: 'center', justifyContent: 'center', marginRight: 16 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },
   headerSubtitle: { fontSize: 12, color: GREY, marginTop: 4 },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 24 },
+  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12 },
   searchIcon: { marginRight: 12 },
   searchInput: { flex: 1, fontSize: 16, color: DARK },
   assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: BLUE, borderRadius: 12, paddingVertical: 14, marginBottom: 24 },
