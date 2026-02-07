@@ -28,9 +28,11 @@ export default function SICDashboard({ navigation }) {
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
-    if (tab === 'Home') navigation.navigate('SICDashboard');
-    if (tab === 'Tasks') navigation.navigate('SICTasks');
-    if (tab === 'Profile') navigation.navigate('SICProfile');
+    if (tab === 'Home') {
+      navigation.navigate('SICDashboard');
+    } else if (tab === 'Tasks') {
+      navigation.navigate('SICTasks');
+    }
   };
 
   return (
@@ -93,7 +95,7 @@ export default function SICDashboard({ navigation }) {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        {['Home', 'Tasks', 'Profile'].map((tab) => (
+        {['Home', 'Tasks'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={styles.navItem}
@@ -103,9 +105,7 @@ export default function SICDashboard({ navigation }) {
               name={
                 tab === 'Home'
                   ? 'home'
-                  : tab === 'Tasks'
-                  ? 'checkbox-outline'
-                  : 'person-outline'
+                  : 'checkbox-outline'
               }
               size={24}
               color={activeTab === tab ? BLUE : GREY}

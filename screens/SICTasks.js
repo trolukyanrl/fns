@@ -43,6 +43,10 @@ export default function SICTasks({ navigation }) {
       (task.baSets && task.baSets.some(baSet => 
         baSet.name.toLowerCase().includes(query) ||
         baSet.id.toLowerCase().includes(query)
+      )) ||
+      (task.safetyKits && task.safetyKits.some(safetyKit => 
+        safetyKit.name.toLowerCase().includes(query) ||
+        safetyKit.id.toLowerCase().includes(query)
       ))
     );
   });
@@ -51,7 +55,6 @@ export default function SICTasks({ navigation }) {
     setActiveTab(tab);
     if (tab === 'Home') navigation.navigate('SICDashboard');
     if (tab === 'Tasks') navigation.navigate('SICTasks');
-    if (tab === 'Profile') navigation.navigate('SICProfile');
   };
 
   const renderTaskCard = ({ item }) => (
@@ -117,6 +120,18 @@ export default function SICTasks({ navigation }) {
           ))}
         </View>
       )}
+
+      {item.safetyKits && item.safetyKits.length > 0 && (
+        <View style={styles.baSetsList}>
+          <Text style={styles.baSetLabel}>Safety Kits:</Text>
+          {item.safetyKits.map((safetyKit) => (
+            <View key={safetyKit.id} style={styles.baSetBadge}>
+              <Ionicons name="construct" size={12} color={WHITE} />
+              <Text style={styles.baSetBadgeText}>{safetyKit.name}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 
@@ -175,7 +190,7 @@ export default function SICTasks({ navigation }) {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        {['Home', 'Tasks', 'Profile'].map((tab) => (
+        {['Home', 'Tasks'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={styles.navItem}
@@ -185,9 +200,7 @@ export default function SICTasks({ navigation }) {
               name={
                 tab === 'Home'
                   ? 'home'
-                  : tab === 'Tasks'
-                  ? 'checkbox-outline'
-                  : 'person-outline'
+                  : 'checkbox-outline'
               }
               size={24}
               color={activeTab === tab ? BLUE : GREY}

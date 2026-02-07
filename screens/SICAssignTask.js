@@ -115,6 +115,59 @@ const BA_SETS = [
   },
 ];
 
+const SAFETY_KITS = [
+  {
+    id: 'SK-2024-001',
+    name: 'Emergency Response Kit A',
+    status: 'Available',
+    zone: 'Zone A - Block 1',
+    kitType: 'First Aid',
+    itemCount: '45 items',
+    nextInspection: '20 Mar 2025',
+    lastInspection: '1 day ago',
+  },
+  {
+    id: 'SK-2024-005',
+    name: 'Fire Safety Kit B',
+    status: 'Available',
+    zone: 'Zone B - Block 2',
+    kitType: 'Fire Safety',
+    itemCount: '32 items',
+    nextInspection: '25 Apr 2025',
+    lastInspection: '3 days ago',
+  },
+  {
+    id: 'SK-2024-009',
+    name: 'Hazmat Response Kit',
+    status: 'Available',
+    zone: 'Zone C - Block 1',
+    kitType: 'Hazmat',
+    itemCount: '28 items',
+    nextInspection: '15 May 2025',
+    lastInspection: '5 days ago',
+  },
+  {
+    id: 'SK-2024-012',
+    name: 'Rescue Equipment Kit',
+    status: 'Available',
+    zone: 'Zone A - Block 4',
+    kitType: 'Rescue',
+    itemCount: '38 items',
+    nextInspection: '10 Jun 2025',
+    lastInspection: '2 days ago',
+  },
+  {
+    id: 'SK-2024-016',
+    name: 'Spill Response Kit',
+    status: 'Available',
+    zone: 'Zone B - Block 5',
+    kitType: 'Spill Control',
+    itemCount: '25 items',
+    nextInspection: '05 May 2025',
+    lastInspection: '4 days ago',
+  },
+];
+
 export default function SICAssignTask({ navigation, route }) {
   const { addTask, updateTask } = useTaskContext();
   const editingTask = route?.params?.taskToEdit;
@@ -130,27 +183,45 @@ export default function SICAssignTask({ navigation, route }) {
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [showZoneModal, setShowZoneModal] = useState(false);
   const [showInspectorModal, setShowInspectorModal] = useState(false);
+  const [selectedTaskType, setSelectedTaskType] = useState(TASK_TYPES[0]); // Default to BA-SET
   const [selectedBASets, setSelectedBASets] = useState(editingTask ? (editingTask.baSets?.map(bs => bs.id) || []) : []);
+  const [selectedSKs, setSelectedSKs] = useState(editingTask ? (editingTask.safetyKits?.map(sk => sk.id) || []) : []);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
 
-  // Filter BA sets based on search query
-  const filteredBASets = BA_SETS.filter(baSet => {
-    const query = searchQuery.toLowerCase();
-    return (
-      baSet.id.toLowerCase().includes(query) ||
-      baSet.name.toLowerCase().includes(query) ||
-      baSet.zone.toLowerCase().includes(query) ||
-      baSet.cylinderNo.toLowerCase().includes(query)
-    );
-  });
+  // Filter based on selected task type
+  const getFilteredItems = () => {
+    if (selectedTaskType.name === 'BA-SET') {
+      return BA_SETS.filter(baSet => {
+        const query = searchQuery.toLowerCase();
+        return (
+          baSet.id.toLowerCase().includes(query) ||
+          baSet.name.toLowerCase().includes(query) ||
+          baSet.zone.toLowerCase().includes(query) ||
+          baSet.cylinderNo.toLowerCase().includes(query)
+        );
+      });
+    } else {
+      return SAFETY_KITS.filter(sk => {
+        const query = searchQuery.toLowerCase();
+        return (
+          sk.id.toLowerCase().includes(query) ||
+          sk.name.toLowerCase().includes(query) ||
+          sk.zone.toLowerCase().includes(query) ||
+          sk.kitType.toLowerCase().includes(query)
+        );
+      });
+    }
+  };
 
   const handleAssignTask = () => {
-    if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedBASets.length === 0) {
-      Alert.alert('Error', 'Please fill in all fields and select at least one BA set to assign a task.');
+    const selectedItems = selectedTaskType.name === 'BA-SET' ? selectedBASets : selectedSKs;
+    
+    if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedItems.length === 0) {
+      Alert.alert('Error', `Please fill in all fields and select at least one ${selectedTaskType.name === 'BA-SET' ? 'BA set' : 'Safety Kit'} to assign a task.`);
       return;
     }
 
@@ -160,9 +231,15 @@ export default function SICAssignTask({ navigation, route }) {
       assignedTo: selectedInspector.name,
       assignedToDept: selectedInspector.department,
       dueDate: dueDate,
-      baSets: selectedBASets.map(id => BA_SETS.find(bs => bs.id === id)).filter(Boolean),
+      taskType: selectedTaskType.name,
       status: 'Pending',
     };
+
+    if (selectedTaskType.name === 'BA-SET') {
+      taskData.baSets = selectedBASets.map(id => BA_SETS.find(bs => bs.id === id)).filter(Boolean);
+    } else {
+      taskData.safetyKits = selectedSKs.map(id => SAFETY_KITS.find(sk => sk.id === id)).filter(Boolean);
+    }
 
     if (isEditMode) {
       // Update existing task
@@ -180,6 +257,7 @@ export default function SICAssignTask({ navigation, route }) {
       setSelectedInspector(null);
       setDueDate('');
       setSelectedBASets([]);
+      setSelectedSKs([]);
       Alert.alert(
         'Task Assigned',
         `Task has been assigned to ${selectedInspector.name} with due date ${dueDate}.`,
@@ -194,17 +272,19 @@ export default function SICAssignTask({ navigation, route }) {
     <TouchableOpacity
       style={[
         styles.typeItem,
-        selectedType?.id === item.id && styles.typeItemSelected
+        selectedTaskType?.id === item.id && styles.typeItemSelected
       ]}
       onPress={() => {
-        setSelectedType(item);
+        setSelectedTaskType(item);
         setShowTypeModal(false);
+        // Reset selections when switching type
+        setSearchQuery('');
       }}
     >
-      <Ionicons name={item.icon} size={20} color={selectedType?.id === item.id ? BLUE : GREY} />
+      <Ionicons name={item.icon} size={20} color={selectedTaskType?.id === item.id ? BLUE : GREY} />
       <Text style={[
         styles.typeText,
-        selectedType?.id === item.id && styles.typeTextSelected
+        selectedTaskType?.id === item.id && styles.typeTextSelected
       ]}>
         {item.name}
       </Text>
@@ -258,6 +338,14 @@ export default function SICAssignTask({ navigation, route }) {
       setSelectedBASets(selectedBASets.filter(id => id !== baSetId));
     } else {
       setSelectedBASets([...selectedBASets, baSetId]);
+    }
+  };
+
+  const toggleSKSelection = (skId) => {
+    if (selectedSKs.includes(skId)) {
+      setSelectedSKs(selectedSKs.filter(id => id !== skId));
+    } else {
+      setSelectedSKs([...selectedSKs, skId]);
     }
   };
 
@@ -364,6 +452,57 @@ export default function SICAssignTask({ navigation, route }) {
     </TouchableOpacity>
   );
 
+  const renderSKCard = (sk) => (
+    <TouchableOpacity
+      style={[
+        styles.baSetCard,
+        selectedSKs.includes(sk.id) && styles.baSetCardSelected
+      ]}
+      onPress={() => toggleSKSelection(sk.id)}
+    >
+      <View style={styles.baSetHeader}>
+        <View style={styles.baSetTitleSection}>
+          <Text style={styles.baSetId}>{sk.id}</Text>
+          <View style={styles.statusBadge}>
+            <Ionicons name="checkmark-circle" size={14} color={GREEN} />
+            <Text style={styles.statusText}>{sk.status}</Text>
+          </View>
+        </View>
+        {selectedSKs.includes(sk.id) && (
+          <Ionicons name="checkmark-circle" size={20} color="#93C5FD" />
+        )}
+      </View>
+
+      <Text style={styles.baSetName}>{sk.name}</Text>
+      <View style={styles.baSetLocation}>
+        <Ionicons name="location" size={14} color={GREY} />
+        <Text style={styles.baSetLocationText}>{sk.zone}</Text>
+      </View>
+
+      <View style={styles.baSetDetailsRow}>
+        <View style={styles.baSetDetail}>
+          <Text style={styles.baSetDetailLabel}>Kit Type</Text>
+          <Text style={styles.baSetDetailValue}>{sk.kitType}</Text>
+        </View>
+        <View style={styles.baSetDetail}>
+          <Text style={styles.baSetDetailLabel}>Items</Text>
+          <Text style={styles.baSetDetailValue}>{sk.itemCount}</Text>
+        </View>
+      </View>
+
+      <View style={styles.baSetFooterRow}>
+        <View style={styles.baSetFooter}>
+          <Text style={styles.baSetFooterLabel}>Next Inspection</Text>
+          <Text style={styles.baSetFooterValue}>{sk.nextInspection}</Text>
+        </View>
+        <View style={styles.baSetFooter}>
+          <Text style={styles.baSetFooterLabel}>Last Inspection</Text>
+          <Text style={styles.baSetFooterValue}>{sk.lastInspection}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Fixed Header - Outside ScrollView */}
@@ -433,27 +572,39 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
         </View>
 
-        {/* BA Sets Selection Section */}
+        {/* Task Type Selection Section */}
         <View style={styles.baSetSection}>
-          <Text style={styles.baSetSectionTitle}>Select BA Sets</Text>
-          <Text style={styles.baSetSectionSubtitle}>Choose equipment for this task</Text>
+          <Text style={styles.baSetSectionTitle}>Select Task Type</Text>
+          <Text style={styles.baSetSectionSubtitle}>Choose the type of equipment for this task</Text>
           
+          {/* Task Type Dropdown */}
+          <View style={styles.inputGroup}>
+            <TouchableOpacity
+              style={styles.taskTypeSelector}
+              onPress={() => setShowTypeModal(true)}
+            >
+              <Ionicons name={selectedTaskType.icon} size={18} color={BLUE} style={styles.inputIcon} />
+              <Text style={styles.taskTypeText}>{selectedTaskType.name}</Text>
+              <Ionicons name="chevron-down" size={16} color={BLUE} />
+            </TouchableOpacity>
+          </View>
+
           {/* Search Bar */}
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={20} color={LIGHT_GREY} style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search BA sets by ID, name, or zone..."
+              placeholder={`Search ${selectedTaskType.name === 'BA-SET' ? 'BA sets' : 'Safety Kits'} by ID, name, or zone...`}
               placeholderTextColor={LIGHT_GREY}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
           
-          {/* BA Sets List */}
+          {/* Items List */}
           <FlatList
-            data={filteredBASets}
-            renderItem={({ item }) => renderBASetCard(item)}
+            data={getFilteredItems()}
+            renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             showsVerticalScrollIndicator={false}
@@ -708,6 +859,23 @@ const styles = StyleSheet.create({
   baSetSectionTitle: { fontSize: 14, fontWeight: '700', color: DARK, marginBottom: 4 },
   baSetSectionSubtitle: { fontSize: 12, color: GREY, marginBottom: 16 },
   baSetSection: { marginTop: 16, paddingTop: 0, borderTopWidth: 0 },
+  taskTypeSelector: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: LIGHT_BLUE, 
+    borderRadius: 12, 
+    paddingHorizontal: 16, 
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: BLUE,
+  },
+  taskTypeText: { 
+    flex: 1, 
+    fontSize: 16, 
+    color: BLUE, 
+    fontWeight: '600',
+    marginLeft: 12,
+  },
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16 },
   searchIcon: { marginRight: 12 },
   searchInput: { flex: 1, fontSize: 16, color: DARK },
