@@ -35,20 +35,22 @@ export default function TaskDetailsScreen({ navigation, route }) {
     taskId: 'INS-2024-0847',
     assetId: task.id,
     location: task.location,
-    cylinderNumbers: 'CYL-8847, CYL-8848',
-    lastHydrotest: '15 Jan 2024',
-    nextHydrotest: '15 Jan 2025',
-    cylinder1Pressure: '300',
-    cylinder2Pressure: '280', // Lower pressure
-    flowRate: '35', // Lower flow rate
-    faceMaskCondition: 'NOT OK', // Issue found
-    harnessStraps: 'OK',
-    cylinderValves: 'OK',
-    pressureGauge: 'N/A', // Not applicable for this model
-    demandValve: 'OK',
-    warningWhistle: 'NOT OK', // Issue found
+    cylinderNumbers: task.id.startsWith('SK-') ? 'N/A' : 'CYL-8847, CYL-8848',
+    lastHydrotest: task.id.startsWith('SK-') ? 'N/A' : '15 Jan 2024',
+    nextHydrotest: task.id.startsWith('SK-') ? 'N/A' : '15 Jan 2025',
+    cylinder1Pressure: task.id.startsWith('SK-') ? 'N/A' : '300',
+    cylinder2Pressure: task.id.startsWith('SK-') ? 'N/A' : '280', // Lower pressure
+    flowRate: task.id.startsWith('SK-') ? 'N/A' : '35', // Lower flow rate
+    faceMaskCondition: task.id.startsWith('SK-') ? 'N/A' : 'NOT OK', // Issue found
+    harnessStraps: task.id.startsWith('SK-') ? 'OK' : 'OK',
+    cylinderValves: task.id.startsWith('SK-') ? 'N/A' : 'OK',
+    pressureGauge: task.id.startsWith('SK-') ? 'OK' : 'N/A', // Not applicable for this model
+    demandValve: task.id.startsWith('SK-') ? 'N/A' : 'OK',
+    warningWhistle: task.id.startsWith('SK-') ? 'OK' : 'NOT OK', // Issue found
     gpsLocation: '40.7128° N, 74.0060° W',
-    generalRemark: 'Face mask shows signs of wear and tear. Warning whistle not functioning properly. Pressure gauge not applicable for this model. Cylinder 2 pressure is lower than optimal. Flow rate below standard. Equipment requires maintenance before next use.',
+    generalRemark: task.id.startsWith('SK-') 
+      ? 'Safety kit inspection completed successfully. All items present and in good condition.' 
+      : 'Face mask shows signs of wear and tear. Warning whistle not functioning properly. Pressure gauge not applicable for this model. Cylinder 2 pressure is lower than optimal. Flow rate below standard. Equipment requires maintenance before next use.',
     isLocationCaptured: true,
   };
 
@@ -92,10 +94,17 @@ export default function TaskDetailsScreen({ navigation, route }) {
   };
 
   const handleStartInspection = () => {
-    navigation.navigate('QRScanner', {
-      baSetId: task.id,
-      location: task.location,
-    });
+    if (task.id.startsWith('SK-')) {
+      navigation.navigate('QRScanner', {
+        skSetId: task.id,
+        location: task.location,
+      });
+    } else {
+      navigation.navigate('QRScanner', {
+        baSetId: task.id,
+        location: task.location,
+      });
+    }
   };
 
   const handleEditInspection = () => {
@@ -189,14 +198,14 @@ export default function TaskDetailsScreen({ navigation, route }) {
               </View>
             </View>
 
-            {/* BA Set Details Section */}
+            {/* Equipment Details Section */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>BA Set Details</Text>
+              <Text style={styles.sectionTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Details' : 'BA Set Details'}</Text>
               
               <View style={styles.baSetCard}>
-                <Ionicons name="cube" size={24} color={BLUE} />
+                <Ionicons name={task.id.startsWith('SK-') ? "construct" : "cube"} size={24} color={BLUE} />
                 <View style={styles.baSetInfo}>
-                  <Text style={styles.baSetTitle}>{assignmentData.baSetDetails}</Text>
+                  <Text style={styles.baSetTitle}>{task.id.startsWith('SK-') ? `Safety Kit: ${task.id}` : `BA Set: ${task.id}`}</Text>
                   <Text style={styles.baSetLocation}>{task.location}</Text>
                 </View>
               </View>

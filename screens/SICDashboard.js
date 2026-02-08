@@ -80,12 +80,12 @@ export default function SICDashboard({ navigation }) {
 
         {/* Pending Approvals */}
         <View style={styles.statsRow}>
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2' }]} onPress={() => navigation.navigate('PendingApprovals')}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2', borderColor: '#DC2626', borderWidth: 1 }]} onPress={() => navigation.navigate('PendingApprovals')}>
             <Ionicons name="document-text-outline" size={24} color="#DC2626" />
             <Text style={styles.statLabel}>Pending Approvals</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF' }]} onPress={() => navigation.navigate('OverdueTasks')}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF', borderColor: '#7C3AED', borderWidth: 1 }]} onPress={() => navigation.navigate('OverdueTasks')}>
             <Ionicons name="time-outline" size={24} color="#7C3AED" />
             <Text style={styles.statLabel}>Overdue Tasks</Text>
           </TouchableOpacity>

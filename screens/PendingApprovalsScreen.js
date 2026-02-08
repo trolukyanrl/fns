@@ -217,13 +217,13 @@ export default function PendingApprovalsScreen({ navigation }) {
   const getStatusBadgeStyle = (status) => {
     switch (status) {
       case 'Pending':
-        return { backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' };
+        return { backgroundColor: '#FEE2E2', borderColor: '#DC2626' };
       case 'Approved':
-        return { backgroundColor: '#D1FAE5', borderColor: '#34D399' };
+        return { backgroundColor: '#D1FAE5', borderColor: '#16A34A' };
       case 'Rejected':
-        return { backgroundColor: '#FEE2E2', borderColor: '#EF4444' };
+        return { backgroundColor: '#FEE2E2', borderColor: '#B91C1C' };
       default:
-        return { backgroundColor: '#F3F4F6', borderColor: '#D1D5DB' };
+        return { backgroundColor: '#F3F4F6', borderColor: '#9CA3AF' };
     }
   };
 

@@ -12,10 +12,10 @@ import SICAssignTask from './screens/SICAssignTask';
 import TADashboard from './screens/TADashboard';
 import TasksScreen from './screens/TasksScreen';
 import TaskDetailsScreen from './screens/TaskDetailsScreen';
-import ProfileScreen from './screens/ProfileScreen';
 import QRScannerScreen from './screens/QRScannerScreen';
 import LocationQRScannerScreen from './screens/LocationQRScannerScreen';
 import InspectionFormScreen from './screens/InspectionFormScreen';
+import SKInspectionScreen from './screens/SKInspectionScreen';
 import PendingApprovalsScreen from './screens/PendingApprovalsScreen';
 import ApprovalReviewScreen from './screens/ApprovalReviewScreen';
 import ApprovalStatusScreen from './screens/ApprovalStatusScreen';
@@ -43,10 +43,10 @@ export default function App() {
           <Stack.Screen name="TADashboard" component={TADashboard} />
           <Stack.Screen name="Tasks" component={TasksScreen} />
           <Stack.Screen name="TaskDetails" component={TaskDetailsScreen} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="QRScanner" component={QRScannerScreen} />
           <Stack.Screen name="LocationQRScanner" component={LocationQRScannerScreen} />
           <Stack.Screen name="InspectionForm" component={InspectionFormScreen} />
+          <Stack.Screen name="SKInspection" component={SKInspectionScreen} />
 
           {/* SIC Screens */}
           <Stack.Screen name="PendingApprovals" component={PendingApprovalsScreen} />

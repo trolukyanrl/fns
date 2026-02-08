@@ -40,6 +40,8 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   const [isCameraSupported] = useState(!!CameraView);
 
   const baSetId = route?.params?.baSetId || 'Unknown';
+  const skSetId = route?.params?.skSetId || 'Unknown';
+  const taskType = route?.params?.taskType || '';
 
   useEffect(() => {
     (async () => {
@@ -56,6 +58,9 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
+    // Determine which set ID to use
+    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+    
     Alert.alert(
       'Location QR Code Scanned',
       `Location: ${data}`,
@@ -68,7 +73,12 @@ export default function LocationQRScannerScreen({ navigation, route }) {
         {
           text: 'Proceed',
           onPress: () => {
-            navigation.replace('InspectionForm', { baSetId, location: data });
+            // Use taskType parameter for reliable navigation
+            if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
+              navigation.replace('SKInspection', { skSetId: currentSetId, location: data });
+            } else {
+              navigation.replace('InspectionForm', { baSetId: currentSetId, location: data });
+            }
           },
           style: 'default',
         },
@@ -84,7 +94,16 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     }
     setShowManualModal(false);
     setManualLocationCode('');
-    navigation.replace('InspectionForm', { baSetId, location: manualLocationCode });
+    
+    // Determine which set ID to use
+    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+    
+    // Use taskType parameter for reliable navigation
+    if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
+      navigation.replace('SKInspection', { skSetId: currentSetId, location: manualLocationCode });
+    } else {
+      navigation.replace('InspectionForm', { baSetId: currentSetId, location: manualLocationCode });
+    }
   };
 
   if (!isCameraSupported) {

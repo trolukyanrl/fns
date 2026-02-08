@@ -12,18 +12,18 @@ const PURPLE = '#9C27B0';
 const TASKS = [
   { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
   { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending for Approval', progress: 100 },
-  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending for Approval', progress: 100 },
+  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
+  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
   { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
   { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
-  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Rejected', progress: 100, rejectionReason: 'Missing safety documentation and improper storage conditions' },
-  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Rejected', progress: 100, rejectionReason: 'Exit route blocked and emergency lighting not functioning' },
-  { id: 'BA-SET-039', title: 'Electrical Panel Inspection', time: '3 days ago', location: 'Zone B-4', status: 'Rejected', progress: 100, rejectionReason: 'Improper wiring and missing protective covers' },
 ];
 
 export default function TasksScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Tasks');
-  const [filter, setFilter] = useState('All'); // New state for filtering
+  const [filter, setFilter] = useState('Pending Task'); // New state for filtering - default to pending tasks
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [expandedSections, setExpandedSections] = useState({
@@ -36,7 +36,6 @@ export default function TasksScreen({ navigation }) {
     setActiveTab(tab);
     if (tab === 'Home') navigation.navigate('TADashboard');
     if (tab === 'Tasks') navigation.navigate('Tasks');
-    if (tab === 'Profile') navigation.navigate('Profile');
   };
 
   const toggleSection = (section) => {
@@ -77,7 +76,7 @@ export default function TasksScreen({ navigation }) {
           </Text>
         </View>
       </View>
-      <Text style={styles.taskTitle}>{task.title}</Text>
+      <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
       <View style={styles.taskDetails}>
         <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
         <Text style={styles.taskDetailText}>{task.time}</Text>
@@ -232,14 +231,14 @@ export default function TasksScreen({ navigation }) {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        {['Home', 'Tasks', 'Profile'].map((tab) => (
+        {['Home', 'Tasks'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={styles.navItem}
             onPress={() => handleNavigation(tab)}
           >
             <Ionicons
-              name={tab === 'Home' ? 'home' : tab === 'Tasks' ? 'checkbox-outline' : 'person-outline'}
+              name={tab === 'Home' ? 'home' : 'checkbox-outline'}
               size={24}
               color={activeTab === tab ? BLUE : LIGHT_GREY}
             />

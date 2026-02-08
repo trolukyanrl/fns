@@ -185,7 +185,7 @@ export default function ApprovalStatusScreen({ navigation, route }) {
           <Text style={styles.approvalId}>{approval.id}</Text>
           <Text style={styles.approvalAsset}>{approval.assetId}</Text>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor() === GREEN ? '#ECFDF5' : '#FEE2E2' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor() === GREEN ? '#ECFDF5' : '#FEE2E2', borderColor: getStatusColor() === GREEN ? '#16A34A' : '#DC2626' }]}>
           <Text style={[styles.statusText, { color: getStatusColor() }]}>{approval.status}</Text>
         </View>
       </View>

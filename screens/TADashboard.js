@@ -17,6 +17,11 @@ const TASKS = [
   { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
   { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
   { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
+  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
+  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
+  { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
+  { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
 ];
 
 export default function TADashboard({ navigation }) {
@@ -26,7 +31,6 @@ export default function TADashboard({ navigation }) {
     setActiveTab(tab);
     if (tab === 'Home') navigation.navigate('TADashboard');
     if (tab === 'Tasks') navigation.navigate('Tasks');
-    if (tab === 'Profile') navigation.navigate('Profile');
   };
 
   return (
@@ -81,7 +85,7 @@ export default function TADashboard({ navigation }) {
         <TouchableOpacity 
           style={styles.quickActionCard} 
           activeOpacity={0.8}
-          onPress={() => navigation.navigate('QRScanner')}
+          onPress={() => navigation.navigate('Tasks')}
         >
           <View style={styles.quickActionIcon}>
             <Ionicons name="grid-outline" size={28} color="#fff" />
@@ -89,7 +93,7 @@ export default function TADashboard({ navigation }) {
               <Ionicons name="qr-code-outline" size={12} color="#fff" />
             </View>
           </View>
-          <Text style={styles.quickActionTitle}>Scan BA Set QR Code</Text>
+          <Text style={styles.quickActionTitle}>Scan QR Code</Text>
           <Text style={styles.quickActionSubtitle}>Start inspection by scanning equipment</Text>
         </TouchableOpacity>
 
@@ -101,7 +105,7 @@ export default function TADashboard({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {TASKS.map((task) => (
+        {TASKS.filter(task => task.status === 'Pending').map((task) => (
           <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
             <View style={styles.taskHeader}>
               <Text style={styles.taskId}>{task.id}</Text>
@@ -127,7 +131,7 @@ export default function TADashboard({ navigation }) {
             {/* Assignment Details for Pending Tasks */}
             {task.status === 'Pending' ? (
               <>
-                <Text style={styles.taskTitle}>BA Set Inspection</Text>
+                <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
                 <View style={styles.taskDetails}>
                   <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
                   <Text style={styles.taskDetailText}>Assigned to: Rajesh Kumar</Text>
@@ -137,8 +141,8 @@ export default function TADashboard({ navigation }) {
                   <Text style={styles.taskDetailText}>Due: 15 Feb 2024</Text>
                 </View>
                 <View style={styles.taskDetails}>
-                  <Ionicons name="cube-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>BA Set: {task.id}</Text>
+                  <Ionicons name={task.id.startsWith('SK-') ? "construct" : "cube-outline"} size={14} color={LIGHT_GREY} />
+                  <Text style={styles.taskDetailText}>{task.id.startsWith('SK-') ? 'Safety Kit' : 'BA Set'}: {task.id}</Text>
                 </View>
                 <View style={styles.taskDetails}>
                   <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
@@ -170,7 +174,7 @@ export default function TADashboard({ navigation }) {
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        {['Home', 'Tasks', 'Profile'].map((tab) => (
+        {['Home', 'Tasks'].map((tab) => (
           <TouchableOpacity
             key={tab}
             style={styles.navItem}
@@ -180,9 +184,7 @@ export default function TADashboard({ navigation }) {
               name={
                 tab === 'Home'
                   ? 'home'
-                  : tab === 'Tasks'
-                  ? 'checkbox-outline'
-                  : 'person-outline'
+                  : 'checkbox-outline'
               }
               size={24}
               color={activeTab === tab ? BLUE : LIGHT_GREY}

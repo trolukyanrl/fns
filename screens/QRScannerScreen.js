@@ -30,7 +30,7 @@ const DARK_GREY = '#333333';
 const LIGHT_GREY = '#666666';
 const GREEN = '#4CAF50';
 
-export default function QRScannerScreen({ navigation }) {
+export default function QRScannerScreen({ navigation, route }) {
   const [hasPermission, requestPermission] = useCameraPermissions ? useCameraPermissions() : [{ granted: false }, null];
   const [scanned, setScanned] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -54,6 +54,10 @@ export default function QRScannerScreen({ navigation }) {
   };
 
   const showScanResult = (data) => {
+    // Determine task type from route params or scanned data
+    const isSKTask = route.params?.skSetId ? true : (data.startsWith('SK-') ? true : false);
+    const taskId = route.params?.skSetId || route.params?.baSetId || data;
+    
     Alert.alert(
       'QR Code Scanned',
       `Code: ${data}`,
@@ -66,7 +70,17 @@ export default function QRScannerScreen({ navigation }) {
         {
           text: 'Proceed',
           onPress: () => {
-            navigation.navigate('LocationQRScanner', { baSetId: data });
+            if (isSKTask) {
+              navigation.navigate('LocationQRScanner', { 
+                skSetId: taskId,
+                taskType: 'SK'
+              });
+            } else {
+              navigation.navigate('LocationQRScanner', { 
+                baSetId: taskId,
+                taskType: 'BA_SET'
+              });
+            }
           },
           style: 'default',
         },
@@ -82,7 +96,21 @@ export default function QRScannerScreen({ navigation }) {
     }
     setShowManualModal(false);
     setManualCode('');
-    navigation.navigate('LocationQRScanner', { baSetId: manualCode });
+    
+    // Determine task type from route params
+    const isSKTask = route.params?.skSetId ? true : (manualCode.startsWith('SK-') ? true : false);
+    
+    if (isSKTask) {
+      navigation.navigate('LocationQRScanner', { 
+        skSetId: manualCode,
+        taskType: 'SK'
+      });
+    } else {
+      navigation.navigate('LocationQRScanner', { 
+        baSetId: manualCode,
+        taskType: 'BA_SET'
+      });
+    }
   };
 
   if (!isCameraSupported) {
@@ -95,7 +123,7 @@ export default function QRScannerScreen({ navigation }) {
           >
             <Ionicons name="chevron-back" size={28} color={DARK_GREY} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Scan BA Set QR Code</Text>
+          <Text style={styles.headerTitle}>Scan QR Code</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -228,7 +256,7 @@ export default function QRScannerScreen({ navigation }) {
         >
           <Ionicons name="chevron-back" size={28} color={DARK_GREY} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Scan BA Set QR Code</Text>
+        <Text style={styles.headerTitle}>Scan QR Code</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -273,7 +301,7 @@ export default function QRScannerScreen({ navigation }) {
 
         {/* Instructions Section */}
         <View style={styles.instructionsContainer}>
-          <Text style={styles.instructionsTitle}>Scan BA Set QR Code</Text>
+          <Text style={styles.instructionsTitle}>Scan QR Code</Text>
           <Text style={styles.instructionsSubtitle}>
             Position the QR code within the frame
           </Text>
@@ -301,9 +329,9 @@ export default function QRScannerScreen({ navigation }) {
                 <Text style={styles.stepNumberText}>1</Text>
               </View>
               <View style={styles.stepContent}>
-                <Text style={styles.stepTitle}>Locate BA Set QR Code</Text>
+                <Text style={styles.stepTitle}>Locate QR Code</Text>
                 <Text style={styles.stepDescription}>
-                  Find the QR code label on the breathing apparatus set
+                  Find the QR code label on the equipment
                 </Text>
               </View>
             </View>
