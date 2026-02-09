@@ -74,7 +74,9 @@ export default function LocationQRScannerScreen({ navigation, route }) {
           text: 'Proceed',
           onPress: () => {
             // Use taskType parameter for reliable navigation
-            if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
+            if (taskType === 'MAPPING') {
+              navigation.replace('Mapping', { scannedData: route.params?.scannedData, location: data, taskType: 'MAPPING' });
+            } else if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
               navigation.replace('SKInspection', { skSetId: currentSetId, location: data });
             } else {
               navigation.replace('InspectionForm', { baSetId: currentSetId, location: data });
@@ -99,7 +101,9 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
     
     // Use taskType parameter for reliable navigation
-    if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
+    if (taskType === 'MAPPING') {
+      navigation.replace('Mapping', { scannedData: route.params?.scannedData, location: manualLocationCode, taskType: 'MAPPING' });
+    } else if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
       navigation.replace('SKInspection', { skSetId: currentSetId, location: manualLocationCode });
     } else {
       navigation.replace('InspectionForm', { baSetId: currentSetId, location: manualLocationCode });

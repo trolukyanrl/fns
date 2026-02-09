@@ -59,7 +59,16 @@ export default function QRScannerScreen({ navigation, route }) {
     const isSKTask = route.params?.skSetId ? true : 
                     (data.startsWith('SK-') || data.includes('SafetyKit') || 
                      data.includes('SK_') || route.params?.taskType === 'SK');
+    const isBATask = route.params?.baSetId ? true : 
+                    (data.startsWith('BA-SET-') || data.includes('BASet') || 
+                     data.includes('BA_') || route.params?.taskType === 'BA_SET');
     const taskId = route.params?.skSetId || route.params?.baSetId || data;
+    
+    // Check if this is a mapping flow (no specific task parameters provided)
+    const isMappingFlow = !route.params?.skSetId && !route.params?.baSetId;
+    
+    // Check if this is a verification flow
+    const isVerifyFlow = route.params?.taskType === 'VERIFY';
     
     Alert.alert(
       'QR Code Scanned',
@@ -73,15 +82,33 @@ export default function QRScannerScreen({ navigation, route }) {
         {
           text: 'Proceed',
           onPress: () => {
-            if (isSKTask) {
+            if (isVerifyFlow) {
+              // For verification flow, navigate to LocationQRScanner with scanned data
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'VERIFY'
+              });
+            } else if (isMappingFlow) {
+              // For mapping flow, navigate to LocationQRScanner with scanned data
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'MAPPING'
+              });
+            } else if (isSKTask) {
               navigation.navigate('LocationQRScanner', { 
                 skSetId: taskId,
                 taskType: 'SK'
               });
-            } else {
+            } else if (isBATask) {
               navigation.navigate('LocationQRScanner', { 
                 baSetId: taskId,
                 taskType: 'BA_SET'
+              });
+            } else {
+              // Default case for unknown task types
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'UNKNOWN'
               });
             }
           },
@@ -105,16 +132,43 @@ export default function QRScannerScreen({ navigation, route }) {
     const isSKTask = route.params?.skSetId ? true : 
                     (manualCode.startsWith('SK-') || manualCode.includes('SafetyKit') || 
                      manualCode.includes('SK_') || route.params?.taskType === 'SK');
+    const isBATask = route.params?.baSetId ? true : 
+                    (manualCode.startsWith('BA-SET-') || manualCode.includes('BASet') || 
+                     manualCode.includes('BA_') || route.params?.taskType === 'BA_SET');
     
-    if (isSKTask) {
+    // Check if this is a mapping flow (no specific task parameters provided)
+    const isMappingFlow = !route.params?.skSetId && !route.params?.baSetId;
+    
+    // Check if this is a verification flow
+    const isVerifyFlow = route.params?.taskType === 'VERIFY';
+    
+    if (isVerifyFlow) {
+      // For verification flow, navigate to LocationQRScanner with manual code
+      navigation.navigate('LocationQRScanner', { 
+        scannedData: manualCode,
+        taskType: 'VERIFY'
+      });
+    } else if (isMappingFlow) {
+      // For mapping flow, navigate to LocationQRScanner with manual code
+      navigation.navigate('LocationQRScanner', { 
+        scannedData: manualCode,
+        taskType: 'MAPPING'
+      });
+    } else if (isSKTask) {
       navigation.navigate('LocationQRScanner', { 
         skSetId: manualCode,
         taskType: 'SK'
       });
-    } else {
+    } else if (isBATask) {
       navigation.navigate('LocationQRScanner', { 
         baSetId: manualCode,
         taskType: 'BA_SET'
+      });
+    } else {
+      // Default case for unknown task types
+      navigation.navigate('LocationQRScanner', { 
+        scannedData: manualCode,
+        taskType: 'UNKNOWN'
       });
     }
   };

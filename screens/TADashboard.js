@@ -33,6 +33,13 @@ export default function TADashboard({ navigation }) {
     if (tab === 'Tasks') navigation.navigate('Tasks');
   };
 
+  const handleLogout = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -46,9 +53,14 @@ export default function TADashboard({ navigation }) {
             <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.bellButton}>
-          <Ionicons name="notifications-outline" size={24} color={DARK_GREY} />
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.bellButton}>
+            <Ionicons name="notifications-outline" size={24} color={DARK_GREY} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={22} color={DARK_GREY} style={styles.logoutIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -207,14 +219,16 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '700', color: DARK_GREY },
   headerSubtitle: { fontSize: 12, color: LIGHT_GREY, marginTop: 2 },
   bellButton: { padding: 8 },
+  headerRight: { flexDirection: 'row', alignItems: 'center' },
+  logoutIcon: { marginLeft: 12 },
   scrollView: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 100 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statCard: { flex: 1, padding: 16, borderRadius: 12 },
-  statPending: { backgroundColor: '#E3F2FD' },
-  statCompleted: { backgroundColor: '#E8F5E9' },
-  statReview: { backgroundColor: '#FFF8E1' },
-  statRejected: { backgroundColor: '#FFE8E8' },
+  statCard: { flex: 1, padding: 16, borderRadius: 18 },
+  statPending: { backgroundColor: '#88baf3' },
+  statCompleted: { backgroundColor: '#6bef9d' },
+  statReview: { backgroundColor: '#ede770' },
+  statRejected: { backgroundColor: '#e97c7c' },
   statNumber: { fontSize: 24, fontWeight: '700', color: DARK_GREY },
   statLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK_GREY, marginBottom: 12 },
