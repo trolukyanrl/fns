@@ -17,6 +17,7 @@ import LocationQRScannerScreen from './screens/LocationQRScannerScreen';
 import InspectionFormScreen from './screens/InspectionFormScreen';
 import SKInspectionScreen from './screens/SKInspectionScreen';
 import MappingScreen from './screens/MappingScreen';
+import VerifyScreen from './screens/VerifyScreen';
 import PendingApprovalsScreen from './screens/PendingApprovalsScreen';
 import ApprovalReviewScreen from './screens/ApprovalReviewScreen';
 import ApprovalStatusScreen from './screens/ApprovalStatusScreen';
@@ -49,6 +50,7 @@ export default function App() {
           <Stack.Screen name="InspectionForm" component={InspectionFormScreen} />
           <Stack.Screen name="SKInspection" component={SKInspectionScreen} />
           <Stack.Screen name="Mapping" component={MappingScreen} />
+          <Stack.Screen name="Verify" component={VerifyScreen} />
 
           {/* SIC Screens */}
           <Stack.Screen name="PendingApprovals" component={PendingApprovalsScreen} />

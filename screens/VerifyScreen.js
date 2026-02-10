@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const MappingScreen = ({ navigation, route }) => {
+const VerifyScreen = ({ navigation, route }) => {
   const { scannedData, taskType, location } = route.params || {};
 
   // Parse the scanned data to extract meaningful information
@@ -15,16 +15,16 @@ const MappingScreen = ({ navigation, route }) => {
         type: 'Safety Kit',
         id: data,
         description: 'Safety Kit Equipment',
-        location: location || 'To be mapped',
-        status: location ? 'Mapped' : 'Pending Mapping'
+        location: location || 'To be verified',
+        status: location ? 'Verified' : 'Pending Verification'
       };
     } else if (data.includes('BA-SET-')) {
       return {
         type: 'BA Set',
         id: data,
         description: 'Breathing Apparatus Set',
-        location: location || 'To be mapped',
-        status: location ? 'Mapped' : 'Pending Mapping'
+        location: location || 'To be verified',
+        status: location ? 'Verified' : 'Pending Verification'
       };
     } else if (data.includes('LOC-')) {
       return {
@@ -32,7 +32,7 @@ const MappingScreen = ({ navigation, route }) => {
         id: data,
         description: 'Physical Location',
         location: location || data.replace('LOC-', ''),
-        status: location ? 'Mapped' : 'Pending Mapping'
+        status: location ? 'Verified' : 'Pending Verification'
       };
     } else {
       // Generic QR code data
@@ -41,15 +41,15 @@ const MappingScreen = ({ navigation, route }) => {
         id: data,
         description: 'Scanned Item',
         location: location || 'To be determined',
-        status: location ? 'Mapped' : 'Pending Processing'
+        status: location ? 'Verified' : 'Pending Processing'
       };
     }
   };
 
   const itemData = parseScannedData(scannedData);
 
-  const handleMapped = () => {
-    console.log('Mapped button pressed');
+  const handleVerified = () => {
+    console.log('Verified button pressed');
     navigation.navigate('SICDashboard');
   };
 
@@ -62,7 +62,7 @@ const MappingScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       {/* Non-scrollable Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Mapping</Text>
+        <Text style={styles.headerTitle}>Verification</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -88,7 +88,7 @@ const MappingScreen = ({ navigation, route }) => {
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Status:</Text>
             <Text style={[styles.detailValue, 
-              itemData.status === 'Mapped' ? styles.statusSuccess : styles.statusPending
+              itemData.status === 'Verified' ? styles.statusSuccess : styles.statusPending
             ]}>
               {itemData.status}
             </Text>
@@ -124,10 +124,10 @@ const MappingScreen = ({ navigation, route }) => {
       {/* Fixed Bottom Buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
-          style={[styles.button, styles.mappedButton]} 
-          onPress={handleMapped}
+          style={[styles.button, styles.verifiedButton]} 
+          onPress={handleVerified}
         >
-          <Text style={styles.mappedButtonText}>Mapped</Text>
+          <Text style={styles.verifiedButtonText}>Verified</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -223,10 +223,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  mappedButton: {
-    backgroundColor: '#0284C7',
+  verifiedButton: {
+    backgroundColor: '#16A34A',
   },
-  mappedButtonText: {
+  verifiedButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
@@ -243,4 +243,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MappingScreen;
+export default VerifyScreen;

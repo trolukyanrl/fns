@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
   fixedHeader: { 
     backgroundColor: '#F9FAFB', 
     paddingHorizontal: 20, 
-    paddingTop: 52, 
-    paddingBottom: 16,
+    paddingTop: 50, 
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
