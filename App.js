@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TaskProvider } from './TaskContext';
+import { AuthProvider } from './AuthContext';
 
 // Screens
 import LoginScreen from './screens/LoginScreen';
@@ -27,12 +28,13 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <TaskProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{ headerShown: false }}
-        >
+    <AuthProvider>
+      <TaskProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="Login"
+            screenOptions={{ headerShown: false }}
+          >
           {/* Login */}
           <Stack.Screen name="Login" component={LoginScreen} />
 
@@ -57,10 +59,11 @@ export default function App() {
           <Stack.Screen name="ApprovalStatus" component={ApprovalStatusScreen} />
           <Stack.Screen name="ApprovalReview" component={ApprovalReviewScreen} />
           <Stack.Screen name="OverdueTasks" component={OverdueTasksScreen} />
-        </Stack.Navigator>
+          </Stack.Navigator>
 
-        <StatusBar style="dark" />
-      </NavigationContainer>
-    </TaskProvider>
+          <StatusBar style="dark" />
+        </NavigationContainer>
+      </TaskProvider>
+    </AuthProvider>
   );
 }
