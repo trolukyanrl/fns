@@ -29,7 +29,7 @@ export default function TADashboard({ navigation }) {
 
   // Get task statistics for current user
   const pendingTasks = userTasks.filter(task => task.status === 'Pending');
-  const completedTasks = userTasks.filter(task => task.status === 'Completed');
+  const completedTasks = userTasks.filter(task => task.status === 'Completed' || task.status === 'Approved');
   const pendingApprovalTasks = userTasks.filter(task => task.status === 'Pending for Approval');
   const rejectedTasks = userTasks.filter(task => task.status === 'Rejected');
 
@@ -143,17 +143,17 @@ export default function TADashboard({ navigation }) {
                   styles.statusBadge,
                   task.status === 'Pending' && styles.statusPending,
                   task.status === 'Pending for Approval' && styles.statusApproval,
-                  task.status === 'Completed' && styles.statusCompleted,
+                  (task.status === 'Completed' || task.status === 'Approved') && styles.statusCompleted,
                   task.status === 'Rejected' && styles.statusRejected,
                 ]}>
                   <Text style={[
                     styles.statusText,
                     task.status === 'Pending' && styles.statusTextPending,
                     task.status === 'Pending for Approval' && styles.statusTextApproval,
-                    task.status === 'Completed' && styles.statusTextCompleted,
+                    (task.status === 'Completed' || task.status === 'Approved') && styles.statusTextCompleted,
                     task.status === 'Rejected' && styles.statusTextRejected,
                   ]}>
-                    {task.status}
+                    {task.status === 'Approved' ? 'Completed' : task.status}
                   </Text>
                 </View>
               </View>

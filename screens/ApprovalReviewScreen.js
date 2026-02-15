@@ -11,6 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
 
 const BLUE = '#2563EB';
 const DARK = '#1F2937';
@@ -27,6 +28,39 @@ export default function ApprovalReviewScreen({ navigation, route }) {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const { approval } = route.params;
+  const { updateTask } = useTaskContext();
+
+  // Map task to approval format if needed
+  const getApprovalData = () => {
+    // Check if this is a task object from TaskContext or approval object
+    const isTask = approval.baSets || approval.safetyKits;
+    
+    if (isTask) {
+      // It's a task object, map it to approval format
+      const isSKTask = approval.safetyKits && approval.safetyKits.length > 0;
+      const equipment = approval.baSets?.[0] || approval.safetyKits?.[0];
+      const inspectionData = approval.inspectionData || {};
+      // Use scanned location from inspection data, fall back to original task location
+      const location = inspectionData.scannedLocation || inspectionData.location || approval.location || 'Location TBA';
+      return {
+        id: approval.id,
+        assetId: equipment?.id || 'Unknown',
+        taskId: approval.id,
+        inspector: approval.assignedToName || approval.assignedTo || 'Unknown',
+        department: approval.assignedToDept || 'Unknown',
+        submittedDate: approval.submittedAt || 'Date not available',
+        location: location,
+        inspectionData: inspectionData,
+        taskType: approval.taskType || (isSKTask ? 'SK' : 'BA-SET'),
+        isSKTask: isSKTask,
+      };
+    }
+    
+    // It's already an approval object
+    return approval;
+  };
+
+  const approvalData = getApprovalData();
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -38,16 +72,24 @@ export default function ApprovalReviewScreen({ navigation, route }) {
   const handleApprove = () => {
     Alert.alert(
       'Approve Inspection',
-      `Are you sure you want to approve the inspection for ${approval.assetId}?`,
+      `Are you sure you want to approve the inspection for ${approvalData.assetId}?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Approve',
           style: 'default',
           onPress: () => {
+            // Update task status to 'Approved'
+            if (approvalData.taskId) {
+              updateTask(approvalData.taskId, {
+                ...approval,
+                status: 'Approved',
+                approvedAt: new Date().toLocaleString(),
+              });
+            }
             Alert.alert(
               'Inspection Approved',
-              `Inspection for ${approval.assetId} has been approved successfully.`,
+              `Inspection for ${approvalData.assetId} has been approved successfully.`,
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
           }
@@ -68,17 +110,31 @@ export default function ApprovalReviewScreen({ navigation, route }) {
     
     Alert.alert(
       'Reject Inspection',
-      `Are you sure you want to reject the inspection for ${approval.assetId}?\n\nReason: ${rejectReason}`,
+      `Are you sure you want to reject the inspection for ${approvalData.assetId}?\n\nReason: ${rejectReason}`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Reject',
           style: 'destructive',
           onPress: () => {
+            // Update task status to 'Rejected'
+            if (approvalData.taskId) {
+              updateTask(approvalData.taskId, {
+                ...approval,
+                status: 'Rejected',
+                rejectionReason: rejectReason,
+                rejectedAt: new Date().toLocaleString(),
+              });
+            }
+            
             Alert.alert(
               'Inspection Rejected',
-              `Inspection for ${approval.assetId} has been rejected with reason: ${rejectReason}`,
-              [{ text: 'OK', onPress: () => navigation.goBack() }]
+              `Inspection for ${approvalData.assetId} has been rejected with reason: ${rejectReason}`,
+              [{ text: 'OK', onPress: () => {
+                setShowRejectModal(false);
+                setRejectReason('');
+                navigation.goBack();
+              } }]
             );
           }
         }
@@ -104,12 +160,20 @@ export default function ApprovalReviewScreen({ navigation, route }) {
     }
   };
 
-  const ChecklistItem = ({ label, status }) => (
-    <View style={styles.checklistItem}>
-      <Ionicons name={getChecklistItemIcon(status)} size={20} color={getChecklistItemColor(status)} />
-      <Text style={styles.checklistLabel}>{label}</Text>
-      <View style={[styles.statusDot, { backgroundColor: getChecklistItemColor(status) }]} />
-      <Text style={[styles.statusText, { color: getChecklistItemColor(status) }]}>{status}</Text>
+  const ChecklistItem = ({ label, status, remarks }) => (
+    <View>
+      <View style={styles.checklistItem}>
+        <Ionicons name={getChecklistItemIcon(status)} size={20} color={getChecklistItemColor(status)} />
+        <Text style={styles.checklistLabel}>{label}</Text>
+        <View style={[styles.statusDot, { backgroundColor: getChecklistItemColor(status) }]} />
+        <Text style={[styles.statusText, { color: getChecklistItemColor(status) }]}>{status}</Text>
+      </View>
+      {remarks && (status === 'NOT OK' || status === 'N/A') && (
+        <View style={styles.remarksBox}>
+          <Text style={styles.remarksLabel}>Remarks:</Text>
+          <Text style={styles.remarksContent}>{remarks}</Text>
+        </View>
+      )}
     </View>
   );
 
@@ -131,37 +195,37 @@ export default function ApprovalReviewScreen({ navigation, route }) {
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Approval ID:</Text>
-            <Text style={styles.detailValue}>{approval.id}</Text>
+            <Text style={styles.detailValue}>{approvalData.id}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Asset ID:</Text>
-            <Text style={styles.detailValue}>{approval.assetId}</Text>
+            <Text style={styles.detailValue}>{approvalData.assetId}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Task ID:</Text>
-            <Text style={styles.detailValue}>{approval.taskId}</Text>
+            <Text style={styles.detailValue}>{approvalData.taskId}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Inspector:</Text>
-            <Text style={styles.detailValue}>{approval.inspector}</Text>
+            <Text style={styles.detailValue}>{approvalData.inspector}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Department:</Text>
-            <Text style={styles.detailValue}>{approval.department}</Text>
+            <Text style={styles.detailValue}>{approvalData.department}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Submitted:</Text>
-            <Text style={styles.detailValue}>{approval.submittedDate}</Text>
+            <Text style={styles.detailValue}>{approvalData.submittedDate}</Text>
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Location:</Text>
-            <Text style={styles.detailValue}>{approval.location}</Text>
+            <Text style={styles.detailValue}>{approvalData.location}</Text>
           </View>
         </View>
 
@@ -169,42 +233,112 @@ export default function ApprovalReviewScreen({ navigation, route }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Inspection Data</Text>
           
-          <View style={styles.dataRow}>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Cylinder 1 Pressure</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.cylinder1Pressure} BAR</Text>
-            </View>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Cylinder 2 Pressure</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.cylinder2Pressure} BAR</Text>
-            </View>
-          </View>
-          
-          <View style={styles.dataRow}>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Flow Rate</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.flowRate} L/MIN</Text>
-            </View>
-          </View>
+          {approvalData.isSKTask ? (
+            <>
+              <View style={styles.dataRow}>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Date</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.date || '—'}</Text>
+                </View>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Shift</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.shift || '—'}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.dataRow}>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Area</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.area || '—'}</Text>
+                </View>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Asset ID</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.assetId || '—'}</Text>
+                </View>
+              </View>
+
+              {approvalData.inspectionData.materials && approvalData.inspectionData.materials.length > 0 && (
+                <View style={styles.materialsTable}>
+                  <Text style={styles.dataLabel}>Materials:</Text>
+                  {approvalData.inspectionData.materials.map((material, idx) => (
+                    <View key={idx} style={styles.materialRow}>
+                      <Text style={styles.materialText}>{material.material || '—'}</Text>
+                      <Text style={styles.materialText}>Qty: {material.qty || '—'}</Text>
+                      <Text style={styles.materialText}>Status: {material.status || '—'}</Text>
+                      {material.replenished && <Text style={styles.materialText}>Replenished: {material.replenished}</Text>}
+                      {material.expiry && <Text style={styles.materialText}>Expiry: {material.expiry}</Text>}
+                      {material.remarks && <Text style={styles.materialRemark}>Remarks: {material.remarks}</Text>}
+                    </View>
+                  ))}
+                </View>
+              )}
+            </>
+          ) : (
+            <>
+              <View style={styles.dataRow}>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Cylinder 1 Pressure</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.cylinder1Pressure || '—'} BAR</Text>
+                </View>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Cylinder 2 Pressure</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.cylinder2Pressure || '—'} BAR</Text>
+                </View>
+              </View>
+              
+              <View style={styles.dataRow}>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Flow Rate</Text>
+                  <Text style={styles.dataValue}>{approvalData.inspectionData.flowRate || '—'} L/MIN</Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
-        {/* Inspection Checklist */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inspection Checklist</Text>
-          
-          <ChecklistItem label="Face Mask Condition" status={approval.inspectionData.faceMaskCondition} />
-          <ChecklistItem label="Harness Straps" status={approval.inspectionData.harnessStraps} />
-          <ChecklistItem label="Cylinder Valves" status={approval.inspectionData.cylinderValves} />
-          <ChecklistItem label="Pressure Gauge" status={approval.inspectionData.pressureGauge} />
-          <ChecklistItem label="Demand Valve" status={approval.inspectionData.demandValve} />
-          <ChecklistItem label="Warning Whistle" status={approval.inspectionData.warningWhistle} />
-        </View>
+        {/* Inspection Checklist - Only for BA-SET */}
+        {!approvalData.isSKTask && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Inspection Checklist</Text>
+            
+            <ChecklistItem 
+              label="Face Mask Condition" 
+              status={approvalData.inspectionData.faceMaskCondition} 
+              remarks={approvalData.inspectionData.faceMaskReview}
+            />
+            <ChecklistItem 
+              label="Harness Straps" 
+              status={approvalData.inspectionData.harnessStraps}
+              remarks={approvalData.inspectionData.harnessReview}
+            />
+            <ChecklistItem 
+              label="Cylinder Valves" 
+              status={approvalData.inspectionData.cylinderValves}
+              remarks={approvalData.inspectionData.cylinderValvesReview}
+            />
+            <ChecklistItem 
+              label="Pressure Gauge" 
+              status={approvalData.inspectionData.pressureGauge}
+              remarks={approvalData.inspectionData.pressureGaugeReview}
+            />
+            <ChecklistItem 
+              label="Demand Valve" 
+              status={approvalData.inspectionData.demandValve}
+              remarks={approvalData.inspectionData.demandValveReview}
+            />
+            <ChecklistItem 
+              label="Warning Whistle" 
+              status={approvalData.inspectionData.warningWhistle}
+              remarks={approvalData.inspectionData.warningWhistleReview}
+            />
+          </View>
+        )}
 
         {/* Remarks */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Remarks</Text>
+          <Text style={styles.sectionTitle}>General Remarks</Text>
           <View style={styles.remarkBox}>
-            <Text style={styles.remarkText}>{approval.inspectionData.generalRemark}</Text>
+            <Text style={styles.remarkText}>{approvalData.inspectionData.generalRemark || 'No remarks provided.'}</Text>
           </View>
         </View>
 
@@ -317,6 +451,9 @@ const styles = StyleSheet.create({
   checklistLabel: { fontSize: 14, color: DARK, flex: 1 },
   statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
   statusText: { fontSize: 12, fontWeight: '600', minWidth: 50 },
+  remarksBox: { backgroundColor: '#FFF3CD', borderLeftWidth: 4, borderLeftColor: ORANGE, marginLeft: 40, marginRight: 0, marginTop: 8, marginBottom: 12, padding: 12, borderRadius: 4 },
+  remarksLabel: { fontSize: 12, fontWeight: '600', color: ORANGE, marginBottom: 4 },
+  remarksContent: { fontSize: 13, color: DARK, lineHeight: 18 },
   remarkBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 12 },
   remarkText: { fontSize: 14, color: DARK, lineHeight: 20 },
   actionContainer: { flexDirection: 'row', gap: 12, marginTop: 16 },
@@ -338,4 +475,8 @@ const styles = StyleSheet.create({
   cancelButtonText: { fontSize: 16, fontWeight: '600', color: GREY },
   submitButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: RED, borderRadius: 8, paddingVertical: 12 },
   submitButtonText: { fontSize: 16, fontWeight: '700', color: WHITE, marginLeft: 8 },
+  materialsTable: { marginTop: 12, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, overflow: 'hidden' },
+  materialRow: { padding: 12, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#F9FAFB' },
+  materialText: { fontSize: 13, color: DARK, linHeight: 18, marginBottom: 4 },
+  materialRemark: { fontSize: 12, color: ORANGE, fontWeight: '600', marginTop: 4, fontStyle: 'italic' },
 });

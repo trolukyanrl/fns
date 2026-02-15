@@ -86,6 +86,10 @@ export default function TaskDetailsScreen({ navigation, route }) {
         return '#7B1FA2';
       case 'Completed':
         return GREEN;
+      case 'Approved':
+        return GREEN;
+      case 'Rejected':
+        return RED;
       default:
         return LIGHT_GREY;
     }
@@ -99,6 +103,10 @@ export default function TaskDetailsScreen({ navigation, route }) {
         return '#7B1FA2';
       case 'Completed':
         return '#2E7D32';
+      case 'Approved':
+        return '#2E7D32';
+      case 'Rejected':
+        return '#C62828';
       default:
         return LIGHT_GREY;
     }
@@ -190,12 +198,12 @@ export default function TaskDetailsScreen({ navigation, route }) {
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Assignment Details Section for Pending Tasks or Pending for Approval Tasks */}
-        {(task.status === 'Pending' || task.status === 'Pending for Approval') ? (
+        {(task.status === 'Pending' || task.status === 'Pending for Approval' || task.status === 'Approved' || task.status === 'Rejected') ? (
           <>
             {/* Task Assignment Overview */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                {task.status === 'Pending for Approval' ? 'Inspection Submitted' : 'Task Assignment'}
+                {task.status === 'Pending for Approval' ? 'Inspection Submitted' : task.status === 'Approved' ? 'Inspection Approved' : task.status === 'Rejected' ? 'Inspection Rejected' : 'Task Assignment'}
               </Text>
               
               <View style={styles.assignmentOverview}>
@@ -222,6 +230,24 @@ export default function TaskDetailsScreen({ navigation, route }) {
                   <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
                   <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
                 </>
+              ) : task.status === 'Approved' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Approved At" value={task.approvedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
+              ) : task.status === 'Rejected' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Rejected At" value={task.rejectedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
               ) : (
                 <>
                   <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
@@ -240,6 +266,19 @@ export default function TaskDetailsScreen({ navigation, route }) {
                 <View style={styles.descriptionCard}>
                   <Text style={styles.descriptionText}>
                     {assignmentData.taskDescription}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Rejection Reason Section (only for Rejected) */}
+            {task.status === 'Rejected' && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Rejection Reason</Text>
+                
+                <View style={[styles.descriptionCard, { borderLeftWidth: 4, borderLeftColor: RED }]}>
+                  <Text style={[styles.descriptionText, { color: RED }]}>
+                    {task.rejectionReason || 'No reason provided'}
                   </Text>
                 </View>
               </View>
@@ -402,6 +441,23 @@ export default function TaskDetailsScreen({ navigation, route }) {
             <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleEditInspection}>
               <Ionicons name="create" size={18} color="#fff" />
               <Text style={styles.editBtnText}>Edit & Resubmit</Text>
+            </TouchableOpacity>
+          </View>
+        ) : task.status === 'Approved' ? (
+          <TouchableOpacity style={[styles.viewBtn, { backgroundColor: GREEN }]} onPress={() => Alert.alert('Approved', 'Your inspection has been approved by the SIC.')}>
+            <Ionicons name="checkmark-circle" size={18} color="#fff" />
+            <Text style={styles.viewBtnText}>Inspection Approved</Text>
+          </TouchableOpacity>
+        ) : task.status === 'Rejected' ? (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.viewBtn, { flex: 1, backgroundColor: RED }]} onPress={() => Alert.alert('Rejected', `Your inspection was rejected.\n\nReason: ${task.rejectionReason || 'No reason provided'}`)}>
+              <Ionicons name="close-circle" size={18} color="#fff" />
+              <Text style={styles.viewBtnText}>View Reason</Text>
+            </TouchableOpacity>
+            <View style={{ width: 12 }} />
+            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleEditInspection}>
+              <Ionicons name="create" size={18} color="#fff" />
+              <Text style={styles.editBtnText}>Resubmit</Text>
             </TouchableOpacity>
           </View>
         ) : (
