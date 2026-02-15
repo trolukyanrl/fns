@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal, Dimensions, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
+import { useAuth } from '../AuthContext';
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -8,18 +10,6 @@ const LIGHT_GREY = '#666666';
 const GREEN = '#4CAF50';
 const ORANGE = '#F9A825';
 const PURPLE = '#9C27B0';
-
-const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
-  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
-  { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
-  { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
-];
 
 export default function TasksScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Tasks');
@@ -31,6 +21,10 @@ export default function TasksScreen({ navigation }) {
     approval: true,
     completed: true,
   });
+
+  // Get current logged-in user and all tasks
+  const { user } = useAuth();
+  const { tasks } = useTaskContext();
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -45,62 +39,78 @@ export default function TasksScreen({ navigation }) {
     }));
   };
 
-  // Separate tasks by status
-  const pendingTasks = TASKS.filter(task => task.status === 'Pending');
-  const pendingApprovalTasks = TASKS.filter(task => task.status === 'Pending for Approval');
-  const completedTasks = TASKS.filter(task => task.status === 'Completed');
-  const rejectedTasks = TASKS.filter(task => task.status === 'Rejected');
+  // Filter tasks to show only those assigned to the current user
+  const userTasks = tasks.filter(task => {
+    // Match by username or name
+    return task.assignedTo === user?.username || 
+           task.assignedTo === user?.name ||
+           task.assignedToName === user?.name ||
+           task.assignedToName === user?.username;
+  });
 
-  const TaskCard = ({ task }) => (
-    <TouchableOpacity 
-      style={styles.taskCard}
-      onPress={() => navigation.navigate('TaskDetails', { task })}
-    >
-      <View style={styles.taskHeader}>
-        <Text style={styles.taskId}>{task.id}</Text>
-        <View style={[
-          styles.statusBadge,
-          task.status === 'Pending' && styles.statusPending,
-          task.status === 'Pending for Approval' && styles.statusApproval,
-          task.status === 'Completed' && styles.statusCompleted,
-          task.status === 'Rejected' && styles.statusRejected,
-        ]}>
-          <Text style={[
-            styles.statusText,
-            task.status === 'Pending' && styles.statusTextPending,
-            task.status === 'Pending for Approval' && styles.statusTextApproval,
-            task.status === 'Completed' && styles.statusTextCompleted,
-            task.status === 'Rejected' && styles.statusTextRejected,
+  // Separate tasks by status
+  const pendingTasks = userTasks.filter(task => task.status === 'Pending');
+  const pendingApprovalTasks = userTasks.filter(task => task.status === 'Pending for Approval');
+  const completedTasks = userTasks.filter(task => task.status === 'Completed');
+  const rejectedTasks = userTasks.filter(task => task.status === 'Rejected');
+
+  const TaskCard = ({ task }) => {
+    // Get first BA-Set or Safety Kit for location and ID display
+    const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
+    const displayId = item?.id || task.id;
+    const displayLocation = item?.zone || 'Location TBA';
+
+    return (
+      <TouchableOpacity 
+        style={styles.taskCard}
+        onPress={() => navigation.navigate('TaskDetails', { task })}
+      >
+        <View style={styles.taskHeader}>
+          <Text style={styles.taskId}>{displayId}</Text>
+          <View style={[
+            styles.statusBadge,
+            task.status === 'Pending' && styles.statusPending,
+            task.status === 'Pending for Approval' && styles.statusApproval,
+            task.status === 'Completed' && styles.statusCompleted,
+            task.status === 'Rejected' && styles.statusRejected,
           ]}>
-            {task.status}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
-      <View style={styles.taskDetails}>
-        <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-        <Text style={styles.taskDetailText}>{task.time}</Text>
-      </View>
-      <View style={styles.taskDetails}>
-        <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-        <Text style={styles.taskDetailText}>{task.location}</Text>
-      </View>
-      {task.progress > 0 && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
+            <Text style={[
+              styles.statusText,
+              task.status === 'Pending' && styles.statusTextPending,
+              task.status === 'Pending for Approval' && styles.statusTextApproval,
+              task.status === 'Completed' && styles.statusTextCompleted,
+              task.status === 'Rejected' && styles.statusTextRejected,
+            ]}>
+              {task.status}
+            </Text>
           </View>
-          <Text style={styles.progressText}>{task.progress}%</Text>
         </View>
-      )}
-      {task.status === 'Rejected' && task.rejectionReason && (
-        <View style={styles.rejectionContainer}>
-          <Ionicons name="alert-circle-outline" size={14} color="#D32F2F" />
-          <Text style={styles.rejectionText}>{task.rejectionReason}</Text>
+        <Text style={styles.taskTitle}>{task.description}</Text>
+        <View style={styles.taskDetails}>
+          <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
+          <Text style={styles.taskDetailText}>Due: {task.dueDate}</Text>
         </View>
-      )}
-    </TouchableOpacity>
-  );
+        <View style={styles.taskDetails}>
+          <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
+          <Text style={styles.taskDetailText}>{displayLocation}</Text>
+        </View>
+        {task.progress > 0 && (
+          <View style={styles.progressContainer}>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
+            </View>
+            <Text style={styles.progressText}>{task.progress}%</Text>
+          </View>
+        )}
+        {task.status === 'Rejected' && task.rejectionReason && (
+          <View style={styles.rejectionContainer}>
+            <Ionicons name="alert-circle-outline" size={14} color="#D32F2F" />
+            <Text style={styles.rejectionText}>{task.rejectionReason}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -178,16 +188,16 @@ export default function TasksScreen({ navigation }) {
           
           // Apply filter first
           if (filter === 'All') {
-            tasksToShow = TASKS;
+            tasksToShow = userTasks;
           } else if (filter === 'Pending Task') {
             tasksToShow = pendingTasks;
-            emptyMessage = 'No pending task tasks found';
+            emptyMessage = 'No pending tasks found';
           } else if (filter === 'Pending for Approval') {
             tasksToShow = pendingApprovalTasks;
             emptyMessage = 'No pending for approval tasks found';
           } else if (filter === 'Task Completed') {
             tasksToShow = completedTasks;
-            emptyMessage = 'No task completed tasks found';
+            emptyMessage = 'No completed tasks found';
           } else if (filter === 'Rejected') {
             tasksToShow = rejectedTasks;
             emptyMessage = 'No rejected tasks found';
@@ -196,14 +206,28 @@ export default function TasksScreen({ navigation }) {
           // Then apply search filter
           if (searchText.trim() !== '') {
             const searchLower = searchText.toLowerCase();
-            tasksToShow = tasksToShow.filter(task => 
-              task.id.toLowerCase().includes(searchLower) ||
-              task.title.toLowerCase().includes(searchLower) ||
-              task.location.toLowerCase().includes(searchLower)
-            );
+            tasksToShow = tasksToShow.filter(task => {
+              const item = task.baSets?.[0] || task.safetyKits?.[0];
+              return (
+                task.id.toLowerCase().includes(searchLower) ||
+                task.description.toLowerCase().includes(searchLower) ||
+                (item?.zone && item.zone.toLowerCase().includes(searchLower)) ||
+                (item?.id && item.id.toLowerCase().includes(searchLower))
+              );
+            });
             if (tasksToShow.length === 0) {
               emptyMessage = 'No tasks found matching your search';
             }
+          }
+
+          if (userTasks.length === 0) {
+            return (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="checkmark-done-outline" size={48} color={LIGHT_GREY} />
+                <Text style={styles.emptyMessage}>No tasks assigned yet</Text>
+                <Text style={styles.emptySubMessage}>Tasks assigned by SIC will appear here</Text>
+              </View>
+            );
           }
 
           if (tasksToShow.length > 0) {
@@ -604,5 +628,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#D32F2F',
     lineHeight: 16,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyMessage: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: DARK_GREY,
+    marginTop: 16,
+  },
+  emptySubMessage: {
+    fontSize: 14,
+    color: LIGHT_GREY,
+    marginTop: 8,
   },
 });

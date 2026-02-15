@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
 import api from '../services/api';
+import axios from 'axios';
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -54,7 +55,7 @@ export default function SICAssignTask({ navigation, route }) {
   useEffect(() => {
     fetchInspectors();
     fetchBASets();
-    // fetchSafetyKits will be added when the collection is created
+    fetchSafetyKits();
   }, []);
   
   const fetchInspectors = async () => {
@@ -109,16 +110,8 @@ export default function SICAssignTask({ navigation, route }) {
   
   const fetchSafetyKits = async () => {
     try {
-      let response;
-      try {
-        response = await api.get('/Safety_Kits');
-      } catch (err) {
-        if (err.response?.status === 404) {
-          response = await api.get('/SafetyKits');
-        } else {
-          throw err;
-        }
-      }
+      // Use the separate Safety Kits API endpoint
+      const response = await axios.get('https://699196a06279728b0154de02.mockapi.io/sk');
       setSafetyKits(response.data || []);
       console.log('Fetched Safety-Kits:', response.data);
     } catch (error) {
@@ -182,7 +175,8 @@ export default function SICAssignTask({ navigation, route }) {
     // Create task object
     const taskData = {
       description: taskDescription,
-      assignedTo: selectedInspector.name,
+      assignedTo: selectedInspector.username, // Use username for consistent filtering
+      assignedToName: selectedInspector.name, // Also store name for display
       assignedToDept: selectedInspector.department,
       dueDate: dueDate,
       taskType: selectedTaskType.name,

@@ -54,6 +54,60 @@ export default function QRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
+    // Extract expected equipment ID from route params
+    const expectedEquipmentId = route.params?.expectedEquipmentId;
+    
+    // If we have an expected equipment ID, validate it
+    if (expectedEquipmentId) {
+      const scannedId = data.trim();
+      const expected = expectedEquipmentId.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedId.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the scanned data contains the expected ID
+      if (scannedId.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract equipment ID from patterns like "EQUIPMENT:BA-2024-001" or "BA-2024-001"
+      const idMatch = scannedId.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      const expectedIdMatch = expected.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      
+      if (idMatch && expectedIdMatch && 
+          idMatch[1].toUpperCase() === expectedIdMatch[1].toUpperCase()) {
+        // Equipment ID matches, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'BA Set ID Mismatch',
+        `Scanned: "${scannedId}"\nExpected: "${expected}"\n\nThe scanned equipment ID does not match the assigned equipment. Please scan the correct QR code.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => setScanned(false),
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected equipment ID validation needed, proceed directly
+    proceedWithValidation(data);
+  };
+
+  const proceedWithValidation = (data) => {
     // Determine task type from route params or scanned data
     // For SK tasks, check if it's explicitly marked as SK or has specific patterns
     const isSKTask = route.params?.skSetId ? true : 
@@ -69,6 +123,9 @@ export default function QRScannerScreen({ navigation, route }) {
     
     // Check if this is a verification flow
     const isVerifyFlow = route.params?.taskType === 'VERIFY';
+    
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
     
     Alert.alert(
       'QR Code Scanned',
@@ -86,29 +143,34 @@ export default function QRScannerScreen({ navigation, route }) {
               // For verification flow, navigate to LocationQRScanner with scanned data
               navigation.navigate('LocationQRScanner', { 
                 scannedData: data,
-                taskType: 'VERIFY'
+                taskType: 'VERIFY',
+                expectedZone: expectedZone,
               });
             } else if (isMappingFlow) {
               // For mapping flow, navigate to LocationQRScanner with scanned data
               navigation.navigate('LocationQRScanner', { 
                 scannedData: data,
-                taskType: 'MAPPING'
+                taskType: 'MAPPING',
+                expectedZone: expectedZone,
               });
             } else if (isSKTask) {
               navigation.navigate('LocationQRScanner', { 
                 skSetId: taskId,
-                taskType: 'SK'
+                taskType: 'SK',
+                expectedZone: expectedZone,
               });
             } else if (isBATask) {
               navigation.navigate('LocationQRScanner', { 
                 baSetId: taskId,
-                taskType: 'BA_SET'
+                taskType: 'BA_SET',
+                expectedZone: expectedZone,
               });
             } else {
               // Default case for unknown task types
               navigation.navigate('LocationQRScanner', { 
                 scannedData: data,
-                taskType: 'UNKNOWN'
+                taskType: 'UNKNOWN',
+                expectedZone: expectedZone,
               });
             }
           },
@@ -124,53 +186,71 @@ export default function QRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter an equipment ID');
       return;
     }
+    
+    const data = manualCode.trim();
+    
+    // Extract expected equipment ID from route params
+    const expectedEquipmentId = route.params?.expectedEquipmentId;
+    
+    // If we have an expected equipment ID, validate it
+    if (expectedEquipmentId) {
+      const scannedId = data;
+      const expected = expectedEquipmentId.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedId.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the entered data contains the expected ID
+      if (scannedId.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract equipment ID from patterns like "EQUIPMENT:BA-2024-001" or "BA-2024-001"
+      const idMatch = scannedId.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      const expectedIdMatch = expected.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      
+      if (idMatch && expectedIdMatch && 
+          idMatch[1].toUpperCase() === expectedIdMatch[1].toUpperCase()) {
+        // Equipment ID matches, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'BA Set ID Mismatch',
+        `Entered: "${scannedId}"\nExpected: "${expected}"\n\nThe entered equipment ID does not match the assigned equipment. Please enter the correct ID.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => {
+              // Keep the modal open and the text for retry
+              setManualCode(data);
+            },
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected equipment ID validation needed, proceed directly
     setShowManualModal(false);
     setManualCode('');
-    
-    // Determine task type from route params
-    // For SK tasks, check if it's explicitly marked as SK or has specific patterns
-    const isSKTask = route.params?.skSetId ? true : 
-                    (manualCode.startsWith('SK-') || manualCode.includes('SafetyKit') || 
-                     manualCode.includes('SK_') || route.params?.taskType === 'SK');
-    const isBATask = route.params?.baSetId ? true : 
-                    (manualCode.startsWith('BA-SET-') || manualCode.includes('BASet') || 
-                     manualCode.includes('BA_') || route.params?.taskType === 'BA_SET');
-    
-    // Check if this is a mapping flow (no specific task parameters provided)
-    const isMappingFlow = !route.params?.skSetId && !route.params?.baSetId;
-    
-    // Check if this is a verification flow
-    const isVerifyFlow = route.params?.taskType === 'VERIFY';
-    
-    if (isVerifyFlow) {
-      // For verification flow, navigate to LocationQRScanner with manual code
-      navigation.navigate('LocationQRScanner', { 
-        scannedData: manualCode,
-        taskType: 'VERIFY'
-      });
-    } else if (isMappingFlow) {
-      // For mapping flow, navigate to LocationQRScanner with manual code
-      navigation.navigate('LocationQRScanner', { 
-        scannedData: manualCode,
-        taskType: 'MAPPING'
-      });
-    } else if (isSKTask) {
-      navigation.navigate('LocationQRScanner', { 
-        skSetId: manualCode,
-        taskType: 'SK'
-      });
-    } else if (isBATask) {
-      navigation.navigate('LocationQRScanner', { 
-        baSetId: manualCode,
-        taskType: 'BA_SET'
-      });
-    } else {
-      // Default case for unknown task types
-      navigation.navigate('LocationQRScanner', { 
-        scannedData: manualCode,
-        taskType: 'UNKNOWN'
-      });
-    }
+    proceedWithValidation(data);
   };
 
   if (!isCameraSupported) {

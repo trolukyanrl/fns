@@ -58,6 +58,60 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
+    
+    // If we have an expected zone, validate it
+    if (expectedZone && expectedZone !== 'Location TBA') {
+      const scannedZone = data.trim();
+      const expected = expectedZone.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedZone.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the scanned data contains the expected zone
+      if (scannedZone.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract zone letter/name from patterns like "LOCATION:Zone A" or "Zone A"
+      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z])/i);
+      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z])/i);
+      
+      if (zoneLetterMatch && expectedZoneLetterMatch && 
+          zoneLetterMatch[1].toUpperCase() === expectedZoneLetterMatch[1].toUpperCase()) {
+        // Zone letter matches, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'Location Mismatch',
+        `Scanned: "${scannedZone}"\nExpected: "${expected}"\n\nThe scanned location does not match the assigned location. Please scan the correct QR code.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => setScanned(false),
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected zone validation needed, proceed directly
+    proceedWithValidation(data);
+  };
+
+  const proceedWithValidation = (data) => {
     // Determine which set ID to use
     const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
     
@@ -96,22 +150,71 @@ export default function LocationQRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter a location code');
       return;
     }
+    
+    const data = manualLocationCode.trim();
+    
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
+    
+    // If we have an expected zone, validate it
+    if (expectedZone && expectedZone !== 'Location TBA') {
+      const scannedZone = data;
+      const expected = expectedZone.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedZone.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the entered data contains the expected zone
+      if (scannedZone.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract zone letter/name from patterns like "LOCATION:Zone A" or "Zone A"
+      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z])/i);
+      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z])/i);
+      
+      if (zoneLetterMatch && expectedZoneLetterMatch && 
+          zoneLetterMatch[1].toUpperCase() === expectedZoneLetterMatch[1].toUpperCase()) {
+        // Zone letter matches, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'Location Mismatch',
+        `Entered: "${scannedZone}"\nExpected: "${expected}"\n\nThe entered location does not match the assigned location. Please enter the correct location.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => {
+              // Keep the modal open and the text for retry
+              setManualLocationCode(data);
+            },
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected zone validation needed, proceed directly
     setShowManualModal(false);
     setManualLocationCode('');
-    
-    // Determine which set ID to use
-    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
-    
-    // Use taskType parameter for reliable navigation
-    if (taskType === 'VERIFY') {
-      navigation.replace('Verify', { scannedData: route.params?.scannedData, location: manualLocationCode, taskType: 'VERIFY' });
-    } else if (taskType === 'MAPPING') {
-      navigation.replace('Mapping', { scannedData: route.params?.scannedData, location: manualLocationCode, taskType: 'MAPPING' });
-    } else if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
-      navigation.replace('SKInspection', { skSetId: currentSetId, location: manualLocationCode });
-    } else {
-      navigation.replace('InspectionForm', { baSetId: currentSetId, location: manualLocationCode });
-    }
+    proceedWithValidation(data);
   };
 
   if (!isCameraSupported) {

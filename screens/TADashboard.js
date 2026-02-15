@@ -8,26 +8,30 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
+import { useTaskContext } from '../TaskContext';
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
 const LIGHT_GREY = '#666666';
 
-const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
-  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
-  { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
-  { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
-];
-
 export default function TADashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
   const { user } = useAuth();
+  const { tasks } = useTaskContext();
+
+  // Filter tasks to show only those assigned to the current user
+  const userTasks = tasks.filter(task => {
+    return task.assignedTo === user?.username || 
+           task.assignedTo === user?.name ||
+           task.assignedToName === user?.name ||
+           task.assignedToName === user?.username;
+  });
+
+  // Get task statistics for current user
+  const pendingTasks = userTasks.filter(task => task.status === 'Pending');
+  const completedTasks = userTasks.filter(task => task.status === 'Completed');
+  const pendingApprovalTasks = userTasks.filter(task => task.status === 'Pending for Approval');
+  const rejectedTasks = userTasks.filter(task => task.status === 'Rejected');
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -73,11 +77,11 @@ export default function TADashboard({ navigation }) {
         {/* Stats Cards */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statPending]}>
-            <Text style={styles.statNumber}>8</Text>
+            <Text style={styles.statNumber}>{pendingTasks.length}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
           <View style={[styles.statCard, styles.statCompleted]}>
-            <Text style={styles.statNumber}>24</Text>
+            <Text style={styles.statNumber}>{completedTasks.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
         </View>
@@ -85,11 +89,11 @@ export default function TADashboard({ navigation }) {
         {/* Approval Status Cards */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statReview]}>
-            <Text style={styles.statNumber}>3</Text>
+            <Text style={styles.statNumber}>{pendingApprovalTasks.length}</Text>
             <Text style={styles.statLabel}>Pending for Approval</Text>
           </View>
           <View style={[styles.statCard, styles.statRejected]}>
-            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statNumber}>{rejectedTasks.length}</Text>
             <Text style={styles.statLabel}>Rejected</Text>
           </View>
         </View>
@@ -119,61 +123,73 @@ export default function TADashboard({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {TASKS.filter(task => task.status === 'Pending').map((task) => (
-          <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
-            <View style={styles.taskHeader}>
-              <Text style={styles.taskId}>{task.id}</Text>
-              <View style={[
-                styles.statusBadge,
-                task.status === 'Pending' && styles.statusPending,
-                task.status === 'Pending for Approval' && styles.statusApproval,
-                task.status === 'Completed' && styles.statusCompleted,
-                task.status === 'Rejected' && styles.statusRejected,
-              ]}>
-                <Text style={[
-                  styles.statusText,
-                  task.status === 'Pending' && styles.statusTextPending,
-                  task.status === 'Pending for Approval' && styles.statusTextApproval,
-                  task.status === 'Completed' && styles.statusTextCompleted,
-                  task.status === 'Rejected' && styles.statusTextRejected,
+        {pendingTasks.length === 0 ? (
+          <View style={styles.noTasksContainer}>
+            <Ionicons name="checkmark-done-outline" size={40} color={LIGHT_GREY} />
+            <Text style={styles.noTasksText}>No pending tasks</Text>
+          </View>
+        ) : (
+          <>
+            {userTasks.filter(task => task.status === 'Pending').map((task) => {
+              const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
+              const displayId = item?.id || task.id;
+              const displayLocation = item?.zone || 'Location TBA';
+
+          return (
+            <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
+              <View style={styles.taskHeader}>
+                <Text style={styles.taskId}>{displayId}</Text>
+                <View style={[
+                  styles.statusBadge,
+                  task.status === 'Pending' && styles.statusPending,
+                  task.status === 'Pending for Approval' && styles.statusApproval,
+                  task.status === 'Completed' && styles.statusCompleted,
+                  task.status === 'Rejected' && styles.statusRejected,
                 ]}>
-                  {task.status}
-                </Text>
+                  <Text style={[
+                    styles.statusText,
+                    task.status === 'Pending' && styles.statusTextPending,
+                    task.status === 'Pending for Approval' && styles.statusTextApproval,
+                    task.status === 'Completed' && styles.statusTextCompleted,
+                    task.status === 'Rejected' && styles.statusTextRejected,
+                  ]}>
+                    {task.status}
+                  </Text>
+                </View>
               </View>
-            </View>
-            
-            {/* Assignment Details for Pending Tasks */}
-            {task.status === 'Pending' ? (
-              <>
-                <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>Assigned to: Rajesh Kumar</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>Due: 15 Feb 2024</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name={task.id.startsWith('SK-') ? "construct" : "cube-outline"} size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.id.startsWith('SK-') ? 'Safety Kit' : 'BA Set'}: {task.id}</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.location}</Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={styles.taskTitle}>{task.title}</Text>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.time}</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.location}</Text>
-                </View>
+              
+              {/* Assignment Details for Pending Tasks */}
+              {task.status === 'Pending' ? (
+                <>
+                  <Text style={styles.taskTitle}>{task.description}</Text>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>Assigned to: {task.assignedToName || task.assignedTo}</Text>
+                  </View>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>Due: {task.dueDate}</Text>
+                  </View>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name={task.taskType === 'SK' ? "construct" : "cube-outline"} size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>{task.taskType}: {displayId}</Text>
+                  </View>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>{displayLocation}</Text>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.taskTitle}>{task.description}</Text>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>Due: {task.dueDate}</Text>
+                  </View>
+                  <View style={styles.taskDetails}>
+                    <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
+                    <Text style={styles.taskDetailText}>{displayLocation}</Text>
+                  </View>
                 {task.progress > 0 && (
                   <View style={styles.progressBar}>
                     <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
@@ -182,8 +198,11 @@ export default function TADashboard({ navigation }) {
                 {task.progress > 0 && <Text style={styles.progressText}>{task.progress}%</Text>}
               </>
             )}
-          </TouchableOpacity>
-        ))}
+            </TouchableOpacity>
+          );
+        })}
+          </>
+        )}
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -264,4 +283,6 @@ const styles = StyleSheet.create({
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   navLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
   navLabelActive: { color: BLUE, fontWeight: '600' },
+  noTasksContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
+  noTasksText: { fontSize: 16, color: LIGHT_GREY, marginTop: 12, fontWeight: '500' },
 });

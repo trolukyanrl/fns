@@ -20,38 +20,39 @@ const RED = '#E53935';
 export default function TaskDetailsScreen({ navigation, route }) {
   const { task } = route.params;
 
-  // Mock assignment data for pending tasks
+  // Get first BA-Set or Safety Kit for details
+  const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
+
+  // Use real task assignment data
   const assignmentData = {
-    assignee: 'Rajesh Kumar',
-    dueDate: '15 Feb 2024',
-    taskDescription: 'Complete inspection of BA Set equipment in Zone A-3',
-    baSetDetails: 'BA-SET-042 - Zone A-3',
+    assignee: task.assignedToName || task.assignedTo,
+    dueDate: task.dueDate,
+    taskDescription: task.description,
+    baSetDetails: item ? `${item.id} - ${item.zone}` : 'No item assigned',
     assignedBy: 'SIC',
     priority: 'High',
   };
 
-  // Mock inspection data - in a real app, this would come from your data source
+  // Use real inspection data
   const inspectionData = {
-    taskId: 'INS-2024-0847',
-    assetId: task.id,
-    location: task.location,
-    cylinderNumbers: task.id.startsWith('SK-') ? 'N/A' : 'CYL-8847, CYL-8848',
-    lastHydrotest: task.id.startsWith('SK-') ? 'N/A' : '15 Jan 2024',
-    nextHydrotest: task.id.startsWith('SK-') ? 'N/A' : '15 Jan 2025',
-    cylinder1Pressure: task.id.startsWith('SK-') ? 'N/A' : '300',
-    cylinder2Pressure: task.id.startsWith('SK-') ? 'N/A' : '280', // Lower pressure
-    flowRate: task.id.startsWith('SK-') ? 'N/A' : '35', // Lower flow rate
-    faceMaskCondition: task.id.startsWith('SK-') ? 'N/A' : 'NOT OK', // Issue found
-    harnessStraps: task.id.startsWith('SK-') ? 'OK' : 'OK',
-    cylinderValves: task.id.startsWith('SK-') ? 'N/A' : 'OK',
-    pressureGauge: task.id.startsWith('SK-') ? 'OK' : 'N/A', // Not applicable for this model
-    demandValve: task.id.startsWith('SK-') ? 'N/A' : 'OK',
-    warningWhistle: task.id.startsWith('SK-') ? 'OK' : 'NOT OK', // Issue found
+    taskId: task.id,
+    assetId: item?.id || task.id,
+    location: item?.zone || 'Location TBA',
+    cylinderNumbers: item?.cylinderNo || 'N/A',
+    lastHydrotest: item?.lastInspection || 'N/A',
+    nextHydrotest: item?.nextHydrotest || 'N/A',
+    cylinder1Pressure: item?.pressure || 'N/A',
+    cylinder2Pressure: 'N/A',
+    flowRate: 'N/A',
+    faceMaskCondition: 'Pending',
+    harnessStraps: 'Pending',
+    cylinderValves: 'Pending',
+    pressureGauge: 'Pending',
+    demandValve: 'Pending',
+    warningWhistle: 'Pending',
     gpsLocation: '40.7128° N, 74.0060° W',
-    generalRemark: task.id.startsWith('SK-') 
-      ? 'Safety kit inspection completed successfully. All items present and in good condition.' 
-      : 'Face mask shows signs of wear and tear. Warning whistle not functioning properly. Pressure gauge not applicable for this model. Cylinder 2 pressure is lower than optimal. Flow rate below standard. Equipment requires maintenance before next use.',
-    isLocationCaptured: true,
+    generalRemark: `Inspect ${item?.name || task.taskType}. Task status: ${task.status}. Complete inspection and provide details.`,
+    isLocationCaptured: false,
   };
 
   const getStatusColor = (status) => {
@@ -94,23 +95,30 @@ export default function TaskDetailsScreen({ navigation, route }) {
   };
 
   const handleStartInspection = () => {
-    if (task.id.startsWith('SK-')) {
+    const equipmentId = item?.id || task.id;
+    const zoneName = item?.zone || 'Location TBA';
+    
+    if (task.taskType === 'SK') {
       navigation.navigate('QRScanner', {
-        skSetId: task.id,
-        location: task.location,
+        skSetId: equipmentId,
+        expectedEquipmentId: equipmentId,
+        expectedZone: zoneName,
+        location: zoneName,
       });
     } else {
       navigation.navigate('QRScanner', {
-        baSetId: task.id,
-        location: task.location,
+        baSetId: equipmentId,
+        expectedEquipmentId: equipmentId,
+        expectedZone: zoneName,
+        location: zoneName,
       });
     }
   };
 
   const handleEditInspection = () => {
     navigation.navigate('InspectionForm', {
-      baSetId: task.id,
-      location: task.location,
+      baSetId: item?.id || task.id,
+      location: item?.zone || 'Location TBA',
       // Pass existing data for editing
       inspectionData,
     });
@@ -168,7 +176,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
               <View style={styles.assignmentOverview}>
                 <View style={styles.taskIdContainer}>
                   <Text style={styles.taskIdLabel}>Task ID</Text>
-                  <Text style={styles.taskId}>{task.id}</Text>
+                  <Text style={styles.taskId}>{item?.id || task.id}</Text>
                 </View>
                 
                 <View style={[
@@ -200,13 +208,13 @@ export default function TaskDetailsScreen({ navigation, route }) {
 
             {/* Equipment Details Section */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Details' : 'BA Set Details'}</Text>
+              <Text style={styles.sectionTitle}>{task.taskType === 'SK' ? 'Safety Kit Details' : 'BA Set Details'}</Text>
               
               <View style={styles.baSetCard}>
-                <Ionicons name={task.id.startsWith('SK-') ? "construct" : "cube"} size={24} color={BLUE} />
+                <Ionicons name={task.taskType === 'SK' ? "construct" : "cube"} size={24} color={BLUE} />
                 <View style={styles.baSetInfo}>
-                  <Text style={styles.baSetTitle}>{task.id.startsWith('SK-') ? `Safety Kit: ${task.id}` : `BA Set: ${task.id}`}</Text>
-                  <Text style={styles.baSetLocation}>{task.location}</Text>
+                  <Text style={styles.baSetTitle}>{item?.id || task.id}</Text>
+                  <Text style={styles.baSetLocation}>{item?.zone || 'Location TBA'}</Text>
                 </View>
               </View>
             </View>
@@ -221,7 +229,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
               <View style={styles.taskOverview}>
                 <View style={styles.taskIdContainer}>
                   <Text style={styles.taskIdLabel}>Task ID</Text>
-                  <Text style={styles.taskId}>{inspectionData.taskId}</Text>
+                  <Text style={styles.taskId}>{item?.id || task.id}</Text>
                 </View>
                 
                 <View style={[
