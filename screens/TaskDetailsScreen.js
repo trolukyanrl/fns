@@ -23,18 +23,31 @@ export default function TaskDetailsScreen({ navigation, route }) {
   // Get first BA-Set or Safety Kit for details
   const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
 
-  // Use real task assignment data
-  const assignmentData = {
-    assignee: task.assignedToName || task.assignedTo,
-    dueDate: task.dueDate,
-    taskDescription: task.description,
-    baSetDetails: item ? `${item.id} - ${item.zone}` : 'No item assigned',
-    assignedBy: 'SIC',
-    priority: 'High',
-  };
+  // Check if task is in "Pending for Approval" status and has inspection data
+  const isPendingApproval = task.status === 'Pending for Approval';
+  const submittedInspectionData = task.inspectionData || {};
 
-  // Use real inspection data
-  const inspectionData = {
+  // Use real inspection data from submission or default values
+  const inspectionData = isPendingApproval ? {
+    taskId: task.id,
+    assetId: item?.id || task.id,
+    location: item?.zone || 'Location TBA',
+    cylinderNumbers: item?.cylinderNo || 'N/A',
+    lastHydrotest: item?.lastInspection || 'N/A',
+    nextHydrotest: item?.nextHydrotest || 'N/A',
+    cylinder1Pressure: submittedInspectionData.cylinder1Pressure || 'N/A',
+    cylinder2Pressure: submittedInspectionData.cylinder2Pressure || 'N/A',
+    flowRate: submittedInspectionData.flowRate || 'N/A',
+    faceMaskCondition: submittedInspectionData.faceMaskCondition || 'Pending',
+    harnessStraps: submittedInspectionData.harnessStraps || 'Pending',
+    cylinderValves: submittedInspectionData.cylinderValves || 'Pending',
+    pressureGauge: submittedInspectionData.pressureGauge || 'Pending',
+    demandValve: submittedInspectionData.demandValve || 'Pending',
+    warningWhistle: submittedInspectionData.warningWhistle || 'Pending',
+    gpsLocation: '40.7128° N, 74.0060° W',
+    generalRemark: submittedInspectionData.generalRemark || `Inspect ${item?.name || task.taskType}. Task status: ${task.status}. Complete inspection and provide details.`,
+    isLocationCaptured: false,
+  } : {
     taskId: task.id,
     assetId: item?.id || task.id,
     location: item?.zone || 'Location TBA',
@@ -53,6 +66,16 @@ export default function TaskDetailsScreen({ navigation, route }) {
     gpsLocation: '40.7128° N, 74.0060° W',
     generalRemark: `Inspect ${item?.name || task.taskType}. Task status: ${task.status}. Complete inspection and provide details.`,
     isLocationCaptured: false,
+  };
+
+  // Use real task assignment data
+  const assignmentData = {
+    assignee: task.assignedToName || task.assignedTo,
+    dueDate: task.dueDate,
+    taskDescription: task.description,
+    baSetDetails: item ? `${item.id} - ${item.zone}` : 'No item assigned',
+    assignedBy: 'SIC',
+    priority: 'High',
   };
 
   const getStatusColor = (status) => {
@@ -166,12 +189,14 @@ export default function TaskDetailsScreen({ navigation, route }) {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Assignment Details Section for Pending Tasks */}
-        {task.status === 'Pending' ? (
+        {/* Assignment Details Section for Pending Tasks or Pending for Approval Tasks */}
+        {(task.status === 'Pending' || task.status === 'Pending for Approval') ? (
           <>
             {/* Task Assignment Overview */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Task Assignment</Text>
+              <Text style={styles.sectionTitle}>
+                {task.status === 'Pending for Approval' ? 'Inspection Submitted' : 'Task Assignment'}
+              </Text>
               
               <View style={styles.assignmentOverview}>
                 <View style={styles.taskIdContainer}>
@@ -189,22 +214,36 @@ export default function TaskDetailsScreen({ navigation, route }) {
                 </View>
               </View>
 
-              <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
-              <TaskDetailRow label="Due Date" value={assignmentData.dueDate} icon="calendar-outline" />
-              <TaskDetailRow label="Priority" value={assignmentData.priority} icon="alert-circle" />
-              <TaskDetailRow label="Assigned By" value={assignmentData.assignedBy} icon="shield-checkmark" />
+              {task.status === 'Pending for Approval' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
+              ) : (
+                <>
+                  <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
+                  <TaskDetailRow label="Due Date" value={assignmentData.dueDate} icon="calendar-outline" />
+                  <TaskDetailRow label="Priority" value={assignmentData.priority} icon="alert-circle" />
+                  <TaskDetailRow label="Assigned By" value={assignmentData.assignedBy} icon="shield-checkmark" />
+                </>
+              )}
             </View>
 
-            {/* Task Description Section */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Task Description</Text>
-              
-              <View style={styles.descriptionCard}>
-                <Text style={styles.descriptionText}>
-                  {assignmentData.taskDescription}
-                </Text>
+            {/* Task Description Section (only for Pending) */}
+            {task.status === 'Pending' && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Task Description</Text>
+                
+                <View style={styles.descriptionCard}>
+                  <Text style={styles.descriptionText}>
+                    {assignmentData.taskDescription}
+                  </Text>
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Equipment Details Section */}
             <View style={styles.section}>
@@ -354,10 +393,17 @@ export default function TaskDetailsScreen({ navigation, route }) {
             <Text style={styles.startBtnText}>Start Inspection</Text>
           </TouchableOpacity>
         ) : task.status === 'Pending for Approval' ? (
-          <TouchableOpacity style={styles.editBtn} onPress={handleEditInspection}>
-            <Ionicons name="create" size={18} color="#fff" />
-            <Text style={styles.editBtnText}>Edit Inspection</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.viewBtn, { flex: 1 }]} onPress={() => Alert.alert('Pending Review', 'Your inspection has been submitted and is awaiting approval from the SIC.')}>
+              <Ionicons name="information-circle" size={18} color="#fff" />
+              <Text style={styles.viewBtnText}>Awaiting Approval</Text>
+            </TouchableOpacity>
+            <View style={{ width: 12 }} />
+            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleEditInspection}>
+              <Ionicons name="create" size={18} color="#fff" />
+              <Text style={styles.editBtnText}>Edit & Resubmit</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <TouchableOpacity style={styles.viewBtn} onPress={() => Alert.alert('Info', 'Inspection completed')}>
             <Ionicons name="eye" size={18} color="#fff" />
@@ -634,6 +680,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#E8E8E8',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
   },
   startBtn: {
     backgroundColor: BLUE,

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -18,6 +19,10 @@ const GREEN = '#22C55E';
 
 export default function SICDashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
+  const { tasks } = useTaskContext();
+
+  // Calculate pending approvals count
+  const pendingApprovalsCount = tasks.filter(task => task.status === 'Pending for Approval').length;
 
   const handleLogout = () => {
     navigation.reset({
@@ -80,6 +85,11 @@ export default function SICDashboard({ navigation }) {
         {/* Pending Approvals */}
         <View style={styles.statsRow}>
           <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2' }]} onPress={() => navigation.navigate('PendingApprovals')}>
+            {pendingApprovalsCount > 0 && (
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{pendingApprovalsCount}</Text>
+              </View>
+            )}
             <Ionicons name="document-text-outline" size={24} color="#DC2626" />
             <Text style={styles.statLabel}>Pending Approvals</Text>
           </TouchableOpacity>
@@ -160,9 +170,27 @@ const styles = StyleSheet.create({
   logoutIcon: { marginLeft: 'auto' },
   pageTitle: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 20 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
-  statCard: { flex: 1, borderRadius: 16, padding: 16 },
+  statCard: { flex: 1, borderRadius: 16, padding: 16, position: 'relative' },
   statNumber: { fontSize: 24, fontWeight: '800', color: DARK, marginTop: 8 },
   statLabel: { fontSize: 13, color: GREY },
+  countBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#DC2626',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  countBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK },
   link: { fontSize: 13, fontWeight: '600', color: BLUE },

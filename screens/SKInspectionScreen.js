@@ -17,6 +17,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTaskContext } from '../TaskContext';
+import { useAuth } from '../AuthContext';
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -109,6 +111,8 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 export default function SKInspectionScreen({ navigation, route }) {
   // Get parameters from QR scanner
   const { skSetId, location: scannedLocation } = route?.params || {};
+  const { tasks, updateTask } = useTaskContext();
+  const { user } = useAuth();
   
   // ...existing code...
   // New state for form fields
@@ -204,7 +208,50 @@ export default function SKInspectionScreen({ navigation, route }) {
         {
           text: 'Yes, Submit',
           style: 'default',
-          onPress: () => navigation.navigate('TADashboard'),
+          onPress: () => {
+            // Find the task that has this equipment (skSetId)
+            const currentTask = tasks.find(task => {
+              const equipment = task.safetyKits?.find(sk => sk.id === skSetId);
+              return equipment || task.id === skSetId;
+            });
+
+            if (!currentTask) {
+              Alert.alert('Error', 'Task not found. Please try again.');
+              return;
+            }
+
+            // Collect inspection data
+            const inspectionData = {
+              date,
+              shift,
+              area,
+              location,
+              locationId,
+              assetId,
+              generalRemarks,
+              materials,
+            };
+
+            // Update task status to "Pending for Approval"
+            const updatedTask = {
+              ...currentTask,
+              status: 'Pending for Approval',
+              inspectionData,
+              submittedAt: new Date().toLocaleString(),
+              inspectedBy: user?.username || 'Unknown',
+            };
+
+            updateTask(currentTask.id, updatedTask);
+
+            Alert.alert('Success', 'Inspection submitted successfully!', [
+              {
+                text: 'OK',
+                onPress: () => {
+                  navigation.navigate('TADashboard');
+                },
+              },
+            ]);
+          },
         },
       ],
       { cancelable: true }

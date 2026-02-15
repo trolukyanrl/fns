@@ -15,6 +15,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
+import { useAuth } from '../AuthContext';
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -106,6 +108,8 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 
 export default function InspectionFormScreen({ navigation, route }) {
   const { baSetId, location } = route?.params || {};
+  const { tasks, updateTask } = useTaskContext();
+  const { user } = useAuth();
   const scrollViewRef = useRef(null);
   const remarksInputRef = useRef(null);
 
@@ -181,14 +185,62 @@ export default function InspectionFormScreen({ navigation, route }) {
       return;
     }
 
+    // Find the task that has this equipment (baSetId)
+    const currentTask = tasks.find(task => {
+      const equipment = task.baSets?.find(bs => bs.id === baSetId);
+      return equipment || task.id === baSetId;
+    });
 
-    // Submit the form
-    setTimeout(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'TADashboard' }],
-      });
-    }, 500);
+    if (!currentTask) {
+      Alert.alert('Error', 'Task not found. Please try again.');
+      return;
+    }
+
+    // Collect inspection data
+    const inspectionData = {
+      cylinder1Pressure,
+      cylinder2Pressure,
+      flowRate,
+      faceMaskCondition,
+      faceMaskReview,
+      harnessStraps,
+      harnessReview,
+      cylinderValves,
+      cylinderValvesReview,
+      pressureGauge,
+      pressureGaugeReview,
+      demandValve,
+      demandValveReview,
+      warningWhistle,
+      warningWhistleReview,
+      generalRemark,
+    };
+
+    // Update task status to "Pending for Approval"
+    const updatedTask = {
+      ...currentTask,
+      status: 'Pending for Approval',
+      inspectionData,
+      submittedAt: new Date().toLocaleString(),
+      inspectedBy: user?.username || 'Unknown',
+    };
+
+    updateTask(currentTask.id, updatedTask);
+
+    Alert.alert('Success', 'Inspection submitted successfully!', [
+      {
+        text: 'OK',
+        onPress: () => {
+          // Navigate back to TADashboard
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'TADashboard' }],
+            });
+          }, 500);
+        },
+      },
+    ]);
   };
 
   const ChecklistItem = ({ label, description, value, reviewValue, onOk, onNotOk, onNA, onClearReview }) => (
