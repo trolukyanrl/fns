@@ -36,132 +36,6 @@ const ZONES = [
   { id: '3', name: 'Zone C' },
 ];
 
-const BA_SETS = [
-  {
-    id: 'BA-2024-001',
-    name: 'Drager PSS 7000',
-    status: 'Available',
-    zone: 'Zone A - Block 3',
-    cylinderNo: 'CYL-A-4521',
-    pressure: '300 bar',
-    nextHydrotest: '15 Mar 2025',
-    lastInspection: '2 days ago',
-  },
-  {
-    id: 'BA-2024-007',
-    name: 'MSA G1 SCBA',
-    status: 'Available',
-    zone: 'Zone B - Block 1',
-    cylinderNo: 'CYL-B-2847',
-    pressure: '290 bar',
-    nextHydrotest: '22 Apr 2025',
-    lastInspection: '5 days ago',
-  },
-  {
-    id: 'BA-2024-003',
-    name: 'Scott Aviation AV-3000',
-    status: 'Available',
-    zone: 'Zone C - Block 2',
-    cylinderNo: 'CYL-C-5632',
-    pressure: '310 bar',
-    nextHydrotest: '10 May 2025',
-    lastInspection: '1 day ago',
-  },
-  {
-    id: 'BA-2024-012',
-    name: 'Dräger PSS 90 SCBA',
-    status: 'Available',
-    zone: 'Zone A - Block 1',
-    cylinderNo: 'CYL-A-3456',
-    pressure: '295 bar',
-    nextHydrotest: '08 Jun 2025',
-    lastInspection: '3 days ago',
-  },
-  {
-    id: 'BA-2024-015',
-    name: 'Honeywell SCSR',
-    status: 'Available',
-    zone: 'Zone B - Block 3',
-    cylinderNo: 'CYL-B-5789',
-    pressure: '280 bar',
-    nextHydrotest: '30 May 2025',
-    lastInspection: '4 days ago',
-  },
-  {
-    id: 'BA-2024-018',
-    name: 'Siebe Gorman AAPRO',
-    status: 'Available',
-    zone: 'Zone C - Block 4',
-    cylinderNo: 'CYL-C-1234',
-    pressure: '320 bar',
-    nextHydrotest: '18 Jul 2025',
-    lastInspection: '6 days ago',
-  },
-  {
-    id: 'BA-2024-021',
-    name: 'Interspiro SCBA II',
-    status: 'Available',
-    zone: 'Zone A - Block 2',
-    cylinderNo: 'CYL-A-9876',
-    pressure: '305 bar',
-    nextHydrotest: '12 Apr 2025',
-    lastInspection: '1 day ago',
-  },
-];
-
-const SAFETY_KITS = [
-  {
-    id: 'SK-2024-001',
-    name: 'Emergency Response Kit A',
-    status: 'Available',
-    zone: 'Zone A - Block 1',
-    kitType: 'First Aid',
-    itemCount: '45 items',
-    nextInspection: '20 Mar 2025',
-    lastInspection: '1 day ago',
-  },
-  {
-    id: 'SK-2024-005',
-    name: 'Fire Safety Kit B',
-    status: 'Available',
-    zone: 'Zone B - Block 2',
-    kitType: 'Fire Safety',
-    itemCount: '32 items',
-    nextInspection: '25 Apr 2025',
-    lastInspection: '3 days ago',
-  },
-  {
-    id: 'SK-2024-009',
-    name: 'Hazmat Response Kit',
-    status: 'Available',
-    zone: 'Zone C - Block 1',
-    kitType: 'Hazmat',
-    itemCount: '28 items',
-    nextInspection: '15 May 2025',
-    lastInspection: '5 days ago',
-  },
-  {
-    id: 'SK-2024-012',
-    name: 'Rescue Equipment Kit',
-    status: 'Available',
-    zone: 'Zone A - Block 4',
-    kitType: 'Rescue',
-    itemCount: '38 items',
-    nextInspection: '10 Jun 2025',
-    lastInspection: '2 days ago',
-  },
-  {
-    id: 'SK-2024-016',
-    name: 'Spill Response Kit',
-    status: 'Available',
-    zone: 'Zone B - Block 5',
-    kitType: 'Spill Control',
-    itemCount: '25 items',
-    nextInspection: '05 May 2025',
-    lastInspection: '4 days ago',
-  },
-];
-
 export default function SICAssignTask({ navigation, route }) {
   const { addTask, updateTask } = useTaskContext();
   const editingTask = route?.params?.taskToEdit;
@@ -171,9 +45,16 @@ export default function SICAssignTask({ navigation, route }) {
   const [inspectors, setInspectors] = useState([]);
   const [loadingInspectors, setLoadingInspectors] = useState(true);
   
+  // State for BA-Sets and Safety Kits
+  const [baSets, setBASets] = useState([]);
+  const [safetyKits, setSafetyKits] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  
   // Fetch inspectors with role "TA" from API
   useEffect(() => {
     fetchInspectors();
+    fetchBASets();
+    // fetchSafetyKits will be added when the collection is created
   }, []);
   
   const fetchInspectors = async () => {
@@ -206,6 +87,46 @@ export default function SICAssignTask({ navigation, route }) {
     }
   };
   
+  const fetchBASets = async () => {
+    try {
+      setLoadingItems(true);
+      const response = await api.get('/BA_Sets');
+      setBASets(response.data || []);
+      console.log('Fetched BA-Sets:', response.data);
+    } catch (error) {
+      console.error('Error fetching BA-Sets:', error.message);
+      console.error('Status:', error.response?.status);
+      console.error('URL:', error.config?.url);
+      setBASets([]);
+      Alert.alert(
+        'BA-Sets Not Found',
+        `Please verify the collection name in MockAPI. Error: ${error.response?.status || error.message}`
+      );
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+  
+  const fetchSafetyKits = async () => {
+    try {
+      let response;
+      try {
+        response = await api.get('/Safety_Kits');
+      } catch (err) {
+        if (err.response?.status === 404) {
+          response = await api.get('/SafetyKits');
+        } else {
+          throw err;
+        }
+      }
+      setSafetyKits(response.data || []);
+      console.log('Fetched Safety-Kits:', response.data);
+    } catch (error) {
+      console.error('Error fetching Safety-Kits:', error.message);
+      setSafetyKits([]);
+    }
+  };
+  
   const findInspectorById = (name, dept) => {
     return inspectors.find(insp => insp.name === name && insp.department === dept);
   };
@@ -228,23 +149,23 @@ export default function SICAssignTask({ navigation, route }) {
   // Filter based on selected task type
   const getFilteredItems = () => {
     if (selectedTaskType.name === 'BA-SET') {
-      return BA_SETS.filter(baSet => {
+      return baSets.filter(baSet => {
         const query = searchQuery.toLowerCase();
         return (
-          baSet.id.toLowerCase().includes(query) ||
-          baSet.name.toLowerCase().includes(query) ||
-          baSet.zone.toLowerCase().includes(query) ||
-          baSet.cylinderNo.toLowerCase().includes(query)
+          (baSet.id && baSet.id.toLowerCase().includes(query)) ||
+          (baSet.name && baSet.name.toLowerCase().includes(query)) ||
+          (baSet.zone && baSet.zone.toLowerCase().includes(query)) ||
+          (baSet.cylinderNo && baSet.cylinderNo.toLowerCase().includes(query))
         );
       });
     } else {
-      return SAFETY_KITS.filter(sk => {
+      return safetyKits.filter(sk => {
         const query = searchQuery.toLowerCase();
         return (
-          sk.id.toLowerCase().includes(query) ||
-          sk.name.toLowerCase().includes(query) ||
-          sk.zone.toLowerCase().includes(query) ||
-          sk.kitType.toLowerCase().includes(query)
+          (sk.id && sk.id.toLowerCase().includes(query)) ||
+          (sk.name && sk.name.toLowerCase().includes(query)) ||
+          (sk.zone && sk.zone.toLowerCase().includes(query)) ||
+          (sk.kitType && sk.kitType.toLowerCase().includes(query))
         );
       });
     }
@@ -269,9 +190,9 @@ export default function SICAssignTask({ navigation, route }) {
     };
 
     if (selectedTaskType.name === 'BA-SET') {
-      taskData.baSets = selectedBASets.map(id => BA_SETS.find(bs => bs.id === id)).filter(Boolean);
+      taskData.baSets = selectedBASets.map(id => baSets.find(bs => bs.id === id)).filter(Boolean);
     } else {
-      taskData.safetyKits = selectedSKs.map(id => SAFETY_KITS.find(sk => sk.id === id)).filter(Boolean);
+      taskData.safetyKits = selectedSKs.map(id => safetyKits.find(sk => sk.id === id)).filter(Boolean);
     }
 
     if (isEditMode) {
@@ -635,15 +556,25 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
           
           {/* Items List */}
-          <FlatList
-            data={getFilteredItems()}
-            renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={false}
-            style={styles.baSetList}
-          />
+          {loadingItems ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Loading {selectedTaskType.name === 'BA-SET' ? 'BA Sets' : 'Safety Kits'}...</Text>
+            </View>
+          ) : getFilteredItems().length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>No {selectedTaskType.name === 'BA-SET' ? 'BA Sets' : 'Safety Kits'} available</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={getFilteredItems()}
+              renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={false}
+              style={styles.baSetList}
+            />
+          )}
         </View>
       </ScrollView>
 
@@ -973,4 +904,6 @@ const styles = StyleSheet.create({
   yearOptionTextSelected: { color: BLUE, fontWeight: '700' },
   yearPickerConfirmButton: { backgroundColor: BLUE, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16 },
   yearPickerConfirmText: { fontSize: 16, fontWeight: '700', color: WHITE },
+  loadingContainer: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { fontSize: 16, color: GREY, fontWeight: '500' },
 });
