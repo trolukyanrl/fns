@@ -7,6 +7,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../AuthContext';
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -26,6 +27,7 @@ const TASKS = [
 
 export default function TADashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
+  const { user } = useAuth();
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -49,7 +51,7 @@ export default function TADashboard({ navigation }) {
             <Ionicons name="shield-checkmark" size={24} color="#fff" />
           </View>
           <View>
-            <Text style={styles.headerTitle}>Welcome back, Rajesh</Text>
+            <Text style={styles.headerTitle}>Welcome back, {user?.name || user?.username || 'User'}</Text>
             <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
           </View>
         </View>

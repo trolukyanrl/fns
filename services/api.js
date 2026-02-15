@@ -88,7 +88,31 @@ export const authAPI = {
       }
     } catch (error) {
       console.error('Login API error:', error.message);
-      if (error.code === 'NETWORK_ERROR') {
+      
+      // Handle different error types
+      if (error.response?.status === 404) {
+        // User not found
+        throw {
+          response: {
+            status: 404,
+            data: {
+              success: false,
+              message: 'User not found. Please check your username.'
+            }
+          }
+        };
+      } else if (error.response?.status) {
+        // Other HTTP errors
+        throw {
+          response: {
+            status: error.response.status,
+            data: {
+              success: false,
+              message: error.response.data?.message || 'Login failed. Please try again.'
+            }
+          }
+        };
+      } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
         throw {
           response: {
             status: 500,
@@ -99,7 +123,22 @@ export const authAPI = {
           }
         };
       }
-      throw error;
+      
+      // Re-throw if it already has proper error structure
+      if (error.response?.data?.message) {
+        throw error;
+      }
+      
+      // Fallback error
+      throw {
+        response: {
+          status: 500,
+          data: {
+            success: false,
+            message: 'An error occurred during login. Please try again.'
+          }
+        }
+      };
     }
   },
 

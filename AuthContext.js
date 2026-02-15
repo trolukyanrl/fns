@@ -17,17 +17,16 @@ export const AuthProvider = ({ children }) => {
   const checkExistingAuth = async () => {
     try {
       // Check if we have a stored token (in a real app, use SecureStore/AsyncStorage)
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        // Verify token with backend
-        const response = await authAPI.verifyToken(token);
-        if (response.data.valid) {
-          setUser(response.data.user);
-        }
-      }
+      // TODO: Implement token storage using AsyncStorage for React Native
+      // const token = await AsyncStorage.getItem('authToken');
+      // if (token) {
+      //   const response = await authAPI.verifyToken(token);
+      //   if (response.data.valid) {
+      //     setUser(response.data.user);
+      //   }
+      // }
     } catch (err) {
       console.log('No existing auth session');
-      localStorage.removeItem('authToken');
     }
   };
 
@@ -40,8 +39,9 @@ export const AuthProvider = ({ children }) => {
       
       if (response.data.success) {
         setUser(response.data.user);
-        // Store token (in real app, use SecureStore for React Native)
-        localStorage.setItem('authToken', response.data.user.token);
+        // Store token (in real app, use SecureStore/AsyncStorage for React Native)
+        // TODO: Implement token storage using AsyncStorage
+        // await AsyncStorage.setItem('authToken', response.data.user.token);
         return { success: true, user: response.data.user };
       } else {
         setError(response.data.message || 'Login failed');
@@ -63,7 +63,8 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', err);
     } finally {
       setUser(null);
-      localStorage.removeItem('authToken');
+      // TODO: Remove token from AsyncStorage
+      // await AsyncStorage.removeItem('authToken');
       setError(null);
     }
   };

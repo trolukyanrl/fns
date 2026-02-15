@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
+import api from '../services/api';
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -33,13 +34,6 @@ const ZONES = [
   { id: '1', name: 'Zone A' },
   { id: '2', name: 'Zone B' },
   { id: '3', name: 'Zone C' },
-];
-
-const INSPECTORS = [
-  { id: '1', name: 'Amit R.', department: 'Safety' },
-  { id: '2', name: 'Sarah K.', department: 'Operations' },
-  { id: '3', name: 'Raj P.', department: 'Maintenance' },
-  { id: '4', name: 'Lisa M.', department: 'Quality' },
 ];
 
 const BA_SETS = [
@@ -173,8 +167,47 @@ export default function SICAssignTask({ navigation, route }) {
   const editingTask = route?.params?.taskToEdit;
   const isEditMode = !!editingTask;
   
+  // State for inspectors (TA users)
+  const [inspectors, setInspectors] = useState([]);
+  const [loadingInspectors, setLoadingInspectors] = useState(true);
+  
+  // Fetch inspectors with role "TA" from API
+  useEffect(() => {
+    fetchInspectors();
+  }, []);
+  
+  const fetchInspectors = async () => {
+    try {
+      setLoadingInspectors(true);
+      const response = await api.get('/users');
+      
+      // Filter users with role "ta" (case-insensitive)
+      const taUsers = response.data.filter(user => 
+        user.role && user.role.toLowerCase() === 'ta'
+      );
+      
+      // Map API users to inspector format
+      const mappedInspectors = taUsers.map((user, index) => ({
+        id: user.id || String(index + 1),
+        name: user.name || user.username,
+        department: user.role || 'Task Assignor',
+        username: user.username,
+      }));
+      
+      setInspectors(mappedInspectors);
+      console.log('Fetched TA users:', mappedInspectors);
+    } catch (error) {
+      console.error('Error fetching inspectors:', error);
+      // Fallback to empty array
+      setInspectors([]);
+      Alert.alert('Error', 'Failed to load inspectors. Please try again.');
+    } finally {
+      setLoadingInspectors(false);
+    }
+  };
+  
   const findInspectorById = (name, dept) => {
-    return INSPECTORS.find(insp => insp.name === name && insp.department === dept);
+    return inspectors.find(insp => insp.name === name && insp.department === dept);
   };
 
   const [taskDescription, setTaskDescription] = useState(editingTask?.description || '');
@@ -688,12 +721,18 @@ export default function SICAssignTask({ navigation, route }) {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Inspector</Text>
-            <FlatList
-              data={INSPECTORS}
-              renderItem={renderInspector}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-            />
+            {loadingInspectors ? (
+              <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20 }]}>Loading inspectors...</Text>
+            ) : inspectors.length === 0 ? (
+              <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20, color: GREY }]}>No inspectors available</Text>
+            ) : (
+              <FlatList
+                data={inspectors}
+                renderItem={renderInspector}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
           </View>
         </TouchableOpacity>
       </Modal>
