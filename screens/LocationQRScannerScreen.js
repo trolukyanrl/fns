@@ -65,7 +65,23 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     if (expectedZone && expectedZone !== 'Location TBA') {
       const scannedZone = data.trim();
       const expected = expectedZone.trim();
+      const expectedBlock = route.params?.expectedBlock;
       
+      const showMismatch = () => {
+        Alert.alert(
+          'Location Mismatch',
+          `Scanned: "${scannedZone}"\nExpected: "${expected}"${expectedBlock ? ` (Block ${expectedBlock})` : ''}\n\nThe scanned location does not match the assigned location. Please scan the correct QR code.`,
+          [
+            {
+              text: 'Try Again',
+              onPress: () => setScanned(false),
+              style: 'default',
+            },
+          ],
+          { cancelable: false }
+        );
+      };
+
       // Strategy 1: Exact match (case-insensitive)
       if (scannedZone.toLowerCase() === expected.toLowerCase()) {
         // Match found, proceed
@@ -73,37 +89,43 @@ export default function LocationQRScannerScreen({ navigation, route }) {
         return;
       }
       
-      // Strategy 2: Partial match - check if the scanned data contains the expected zone
-      if (scannedZone.toLowerCase().includes(expected.toLowerCase())) {
-        // Match found, proceed
+      // Strategy 2: Component-based validation (Zone & Block)
+      // Replaces previous partial match strategies with stricter component parsing
+      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z0-9]+)/i);
+      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z0-9]+)/i);
+      
+      if (zoneLetterMatch && expectedZoneLetterMatch) {
+        // Check Zone
+        if (zoneLetterMatch[1].toUpperCase() !== expectedZoneLetterMatch[1].toUpperCase()) {
+          showMismatch();
+          return;
+        }
+        
+        // Check Block
+        const scannedBlockMatch = scannedZone.match(/Block\s*([A-Z0-9]+)/i);
+        let expectedBlockValue = expectedBlock;
+        
+        // If not provided in params, try extracting from expected string
+        if (!expectedBlockValue) {
+           const expectedBlockMatch = expected.match(/Block\s*([A-Z0-9]+)/i);
+           if (expectedBlockMatch) expectedBlockValue = expectedBlockMatch[1];
+        }
+        
+        if (scannedBlockMatch && expectedBlockValue) {
+            if (scannedBlockMatch[1].toUpperCase() !== String(expectedBlockValue).toUpperCase()) {
+                // Block mismatch
+                showMismatch();
+                return;
+            }
+        }
+        
+        // Zone matches, and Block matches (or checks were skipped due to missing data)
         proceedWithValidation(data);
         return;
       }
       
-      // Strategy 3: Extract zone letter/name from patterns like "LOCATION:Zone A" or "Zone A"
-      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z])/i);
-      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z])/i);
-      
-      if (zoneLetterMatch && expectedZoneLetterMatch && 
-          zoneLetterMatch[1].toUpperCase() === expectedZoneLetterMatch[1].toUpperCase()) {
-        // Zone letter matches, proceed
-        proceedWithValidation(data);
-        return;
-      }
-      
-      // No match found - show error alert
-      Alert.alert(
-        'Location Mismatch',
-        `Scanned: "${scannedZone}"\nExpected: "${expected}"\n\nThe scanned location does not match the assigned location. Please scan the correct QR code.`,
-        [
-          {
-            text: 'Try Again',
-            onPress: () => setScanned(false),
-            style: 'default',
-          },
-        ],
-        { cancelable: false }
-      );
+      // No match found
+      showMismatch();
       return;
     }
     

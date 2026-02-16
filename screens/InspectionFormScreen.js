@@ -107,7 +107,7 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 );
 
 export default function InspectionFormScreen({ navigation, route }) {
-  const { baSetId, location } = route?.params || {};
+  const { baSetId, location, inspectionData } = route?.params || {};
   const { tasks, updateTask } = useTaskContext();
   const { user } = useAuth();
   const scrollViewRef = useRef(null);
@@ -135,6 +135,31 @@ export default function InspectionFormScreen({ navigation, route }) {
   const [reviewText, setReviewText] = useState('');
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewField, setCurrentReviewField] = useState(null);
+
+  // Pre-fill form if editing existing inspection
+  useEffect(() => {
+    if (inspectionData) {
+      setCylinder1Pressure(inspectionData.cylinder1Pressure || '300');
+      setCylinder2Pressure(inspectionData.cylinder2Pressure || '300');
+      setFlowRate(inspectionData.flowRate || '40');
+      setGeneralRemark(inspectionData.generalRemark || '');
+      
+      setFaceMaskCondition(inspectionData.faceMaskCondition || null);
+      setHarnessStraps(inspectionData.harnessStraps || null);
+      setCylinderValves(inspectionData.cylinderValves || null);
+      setPressureGauge(inspectionData.pressureGauge || null);
+      setDemandValve(inspectionData.demandValve || null);
+      setWarningWhistle(inspectionData.warningWhistle || null);
+
+      // Restore reviews if they exist (assuming they are part of inspectionData)
+      if (inspectionData.faceMaskReview) setFaceMaskReview(inspectionData.faceMaskReview);
+      if (inspectionData.harnessReview) setHarnessReview(inspectionData.harnessReview);
+      if (inspectionData.cylinderValvesReview) setCylinderValvesReview(inspectionData.cylinderValvesReview);
+      if (inspectionData.pressureGaugeReview) setPressureGaugeReview(inspectionData.pressureGaugeReview);
+      if (inspectionData.demandValveReview) setDemandValveReview(inspectionData.demandValveReview);
+      if (inspectionData.warningWhistleReview) setWarningWhistleReview(inspectionData.warningWhistleReview);
+    }
+  }, [inspectionData]);
 
 
   const handleSaveDraft = () => {
@@ -185,11 +210,29 @@ export default function InspectionFormScreen({ navigation, route }) {
       return;
     }
 
-    // Find the task that has this equipment (baSetId)
-    const currentTask = tasks.find(task => {
-      const equipment = task.baSets?.find(bs => bs.id === baSetId);
-      return equipment || task.id === baSetId;
-    });
+    // Find the task
+    let currentTask;
+    const params = route.params || {};
+
+    // 1. Try finding by taskId from inspectionData (most reliable for edits)
+    if (params.inspectionData && params.inspectionData.taskId) {
+      currentTask = tasks.find(t => t.id === params.inspectionData.taskId);
+    }
+
+    // 2. Fallback: Search by baSetId
+    if (!currentTask && params.baSetId) {
+      currentTask = tasks.find(task => {
+        // Safe check for baSets array
+        const baSets = Array.isArray(task.baSets) ? task.baSets : [];
+        const equipment = baSets.find(bs => bs.id === params.baSetId);
+        
+        // Also check safetyKits
+        const safetyKits = Array.isArray(task.safetyKits) ? task.safetyKits : [];
+        const kit = safetyKits.find(sk => sk.id === params.baSetId);
+        
+        return equipment || kit || task.id === params.baSetId;
+      });
+    }
 
     if (!currentTask) {
       Alert.alert('Error', 'Task not found. Please try again.');

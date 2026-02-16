@@ -113,6 +113,16 @@ export default function SKInspectionScreen({ navigation, route }) {
   const { skSetId, location: scannedLocation } = route?.params || {};
   const { tasks, updateTask } = useTaskContext();
   const { user } = useAuth();
+
+  // Find the task based on skSetId
+  const currentTask = useMemo(() => {
+    return tasks.find(task => {
+      // Check if this task contains the scanned safety kit
+      const hasSafetyKit = Array.isArray(task.safetyKits) && task.safetyKits.some(sk => sk.id === skSetId);
+      // Or if the task ID matches (though skSetId is likely the equipment ID)
+      return hasSafetyKit || task.id === skSetId;
+    });
+  }, [tasks, skSetId]);
   
   // ...existing code...
   // New state for form fields
@@ -127,6 +137,25 @@ export default function SKInspectionScreen({ navigation, route }) {
   
   // General remarks state
   const [generalRemarks, setGeneralRemarks] = useState('');
+  
+  // Pre-fill data if editing
+  const inspectionData = route?.params?.inspectionData;
+
+  useEffect(() => {
+    if (inspectionData) {
+      setDate(inspectionData.date || '');
+      setShift(inspectionData.shift || '');
+      setArea(inspectionData.area || '');
+      setLocation(inspectionData.location || '');
+      if (inspectionData.locationId) setLocationId(inspectionData.locationId);
+      if (inspectionData.assetId) setAssetId(inspectionData.assetId);
+      setGeneralRemarks(inspectionData.generalRemarks || '');
+      
+      if (inspectionData.materials && Array.isArray(inspectionData.materials)) {
+        setMaterials(inspectionData.materials);
+      }
+    }
+  }, [inspectionData]);
   
   // Ref for general remarks field
   const generalRemarksRef = useRef(null);
@@ -211,7 +240,7 @@ export default function SKInspectionScreen({ navigation, route }) {
           onPress: () => {
             // Find the task that has this equipment (skSetId)
             const currentTask = tasks.find(task => {
-              const equipment = task.safetyKits?.find(sk => sk.id === skSetId);
+              const equipment = Array.isArray(task.safetyKits) && task.safetyKits.find(sk => sk.id === skSetId);
               return equipment || task.id === skSetId;
             });
 
@@ -312,10 +341,10 @@ export default function SKInspectionScreen({ navigation, route }) {
           <View style={styles.detailRow}>
             <View style={styles.detailLeft}>
               <Text style={styles.detailLabel}>Task ID</Text>
-              <Text style={styles.detailValue}>#SK-2024-0847</Text>
+              <Text style={styles.detailValue}>{currentTask?.id || 'N/A'}</Text>
             </View>
             <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>Pending</Text>
+              <Text style={styles.statusText}>{currentTask?.status || 'Pending'}</Text>
             </View>
           </View>
 

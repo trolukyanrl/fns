@@ -147,12 +147,21 @@ export default function TaskDetailsScreen({ navigation, route }) {
   };
 
   const handleEditInspection = () => {
-    navigation.navigate('InspectionForm', {
-      baSetId: item?.id || task.id,
-      location: item?.zone || 'Location TBA',
-      // Pass existing data for editing
-      inspectionData,
-    });
+    if (task.taskType === 'SK') {
+      navigation.navigate('SKInspection', {
+        skSetId: item?.id || task.id,
+        location: item?.zone || 'Location TBA',
+        // Pass full existing data for editing
+        inspectionData: task.inspectionData,
+      });
+    } else {
+      navigation.navigate('InspectionForm', {
+        baSetId: item?.id || task.id,
+        location: item?.zone || 'Location TBA',
+        // Pass existing data for editing
+        inspectionData,
+      });
+    }
   };
 
   const TaskDetailRow = ({ label, value, icon }) => (
@@ -209,7 +218,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
               <View style={styles.assignmentOverview}>
                 <View style={styles.taskIdContainer}>
                   <Text style={styles.taskIdLabel}>Task ID</Text>
-                  <Text style={styles.taskId}>{item?.id || task.id}</Text>
+                  <Text style={styles.taskId}>{task.id}</Text>
                 </View>
                 
                 <View style={[
@@ -307,7 +316,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
               <View style={styles.taskOverview}>
                 <View style={styles.taskIdContainer}>
                   <Text style={styles.taskIdLabel}>Task ID</Text>
-                  <Text style={styles.taskId}>{item?.id || task.id}</Text>
+                  <Text style={styles.taskId}>{task.id}</Text>
                 </View>
                 
                 <View style={[
@@ -449,17 +458,10 @@ export default function TaskDetailsScreen({ navigation, route }) {
             <Text style={styles.viewBtnText}>Inspection Approved</Text>
           </TouchableOpacity>
         ) : task.status === 'Rejected' ? (
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={[styles.viewBtn, { flex: 1, backgroundColor: RED }]} onPress={() => Alert.alert('Rejected', `Your inspection was rejected.\n\nReason: ${task.rejectionReason || 'No reason provided'}`)}>
-              <Ionicons name="close-circle" size={18} color="#fff" />
-              <Text style={styles.viewBtnText}>View Reason</Text>
-            </TouchableOpacity>
-            <View style={{ width: 12 }} />
-            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleEditInspection}>
-              <Ionicons name="create" size={18} color="#fff" />
-              <Text style={styles.editBtnText}>Resubmit</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={[styles.viewBtn, { backgroundColor: RED }]} onPress={() => Alert.alert('Rejected', `Your inspection was rejected.\n\nReason: ${task.rejectionReason || 'No reason provided'}`)}>
+            <Ionicons name="close-circle" size={18} color="#fff" />
+            <Text style={styles.viewBtnText}>View Reason</Text>
+          </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.viewBtn} onPress={() => Alert.alert('Info', 'Inspection completed')}>
             <Ionicons name="eye" size={18} color="#fff" />

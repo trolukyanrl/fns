@@ -13,7 +13,7 @@ const PURPLE = '#9C27B0';
 
 export default function TasksScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Tasks');
-  const [filter, setFilter] = useState('Pending Task'); // New state for filtering - default to pending tasks
+  const [filter, setFilter] = useState('All'); // Show all tasks by default
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [expandedSections, setExpandedSections] = useState({
@@ -51,7 +51,7 @@ export default function TasksScreen({ navigation }) {
   // Separate tasks by status
   const pendingTasks = userTasks.filter(task => task.status === 'Pending');
   const pendingApprovalTasks = userTasks.filter(task => task.status === 'Pending for Approval');
-  const completedTasks = userTasks.filter(task => task.status === 'Completed');
+  const completedTasks = userTasks.filter(task => task.status === 'Completed' || task.status === 'Approved');
   const rejectedTasks = userTasks.filter(task => task.status === 'Rejected');
 
   const TaskCard = ({ task }) => {
