@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
-import api from '../services/api';
+import api, { itemsAPI } from '../services/api';
 import axios from 'axios';
 
 const BLUE = '#2563EB';
@@ -91,7 +91,7 @@ export default function SICAssignTask({ navigation, route }) {
   const fetchBASets = async () => {
     try {
       setLoadingItems(true);
-      const response = await api.get('/BA_Sets');
+      const response = await itemsAPI.getBASets();
       setBASets(response.data || []);
       console.log('Fetched BA-Sets:', response.data);
     } catch (error) {
@@ -111,7 +111,7 @@ export default function SICAssignTask({ navigation, route }) {
   const fetchSafetyKits = async () => {
     try {
       // Use the separate Safety Kits API endpoint
-      const response = await axios.get('https://699196a06279728b0154de02.mockapi.io/sk');
+      const response = await itemsAPI.getSafetyKits();
       setSafetyKits(response.data || []);
       console.log('Fetched Safety-Kits:', response.data);
     } catch (error) {
@@ -164,7 +164,7 @@ export default function SICAssignTask({ navigation, route }) {
     }
   };
 
-  const handleAssignTask = () => {
+  const handleAssignTask = async () => {
     const selectedItems = selectedTaskType.name === 'BA-SET' ? selectedBASets : selectedSKs;
     
     if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedItems.length === 0) {
@@ -189,30 +189,35 @@ export default function SICAssignTask({ navigation, route }) {
       taskData.safetyKits = selectedSKs.map(id => safetyKits.find(sk => sk.id === id)).filter(Boolean);
     }
 
-    if (isEditMode) {
-      // Update existing task
-      updateTask(editingTask.id, taskData);
-      Alert.alert(
-        'Task Updated',
-        `Task for ${selectedInspector.name} has been updated successfully.`,
-        [{ text: 'OK', onPress: () => navigation.replace('SICTasks') }]
-      );
-    } else {
-      // Add new task
-      addTask(taskData);
-      // Reset form
-      setTaskDescription('');
-      setSelectedInspector(null);
-      setDueDate('');
-      setSelectedBASets([]);
-      setSelectedSKs([]);
-      Alert.alert(
-        'Task Assigned',
-        `Task has been assigned to ${selectedInspector.name} with due date ${dueDate}.`,
-      [{ text: 'OK', onPress: () => {
-          navigation.replace('SICTasks');
-        }}]
-      );
+    try {
+      if (isEditMode) {
+        // Update existing task
+        await updateTask(editingTask.id, taskData);
+        Alert.alert(
+          'Task Updated',
+          `Task for ${selectedInspector.name} has been updated successfully.`,
+          [{ text: 'OK', onPress: () => navigation.replace('SICTasks') }]
+        );
+      } else {
+        // Add new task
+        await addTask(taskData);
+        // Reset form
+        setTaskDescription('');
+        setSelectedInspector(null);
+        setDueDate('');
+        setSelectedBASets([]);
+        setSelectedSKs([]);
+        Alert.alert(
+          'Task Assigned',
+          `Task has been assigned to ${selectedInspector.name} with due date ${dueDate}.`,
+          [{ text: 'OK', onPress: () => {
+              navigation.replace('SICTasks');
+            }}]
+        );
+      }
+    } catch (error) {
+      console.error('Task assignment error:', error);
+      Alert.alert('Error', 'Failed to save task. Please check your connection and try again.');
     }
   };
 

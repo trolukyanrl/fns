@@ -1,13 +1,24 @@
 // services/api.js
 import axios from 'axios';
 
-// MockAPI.io base URL - replace with your actual MockAPI endpoint
-// Format: https://YOUR_PROJECT_ID.mockapi.io/api/v1
-const MOCK_API_BASE_URL = 'https://698d7eebb79d1c928ed582de.mockapi.io/api/v1'; // Your actual MockAPI endpoint
+// MockAPI.io base URLs
+// Main project: Users and BA Sets
+const BASE_URL_MAIN = 'https://698d7eebb79d1c928ed582de.mockapi.io/api/v1';
+// Safety Kits and Tasks project
+const BASE_URL_SK = 'https://699196a06279728b0154de02.mockapi.io';
 
-// Create axios instance with base configuration
+// Create axios instances for different projects
 const api = axios.create({
-  baseURL: MOCK_API_BASE_URL,
+  baseURL: BASE_URL_MAIN,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Axios instance for Safety Kits and Tasks
+const skApi = axios.create({
+  baseURL: BASE_URL_SK,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -165,17 +176,18 @@ export const authAPI = {
   }
 };
 
-// Tasks API methods (for future integration)
+// Items API methods (BA Sets and Safety Kits)
+export const itemsAPI = {
+  getBASets: async () => await api.get('/BA_Sets'),
+  getSafetyKits: async () => await skApi.get('/sk')
+};
+
+// Tasks API methods - using Safety Kits project
 export const tasksAPI = {
-  getTasks: async () => {
-    // Mock tasks data
-    return {
-      data: [
-        { id: 1, title: 'Safety Inspection', status: 'pending', assignedTo: 'TA' },
-        { id: 2, title: 'Equipment Check', status: 'completed', assignedTo: 'SIC' }
-      ]
-    };
-  }
+  getTasks: async () => await skApi.get('/tasks'),
+  createTask: async (taskData) => await skApi.post('/tasks', taskData),
+  updateTask: async (taskId, taskData) => await skApi.put(`/tasks/${taskId}`, taskData),
+  deleteTask: async (taskId) => await skApi.delete(`/tasks/${taskId}`)
 };
 
 export default api;
