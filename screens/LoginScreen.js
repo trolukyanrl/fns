@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-=======
 import React, { useState, useEffect } from 'react';
->>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -13,15 +9,10 @@ import {
   Platform,
   ScrollView,
   Alert,
-<<<<<<< HEAD
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-=======
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
->>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -30,30 +21,10 @@ const BORDER_GREY = '#CCCCCC';
 const BG_GREY = '#E8E8E8';
 const GREEN = '#34A853';
 
-<<<<<<< HEAD
-// Dummy credentials
-const SIC_CREDENTIALS = { username: 'sic@123', password: 'sic@123' };
-const TA_CREDENTIALS = { username: 'ta@123', password: 'ta@123' };
-
-=======
->>>>>>> bcknd
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-<<<<<<< HEAD
-
-  const handleLogin = () => {
-    const trimmedUsername = username.trim();
-    const trimmedPassword = password.trim();
-
-    if (trimmedUsername === SIC_CREDENTIALS.username && trimmedPassword === SIC_CREDENTIALS.password) {
-      navigation.replace('SICDashboard');
-    } else if (trimmedUsername === TA_CREDENTIALS.username && trimmedPassword === TA_CREDENTIALS.password) {
-      navigation.replace('TADashboard');
-    } else {
-      Alert.alert('Invalid Credentials', 'Please enter a valid username and password.');
-=======
   const { login, loading, error, clearError } = useAuth();
 
   // Clear error when user starts typing
@@ -94,7 +65,6 @@ export default function LoginScreen({ navigation }) {
         navigation.replace('TADashboard');
       }
       console.log('Navigation completed');
->>>>>>> bcknd
     }
   };
 
@@ -163,11 +133,6 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Sign In Button */}
-<<<<<<< HEAD
-          <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.8}>
-            <Text style={styles.buttonText}>Sign In</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
-=======
           <TouchableOpacity 
             style={[styles.button, loading && styles.buttonDisabled]} 
             onPress={handleLogin} 
@@ -182,7 +147,6 @@ export default function LoginScreen({ navigation }) {
                 <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
               </>
             )}
->>>>>>> bcknd
           </TouchableOpacity>
         </View>
 
@@ -291,13 +255,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     marginTop: 8,
   },
-<<<<<<< HEAD
-=======
   buttonDisabled: {
     backgroundColor: '#A0C3FF',
     opacity: 0.7,
   },
->>>>>>> bcknd
   buttonText: {
     fontSize: 16,
     fontWeight: '700',

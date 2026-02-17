@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-=======
 import React, { useState, useEffect } from 'react';
->>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -18,11 +14,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
-<<<<<<< HEAD
-=======
 import api, { itemsAPI } from '../services/api';
 import axios from 'axios';
->>>>>>> bcknd
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -44,151 +37,12 @@ const ZONES = [
   { id: '3', name: 'Zone C' },
 ];
 
-<<<<<<< HEAD
-const INSPECTORS = [
-  { id: '1', name: 'Amit R.', department: 'Safety' },
-  { id: '2', name: 'Sarah K.', department: 'Operations' },
-  { id: '3', name: 'Raj P.', department: 'Maintenance' },
-  { id: '4', name: 'Lisa M.', department: 'Quality' },
-];
 
-const BA_SETS = [
-  {
-    id: 'BA-2024-001',
-    name: 'Drager PSS 7000',
-    status: 'Available',
-    zone: 'Zone A - Block 3',
-    cylinderNo: 'CYL-A-4521',
-    pressure: '300 bar',
-    nextHydrotest: '15 Mar 2025',
-    lastInspection: '2 days ago',
-  },
-  {
-    id: 'BA-2024-007',
-    name: 'MSA G1 SCBA',
-    status: 'Available',
-    zone: 'Zone B - Block 1',
-    cylinderNo: 'CYL-B-2847',
-    pressure: '290 bar',
-    nextHydrotest: '22 Apr 2025',
-    lastInspection: '5 days ago',
-  },
-  {
-    id: 'BA-2024-003',
-    name: 'Scott Aviation AV-3000',
-    status: 'Available',
-    zone: 'Zone C - Block 2',
-    cylinderNo: 'CYL-C-5632',
-    pressure: '310 bar',
-    nextHydrotest: '10 May 2025',
-    lastInspection: '1 day ago',
-  },
-  {
-    id: 'BA-2024-012',
-    name: 'Dräger PSS 90 SCBA',
-    status: 'Available',
-    zone: 'Zone A - Block 1',
-    cylinderNo: 'CYL-A-3456',
-    pressure: '295 bar',
-    nextHydrotest: '08 Jun 2025',
-    lastInspection: '3 days ago',
-  },
-  {
-    id: 'BA-2024-015',
-    name: 'Honeywell SCSR',
-    status: 'Available',
-    zone: 'Zone B - Block 3',
-    cylinderNo: 'CYL-B-5789',
-    pressure: '280 bar',
-    nextHydrotest: '30 May 2025',
-    lastInspection: '4 days ago',
-  },
-  {
-    id: 'BA-2024-018',
-    name: 'Siebe Gorman AAPRO',
-    status: 'Available',
-    zone: 'Zone C - Block 4',
-    cylinderNo: 'CYL-C-1234',
-    pressure: '320 bar',
-    nextHydrotest: '18 Jul 2025',
-    lastInspection: '6 days ago',
-  },
-  {
-    id: 'BA-2024-021',
-    name: 'Interspiro SCBA II',
-    status: 'Available',
-    zone: 'Zone A - Block 2',
-    cylinderNo: 'CYL-A-9876',
-    pressure: '305 bar',
-    nextHydrotest: '12 Apr 2025',
-    lastInspection: '1 day ago',
-  },
-];
-
-const SAFETY_KITS = [
-  {
-    id: 'SK-2024-001',
-    name: 'Emergency Response Kit A',
-    status: 'Available',
-    zone: 'Zone A - Block 1',
-    kitType: 'First Aid',
-    itemCount: '45 items',
-    nextInspection: '20 Mar 2025',
-    lastInspection: '1 day ago',
-  },
-  {
-    id: 'SK-2024-005',
-    name: 'Fire Safety Kit B',
-    status: 'Available',
-    zone: 'Zone B - Block 2',
-    kitType: 'Fire Safety',
-    itemCount: '32 items',
-    nextInspection: '25 Apr 2025',
-    lastInspection: '3 days ago',
-  },
-  {
-    id: 'SK-2024-009',
-    name: 'Hazmat Response Kit',
-    status: 'Available',
-    zone: 'Zone C - Block 1',
-    kitType: 'Hazmat',
-    itemCount: '28 items',
-    nextInspection: '15 May 2025',
-    lastInspection: '5 days ago',
-  },
-  {
-    id: 'SK-2024-012',
-    name: 'Rescue Equipment Kit',
-    status: 'Available',
-    zone: 'Zone A - Block 4',
-    kitType: 'Rescue',
-    itemCount: '38 items',
-    nextInspection: '10 Jun 2025',
-    lastInspection: '2 days ago',
-  },
-  {
-    id: 'SK-2024-016',
-    name: 'Spill Response Kit',
-    status: 'Available',
-    zone: 'Zone B - Block 5',
-    kitType: 'Spill Control',
-    itemCount: '25 items',
-    nextInspection: '05 May 2025',
-    lastInspection: '4 days ago',
-  },
-];
-
-=======
->>>>>>> bcknd
 export default function SICAssignTask({ navigation, route }) {
   const { addTask, updateTask } = useTaskContext();
   const editingTask = route?.params?.taskToEdit;
   const isEditMode = !!editingTask;
   
-<<<<<<< HEAD
-  const findInspectorById = (name, dept) => {
-    return INSPECTORS.find(insp => insp.name === name && insp.department === dept);
-=======
   // State for inspectors (TA users)
   const [inspectors, setInspectors] = useState([]);
   const [loadingInspectors, setLoadingInspectors] = useState(true);
@@ -269,7 +123,6 @@ export default function SICAssignTask({ navigation, route }) {
   
   const findInspectorById = (name, dept) => {
     return inspectors.find(insp => insp.name === name && insp.department === dept);
->>>>>>> bcknd
   };
 
   const [taskDescription, setTaskDescription] = useState(editingTask?.description || '');
@@ -290,25 +143,6 @@ export default function SICAssignTask({ navigation, route }) {
   // Filter based on selected task type
   const getFilteredItems = () => {
     if (selectedTaskType.name === 'BA-SET') {
-<<<<<<< HEAD
-      return BA_SETS.filter(baSet => {
-        const query = searchQuery.toLowerCase();
-        return (
-          baSet.id.toLowerCase().includes(query) ||
-          baSet.name.toLowerCase().includes(query) ||
-          baSet.zone.toLowerCase().includes(query) ||
-          baSet.cylinderNo.toLowerCase().includes(query)
-        );
-      });
-    } else {
-      return SAFETY_KITS.filter(sk => {
-        const query = searchQuery.toLowerCase();
-        return (
-          sk.id.toLowerCase().includes(query) ||
-          sk.name.toLowerCase().includes(query) ||
-          sk.zone.toLowerCase().includes(query) ||
-          sk.kitType.toLowerCase().includes(query)
-=======
       return baSets.filter(baSet => {
         const query = searchQuery.toLowerCase();
         return (
@@ -326,17 +160,12 @@ export default function SICAssignTask({ navigation, route }) {
           (sk.name && sk.name.toLowerCase().includes(query)) ||
           (sk.zone && sk.zone.toLowerCase().includes(query)) ||
           (sk.kitType && sk.kitType.toLowerCase().includes(query))
->>>>>>> bcknd
         );
       });
     }
   };
 
-<<<<<<< HEAD
-  const handleAssignTask = () => {
-=======
   const handleAssignTask = async () => {
->>>>>>> bcknd
     const selectedItems = selectedTaskType.name === 'BA-SET' ? selectedBASets : selectedSKs;
     
     if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedItems.length === 0) {
@@ -344,48 +173,6 @@ export default function SICAssignTask({ navigation, route }) {
       return;
     }
 
-<<<<<<< HEAD
-    // Create task object
-    const taskData = {
-      description: taskDescription,
-      assignedTo: selectedInspector.name,
-      assignedToDept: selectedInspector.department,
-      dueDate: dueDate,
-      taskType: selectedTaskType.name,
-      status: 'Pending',
-    };
-
-    if (selectedTaskType.name === 'BA-SET') {
-      taskData.baSets = selectedBASets.map(id => BA_SETS.find(bs => bs.id === id)).filter(Boolean);
-    } else {
-      taskData.safetyKits = selectedSKs.map(id => SAFETY_KITS.find(sk => sk.id === id)).filter(Boolean);
-    }
-
-    if (isEditMode) {
-      // Update existing task
-      updateTask(editingTask.id, taskData);
-      Alert.alert(
-        'Task Updated',
-        `Task for ${selectedInspector.name} has been updated successfully.`,
-        [{ text: 'OK', onPress: () => navigation.replace('SICTasks') }]
-      );
-    } else {
-      // Add new task
-      addTask(taskData);
-      // Reset form
-      setTaskDescription('');
-      setSelectedInspector(null);
-      setDueDate('');
-      setSelectedBASets([]);
-      setSelectedSKs([]);
-      Alert.alert(
-        'Task Assigned',
-        `Task has been assigned to ${selectedInspector.name} with due date ${dueDate}.`,
-      [{ text: 'OK', onPress: () => {
-          navigation.replace('SICTasks');
-        }}]
-      );
-=======
     try {
       if (isEditMode) {
         // Update existing task
@@ -478,7 +265,6 @@ export default function SICAssignTask({ navigation, route }) {
     } catch (error) {
       console.error('Task assignment error:', error);
       Alert.alert('Error', 'Failed to save task. Please check your connection and try again.');
->>>>>>> bcknd
     }
   };
 
@@ -816,17 +602,6 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
           
           {/* Items List */}
-<<<<<<< HEAD
-          <FlatList
-            data={getFilteredItems()}
-            renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={false}
-            style={styles.baSetList}
-          />
-=======
           {loadingItems ? (
             <View style={styles.loadingContainer}>
               <Text style={styles.loadingText}>Loading {selectedTaskType.name === 'BA-SET' ? 'BA Sets' : 'Safety Kits'}...</Text>
@@ -846,7 +621,6 @@ export default function SICAssignTask({ navigation, route }) {
               style={styles.baSetList}
             />
           )}
->>>>>>> bcknd
         </View>
       </ScrollView>
 
@@ -924,14 +698,6 @@ export default function SICAssignTask({ navigation, route }) {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Inspector</Text>
-<<<<<<< HEAD
-            <FlatList
-              data={INSPECTORS}
-              renderItem={renderInspector}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-            />
-=======
             {loadingInspectors ? (
               <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20 }]}>Loading inspectors...</Text>
             ) : inspectors.length === 0 ? (
@@ -944,7 +710,6 @@ export default function SICAssignTask({ navigation, route }) {
                 showsVerticalScrollIndicator={false}
               />
             )}
->>>>>>> bcknd
           </View>
         </TouchableOpacity>
       </Modal>
@@ -1185,9 +950,6 @@ const styles = StyleSheet.create({
   yearOptionTextSelected: { color: BLUE, fontWeight: '700' },
   yearPickerConfirmButton: { backgroundColor: BLUE, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16 },
   yearPickerConfirmText: { fontSize: 16, fontWeight: '700', color: WHITE },
-<<<<<<< HEAD
-=======
   loadingContainer: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontSize: 16, color: GREY, fontWeight: '500' },
->>>>>>> bcknd
 });

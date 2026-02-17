@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, FlatList, Modal, Dimensions, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
 import { useAuth } from '../AuthContext';
->>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -14,27 +11,9 @@ const GREEN = '#4CAF50';
 const ORANGE = '#F9A825';
 const PURPLE = '#9C27B0';
 
-<<<<<<< HEAD
-const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
-  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
-  { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
-  { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
-];
-
-export default function TasksScreen({ navigation }) {
-  const [activeTab, setActiveTab] = useState('Tasks');
-  const [filter, setFilter] = useState('Pending Task'); // New state for filtering - default to pending tasks
-=======
 export default function TasksScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState('Tasks');
   const [filter, setFilter] = useState('All'); // Show all tasks by default
->>>>>>> bcknd
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [expandedSections, setExpandedSections] = useState({
@@ -43,13 +22,10 @@ export default function TasksScreen({ navigation }) {
     completed: true,
   });
 
-<<<<<<< HEAD
-=======
   // Get current logged-in user and all tasks
   const { user } = useAuth();
   const { tasks } = useTaskContext();
 
->>>>>>> bcknd
   const handleNavigation = (tab) => {
     setActiveTab(tab);
     if (tab === 'Home') navigation.navigate('TADashboard');
@@ -63,64 +39,6 @@ export default function TasksScreen({ navigation }) {
     }));
   };
 
-<<<<<<< HEAD
-  // Separate tasks by status
-  const pendingTasks = TASKS.filter(task => task.status === 'Pending');
-  const pendingApprovalTasks = TASKS.filter(task => task.status === 'Pending for Approval');
-  const completedTasks = TASKS.filter(task => task.status === 'Completed');
-  const rejectedTasks = TASKS.filter(task => task.status === 'Rejected');
-
-  const TaskCard = ({ task }) => (
-    <TouchableOpacity 
-      style={styles.taskCard}
-      onPress={() => navigation.navigate('TaskDetails', { task })}
-    >
-      <View style={styles.taskHeader}>
-        <Text style={styles.taskId}>{task.id}</Text>
-        <View style={[
-          styles.statusBadge,
-          task.status === 'Pending' && styles.statusPending,
-          task.status === 'Pending for Approval' && styles.statusApproval,
-          task.status === 'Completed' && styles.statusCompleted,
-          task.status === 'Rejected' && styles.statusRejected,
-        ]}>
-          <Text style={[
-            styles.statusText,
-            task.status === 'Pending' && styles.statusTextPending,
-            task.status === 'Pending for Approval' && styles.statusTextApproval,
-            task.status === 'Completed' && styles.statusTextCompleted,
-            task.status === 'Rejected' && styles.statusTextRejected,
-          ]}>
-            {task.status}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
-      <View style={styles.taskDetails}>
-        <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-        <Text style={styles.taskDetailText}>{task.time}</Text>
-      </View>
-      <View style={styles.taskDetails}>
-        <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-        <Text style={styles.taskDetailText}>{task.location}</Text>
-      </View>
-      {task.progress > 0 && (
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
-          </View>
-          <Text style={styles.progressText}>{task.progress}%</Text>
-        </View>
-      )}
-      {task.status === 'Rejected' && task.rejectionReason && (
-        <View style={styles.rejectionContainer}>
-          <Ionicons name="alert-circle-outline" size={14} color="#D32F2F" />
-          <Text style={styles.rejectionText}>{task.rejectionReason}</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-=======
   // Filter tasks to show only those assigned to the current user
   const userTasks = tasks.filter(task => {
     // Match by username or name
@@ -202,7 +120,6 @@ export default function TasksScreen({ navigation }) {
       </TouchableOpacity>
     );
   };
->>>>>>> bcknd
 
   return (
     <View style={styles.container}>
@@ -280,27 +197,16 @@ export default function TasksScreen({ navigation }) {
           
           // Apply filter first
           if (filter === 'All') {
-<<<<<<< HEAD
-            tasksToShow = TASKS;
-          } else if (filter === 'Pending Task') {
-            tasksToShow = pendingTasks;
-            emptyMessage = 'No pending task tasks found';
-=======
             tasksToShow = userTasks;
           } else if (filter === 'Pending Task') {
             tasksToShow = pendingTasks;
             emptyMessage = 'No pending tasks found';
->>>>>>> bcknd
           } else if (filter === 'Pending for Approval') {
             tasksToShow = pendingApprovalTasks;
             emptyMessage = 'No pending for approval tasks found';
           } else if (filter === 'Task Completed') {
             tasksToShow = completedTasks;
-<<<<<<< HEAD
-            emptyMessage = 'No task completed tasks found';
-=======
             emptyMessage = 'No completed tasks found';
->>>>>>> bcknd
           } else if (filter === 'Rejected') {
             tasksToShow = rejectedTasks;
             emptyMessage = 'No rejected tasks found';
@@ -309,13 +215,6 @@ export default function TasksScreen({ navigation }) {
           // Then apply search filter
           if (searchText.trim() !== '') {
             const searchLower = searchText.toLowerCase();
-<<<<<<< HEAD
-            tasksToShow = tasksToShow.filter(task => 
-              task.id.toLowerCase().includes(searchLower) ||
-              task.title.toLowerCase().includes(searchLower) ||
-              task.location.toLowerCase().includes(searchLower)
-            );
-=======
             tasksToShow = tasksToShow.filter(task => {
               const item = task.baSets?.[0] || task.safetyKits?.[0];
               return (
@@ -326,14 +225,11 @@ export default function TasksScreen({ navigation }) {
                 (item?.id && item.id.toLowerCase().includes(searchLower))
               );
             });
->>>>>>> bcknd
             if (tasksToShow.length === 0) {
               emptyMessage = 'No tasks found matching your search';
             }
           }
 
-<<<<<<< HEAD
-=======
           if (userTasks.length === 0) {
             return (
               <View style={styles.emptyContainer}>
@@ -344,7 +240,6 @@ export default function TasksScreen({ navigation }) {
             );
           }
 
->>>>>>> bcknd
           if (tasksToShow.length > 0) {
             return (
               <FlatList
@@ -497,8 +392,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginBottom: 10 
   },
-<<<<<<< HEAD
-=======
   taskIdContainer: {
     flex: 1,
     alignItems: 'flex-start',
@@ -508,15 +401,12 @@ const styles = StyleSheet.create({
     color: LIGHT_GREY,
     marginBottom: 2,
   },
->>>>>>> bcknd
   taskId: { 
     fontSize: 11, 
     fontWeight: '700', 
     color: BLUE,
     letterSpacing: 0.5
   },
-<<<<<<< HEAD
-=======
   assetIdContainer: {
     flex: 1,
     alignItems: 'flex-end',
@@ -533,7 +423,6 @@ const styles = StyleSheet.create({
     color: PURPLE,
     letterSpacing: 0.5,
   },
->>>>>>> bcknd
   
   statusBadge: { 
     paddingHorizontal: 10, 
@@ -775,8 +664,6 @@ const styles = StyleSheet.create({
     color: '#D32F2F',
     lineHeight: 16,
   },
-<<<<<<< HEAD
-=======
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -794,5 +681,4 @@ const styles = StyleSheet.create({
     color: LIGHT_GREY,
     marginTop: 8,
   },
->>>>>>> bcknd
 });

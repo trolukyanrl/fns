@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-import React, { useState, useEffect, useRef } from 'react';
-=======
 import React, { useState, useEffect, useRef, useCallback } from 'react';
->>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -17,10 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
->>>>>>> bcknd
 
 let CameraView = null;
 let useCameraPermissions = null;
@@ -39,10 +32,7 @@ const LIGHT_GREY = '#666666';
 const GREEN = '#4CAF50';
 
 export default function LocationQRScannerScreen({ navigation, route }) {
-<<<<<<< HEAD
-=======
   const { tasks } = useTaskContext();
->>>>>>> bcknd
   const [hasPermission, requestPermission] = useCameraPermissions ? useCameraPermissions() : [{ granted: false }, null];
   const [scanned, setScanned] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -55,8 +45,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   const skSetId = route?.params?.skSetId || 'Unknown';
   const taskType = route?.params?.taskType || '';
 
-<<<<<<< HEAD
-=======
   // Check for existing pending tasks for the same asset
   const checkForPendingTasks = useCallback(() => {
     if (!baSetId || !skSetId || !tasks) return null;
@@ -118,7 +106,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     }
   }, [checkForPendingTasks, navigation, baSetId, skSetId, route?.params?.inspectionData]);
 
->>>>>>> bcknd
   useEffect(() => {
     (async () => {
       if (!isCameraSupported) return;
@@ -134,10 +121,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
-<<<<<<< HEAD
-    // Determine which set ID to use
-    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
-=======
     // Extract expected zone from route params
     const expectedZone = route.params?.expectedZone;
     
@@ -217,7 +200,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     // Determine which set ID to use
     const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
     const passedTaskId = route.params?.taskId;
->>>>>>> bcknd
     
     Alert.alert(
       'Location QR Code Scanned',
@@ -232,12 +214,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
           text: 'Proceed',
           onPress: () => {
             // Use taskType parameter for reliable navigation
-<<<<<<< HEAD
-            if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
-              navigation.replace('SKInspection', { skSetId: currentSetId, location: data });
-            } else {
-              navigation.replace('InspectionForm', { baSetId: currentSetId, location: data });
-=======
             if (taskType === 'VERIFY') {
               navigation.replace('Verify', { scannedData: route.params?.scannedData, location: data, taskType: 'VERIFY' });
             } else if (taskType === 'MAPPING') {
@@ -246,7 +222,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
               navigation.replace('SKInspection', { skSetId: currentSetId, location: data, taskId: passedTaskId });
             } else {
               navigation.replace('InspectionForm', { baSetId: currentSetId, location: data, taskId: passedTaskId });
->>>>>>> bcknd
             }
           },
           style: 'default',
@@ -261,21 +236,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter a location code');
       return;
     }
-<<<<<<< HEAD
-    setShowManualModal(false);
-    setManualLocationCode('');
-    
-    // Determine which set ID to use
-    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
-    
-    // Use taskType parameter for reliable navigation
-    if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
-      navigation.replace('SKInspection', { skSetId: currentSetId, location: manualLocationCode });
-    } else {
-      navigation.replace('InspectionForm', { baSetId: currentSetId, location: manualLocationCode });
-    }
-=======
-    
     const data = manualLocationCode.trim();
     
     // Extract expected zone from route params
@@ -340,7 +300,6 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     setShowManualModal(false);
     setManualLocationCode('');
     proceedWithValidation(data);
->>>>>>> bcknd
   };
 
   if (!isCameraSupported) {

@@ -54,12 +54,6 @@ export default function QRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
-<<<<<<< HEAD
-    // Determine task type from route params or scanned data
-    const isSKTask = route.params?.skSetId ? true : (data.startsWith('SK-') ? true : false);
-    const taskId = route.params?.skSetId || route.params?.baSetId || data;
-    
-=======
     // Extract expected equipment ID from route params
     const expectedEquipmentId = route.params?.expectedEquipmentId;
     
@@ -136,8 +130,6 @@ export default function QRScannerScreen({ navigation, route }) {
     // Get task ID and task type from route params if available
     const passedTaskId = route.params?.taskId;
     const passedTaskType = route.params?.taskType;
-    
->>>>>>> bcknd
     Alert.alert(
       'QR Code Scanned',
       `Code: ${data}`,
@@ -150,17 +142,6 @@ export default function QRScannerScreen({ navigation, route }) {
         {
           text: 'Proceed',
           onPress: () => {
-<<<<<<< HEAD
-            if (isSKTask) {
-              navigation.navigate('LocationQRScanner', { 
-                skSetId: taskId,
-                taskType: 'SK'
-              });
-            } else {
-              navigation.navigate('LocationQRScanner', { 
-                baSetId: taskId,
-                taskType: 'BA_SET'
-=======
             if (isVerifyFlow) {
               // For verification flow, navigate to LocationQRScanner with scanned data
               navigation.navigate('LocationQRScanner', { 
@@ -196,7 +177,6 @@ export default function QRScannerScreen({ navigation, route }) {
                 taskType: 'UNKNOWN',
                 expectedZone: expectedZone,
                 taskId: passedTaskId,
->>>>>>> bcknd
               });
             }
           },
@@ -212,25 +192,6 @@ export default function QRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter an equipment ID');
       return;
     }
-<<<<<<< HEAD
-    setShowManualModal(false);
-    setManualCode('');
-    
-    // Determine task type from route params
-    const isSKTask = route.params?.skSetId ? true : (manualCode.startsWith('SK-') ? true : false);
-    
-    if (isSKTask) {
-      navigation.navigate('LocationQRScanner', { 
-        skSetId: manualCode,
-        taskType: 'SK'
-      });
-    } else {
-      navigation.navigate('LocationQRScanner', { 
-        baSetId: manualCode,
-        taskType: 'BA_SET'
-      });
-    }
-=======
     
     const data = manualCode.trim();
     
@@ -296,7 +257,6 @@ export default function QRScannerScreen({ navigation, route }) {
     setShowManualModal(false);
     setManualCode('');
     proceedWithValidation(data);
->>>>>>> bcknd
   };
 
   if (!isCameraSupported) {

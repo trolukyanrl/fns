@@ -15,11 +15,8 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
 import { useAuth } from '../AuthContext';
->>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -110,20 +107,11 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 );
 
 export default function InspectionFormScreen({ navigation, route }) {
-<<<<<<< HEAD
-  const { baSetId, location } = route?.params || {};
-  const scrollViewRef = useRef(null);
-  const remarksInputRef = useRef(null);
-
-=======
   const { baSetId, location, inspectionData } = route?.params || {};
   const { tasks, updateTask } = useTaskContext();
   const { user } = useAuth();
   const scrollViewRef = useRef(null);
   const remarksInputRef = useRef(null);
-
-
->>>>>>> bcknd
   // Form state
   const [cylinder1Pressure, setCylinder1Pressure] = useState('300');
   const [cylinder2Pressure, setCylinder2Pressure] = useState('300');
@@ -147,11 +135,6 @@ export default function InspectionFormScreen({ navigation, route }) {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewField, setCurrentReviewField] = useState(null);
 
-<<<<<<< HEAD
-
-  const handleSaveDraft = () => {
-    Alert.alert('Success', 'Inspection draft saved successfully!');
-=======
   // Get current task using useMemo for reliable task ID fetching
   const currentTask = useMemo(() => {
     if (!tasks || tasks.length === 0) return null;
@@ -230,7 +213,6 @@ export default function InspectionFormScreen({ navigation, route }) {
       ],
       { cancelable: true }
     );
->>>>>>> bcknd
   };
 
   const handleSaveReview = () => {
@@ -277,16 +259,6 @@ export default function InspectionFormScreen({ navigation, route }) {
       return;
     }
 
-<<<<<<< HEAD
-
-    // Submit the form
-    setTimeout(() => {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'TADashboard' }],
-      });
-    }, 500);
-=======
     // Find the task
     let currentTask;
     const params = route.params || {};
@@ -367,7 +339,6 @@ export default function InspectionFormScreen({ navigation, route }) {
         },
       },
     ]);
->>>>>>> bcknd
   };
 
   const ChecklistItem = ({ label, description, value, reviewValue, onOk, onNotOk, onNA, onClearReview }) => (
@@ -459,17 +430,10 @@ export default function InspectionFormScreen({ navigation, route }) {
               <View style={styles.detailRow}>
                 <View style={styles.detailLeft}>
                   <Text style={styles.detailLabel}>Task ID</Text>
-<<<<<<< HEAD
-                  <Text style={styles.detailValue}>#INS-2024-0847</Text>
-                </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Pending</Text>
-=======
                   <Text style={styles.detailValue}>{currentTask?.id || 'N/A'}</Text>
                 </View>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusText}>{currentTask?.status || 'Pending'}</Text>
->>>>>>> bcknd
                 </View>
               </View>
 
@@ -484,11 +448,6 @@ export default function InspectionFormScreen({ navigation, route }) {
                 </View>
               </View>
 
-<<<<<<< HEAD
-              <View>
-                <Text style={styles.detailLabel}>Cylinder Numbers</Text>
-                <Text style={styles.detailValue}>CYL-8847, CYL-8848</Text>
-=======
               <View style={styles.detailRow}>
                 <View style={styles.detailLeft}>
                   <Text style={styles.detailLabel}>Cylinder Numbers</Text>
@@ -498,7 +457,6 @@ export default function InspectionFormScreen({ navigation, route }) {
                   <Text style={styles.detailLabel}>Due Date</Text>
                   <Text style={styles.detailValue}>{currentTask?.dueDate || 'N/A'}</Text>
                 </View>
->>>>>>> bcknd
               </View>
 
               <View style={styles.detailRow}>
@@ -688,15 +646,9 @@ export default function InspectionFormScreen({ navigation, route }) {
 
         {/* Bottom Action Buttons */}
         <View style={styles.bottomActions}>
-<<<<<<< HEAD
-          <TouchableOpacity style={styles.saveDraftBtn} onPress={handleSaveDraft}>
-            <Ionicons name="archive-outline" size={18} color={LIGHT_GREY} />
-            <Text style={styles.saveDraftBtnText}>Save Draft</Text>
-=======
           <TouchableOpacity style={[styles.submitBtn, styles.cancelBtn]} onPress={handleCancel}>
             <Ionicons name="close-circle" size={18} color="#fff" />
             <Text style={styles.submitBtnText}>Cancel</Text>
->>>>>>> bcknd
           </TouchableOpacity>
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
             <Ionicons name="send" size={18} color="#fff" />
@@ -898,12 +850,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: LIGHT_GREY,
   },
-<<<<<<< HEAD
-=======
   cancelBtn: {
     backgroundColor: RED,
   },
->>>>>>> bcknd
   submitBtn: {
     flex: 1,
     flexDirection: 'row',

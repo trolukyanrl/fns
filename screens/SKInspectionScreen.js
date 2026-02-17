@@ -17,11 +17,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
 import { useAuth } from '../AuthContext';
->>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -112,8 +109,6 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 );
 
 export default function SKInspectionScreen({ navigation, route }) {
-<<<<<<< HEAD
-=======
   // Get parameters from QR scanner
   const { skSetId, location: scannedLocation } = route?.params || {};
   const { tasks, updateTask } = useTaskContext();
@@ -143,8 +138,6 @@ export default function SKInspectionScreen({ navigation, route }) {
 
     return null;
   }, [tasks, skSetId, route?.params?.taskId]);
-  
->>>>>>> bcknd
   // ...existing code...
   // New state for form fields
   const [date, setDate] = useState('');
@@ -152,8 +145,6 @@ export default function SKInspectionScreen({ navigation, route }) {
   const [area, setArea] = useState('');
   const [location, setLocation] = useState('');
   
-<<<<<<< HEAD
-=======
   // State for QR code data
   const [locationId, setLocationId] = useState(scannedLocation || '');
   const [assetId, setAssetId] = useState(skSetId || '');
@@ -182,21 +173,16 @@ export default function SKInspectionScreen({ navigation, route }) {
   
   // Ref for general remarks field
   const generalRemarksRef = useRef(null);
-  
->>>>>>> bcknd
   // Date picker state
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [openExpiryDatePicker, setOpenExpiryDatePicker] = useState(false);
   const [selectedExpiryDate, setSelectedExpiryDate] = useState(new Date());
   const [expiryDatePickerIndex, setExpiryDatePickerIndex] = useState(null);
-<<<<<<< HEAD
-=======
   
   // Shift picker state
   const [openShiftPicker, setOpenShiftPicker] = useState(false);
   const shiftOptions = ['Shift A', 'Shift B', 'Shift C'];
->>>>>>> bcknd
 
   // Table rows state
   const [materials, setMaterials] = useState([
@@ -231,12 +217,6 @@ export default function SKInspectionScreen({ navigation, route }) {
     });
   };
 
-<<<<<<< HEAD
-  // Handler for form submit
-  const handleSubmit = () => {
-    // Navigate to TA Dashboard regardless of form completion
-    navigation.navigate('TADashboard');
-=======
   // Handler for cancel with confirmation
   const handleCancel = () => {
     Alert.alert(
@@ -334,7 +314,6 @@ export default function SKInspectionScreen({ navigation, route }) {
       ],
       { cancelable: true }
     );
->>>>>>> bcknd
   };
 
   // Handler for date picker
@@ -348,13 +327,6 @@ export default function SKInspectionScreen({ navigation, route }) {
     setOpenExpiryDatePicker(true);
   };
 
-<<<<<<< HEAD
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <Text style={{ fontSize: 22, fontWeight: '700', marginBottom: 24 }}>SAFETY KIT BOX STATUS</Text>
-=======
   // Handler to clear main date
   const handleClearDate = () => {
     setDate('');
@@ -427,7 +399,6 @@ export default function SKInspectionScreen({ navigation, route }) {
             </View>
           </View>
         </View>
->>>>>>> bcknd
 
         {/* Form Fields */}
         <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 24 }}>
@@ -445,14 +416,6 @@ export default function SKInspectionScreen({ navigation, route }) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ fontWeight: '600', color: 'red', marginBottom: 4 }}>Shift *</Text>
-<<<<<<< HEAD
-              <TextInput
-                style={styles.input}
-                value={shift}
-                onChangeText={setShift}
-                placeholder="Select Shift"
-              />
-=======
               <TouchableOpacity
                 style={[styles.input, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}
                 onPress={() => setOpenShiftPicker(true)}
@@ -462,7 +425,6 @@ export default function SKInspectionScreen({ navigation, route }) {
                 </Text>
                 <Ionicons name="chevron-down" size={20} color={LIGHT_GREY} />
               </TouchableOpacity>
->>>>>>> bcknd
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 16 }}>
@@ -487,65 +449,6 @@ export default function SKInspectionScreen({ navigation, route }) {
           </View>
         </View>
 
-<<<<<<< HEAD
-        {/* Table Section */}
-        <ScrollView 
-          horizontal={true}
-          showsHorizontalScrollIndicator={true}
-          style={{ marginBottom: 24 }}
-        >
-          <View style={{ backgroundColor: '#fff', borderRadius: 12, padding: 16, minWidth: 900 }}>
-            <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#E8E8E8', paddingBottom: 8 }}>
-              <Text style={{ width: 200, fontWeight: '700' }}>MATERIAL</Text>
-              <Text style={{ width: 120, fontWeight: '700', textAlign: 'center' }}>Standerd Qty</Text>
-              <Text style={{ width: 120, fontWeight: '700', textAlign: 'center' }}>Present Status</Text>
-              <Text style={{ width: 120, fontWeight: '700', textAlign: 'center' }}>Replenished</Text>
-              <Text style={{ width: 120, fontWeight: '700', textAlign: 'center' }}>Expiry Date</Text>
-              <Text style={{ width: 120, fontWeight: '700', textAlign: 'center' }}>Remarks</Text>
-            </View>
-            {materials.map((row, idx) => (
-              <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-                <Text style={{ width: 200 }}>{row.material}</Text>
-                <TextInput
-                  style={[styles.input, { width: 120, marginHorizontal: 4 }]}
-                  value={row.qty}
-                  onChangeText={v => handleMaterialChange(idx, 'qty', v)}
-                  placeholder=""
-                />
-                <TextInput
-                  style={[styles.input, { width: 120, marginHorizontal: 4 }]}
-                  value={row.status}
-                  onChangeText={v => handleMaterialChange(idx, 'status', v)}
-                  placeholder=""
-                />
-                <TextInput
-                  style={[styles.input, { width: 120, marginHorizontal: 4 }]}
-                  value={row.replenished}
-                  onChangeText={v => handleMaterialChange(idx, 'replenished', v)}
-                  placeholder=""
-                />
-                <TouchableOpacity
-                  style={[styles.input, { width: 120, marginHorizontal: 4 }]}
-                  onPress={() => handleExpiryDatePicker(idx)}
-                >
-                  <Text style={[styles.inputText, row.expiry ? styles.inputTextFilled : styles.inputTextPlaceholder]}>
-                    {row.expiry || "dd-mm-yyyy"}
-                  </Text>
-                </TouchableOpacity>
-                <TextInput
-                  style={[styles.input, { width: 120, marginHorizontal: 4 }]}
-                  value={row.remarks}
-                  onChangeText={v => handleMaterialChange(idx, 'remarks', v)}
-                  placeholder=""
-                />
-              </View>
-            ))}
-          </View>
-        </ScrollView>
-
-        {/* Submit Button */}
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 32 }}>
-=======
         {/* Materials Cards Section */}
         <View style={{ marginBottom: 24 }}>
           {materials.map((row, idx) => (
@@ -656,87 +559,12 @@ export default function SKInspectionScreen({ navigation, route }) {
             <Text style={styles.submitBtnText}>Cancel</Text>
           </TouchableOpacity>
           
->>>>>>> bcknd
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
             <Ionicons name="send" size={18} color="#fff" />
             <Text style={styles.submitBtnText}>Submit</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-<<<<<<< HEAD
-
-        {/* Date Picker Modal */}
-      {openDatePicker && (
-        <Modal
-          transparent={true}
-          visible={openDatePicker}
-          animationType="slide"
-          onRequestClose={() => setOpenDatePicker(false)}
-        >
-          <View style={styles.datePickerModal}>
-            <View style={styles.datePickerContainer}>
-              <DateTimePicker
-                value={selectedDate}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (date) {
-                    setSelectedDate(date);
-                    // Format date as dd-mm-yyyy
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    setDate(`${day}-${month}-${year}`);
-                    setOpenDatePicker(false);
-                  }
-                }}
-                style={styles.datePickerIOS}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
-
-        {/* Expiry Date Picker Modal */}
-      {openExpiryDatePicker && (
-        <Modal
-          transparent={true}
-          visible={openExpiryDatePicker}
-          animationType="slide"
-          onRequestClose={() => setOpenExpiryDatePicker(false)}
-        >
-          <View style={styles.datePickerModal}>
-            <View style={styles.datePickerContainer}>
-              <DateTimePicker
-                value={selectedExpiryDate}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (date) {
-                    setSelectedExpiryDate(date);
-                    // Format date as dd-mm-yyyy
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    const formattedDate = `${day}-${month}-${year}`;
-                    
-                    // Update the specific row's expiry date
-                    if (expiryDatePickerIndex !== null) {
-                      setMaterials(prev => {
-                        const updated = [...prev];
-                        updated[expiryDatePickerIndex].expiry = formattedDate;
-                        return updated;
-                      });
-                    }
-                    
-                    setOpenExpiryDatePicker(false);
-                  }
-                }}
-                style={styles.datePickerIOS}
-              />
-            </View>
-          </View>
-=======
       </KeyboardAvoidingView>
 
       {/* Date Picker Modal */}
@@ -855,7 +683,6 @@ export default function SKInspectionScreen({ navigation, route }) {
               </TouchableWithoutFeedback>
             </View>
           </TouchableWithoutFeedback>
->>>>>>> bcknd
         </Modal>
       )}
     </SafeAreaView>
@@ -886,13 +713,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: DARK_GREY,
   },
-<<<<<<< HEAD
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 40,
-=======
   fixedHeader: {
     backgroundColor: '#fff',
     paddingVertical: 40,
@@ -959,7 +779,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 16,
->>>>>>> bcknd
     paddingHorizontal: 20,
     paddingBottom: 120,
   },
@@ -1036,8 +855,6 @@ const styles = StyleSheet.create({
     color: DARK_GREY,
     backgroundColor: '#F9F9F9',
   },
-<<<<<<< HEAD
-=======
   materialCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -1094,7 +911,6 @@ const styles = StyleSheet.create({
     minHeight: 44,
     justifyContent: 'center',
   },
->>>>>>> bcknd
   checklistItem: {
     marginBottom: 20,
     paddingBottom: 16,
@@ -1190,12 +1006,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
-<<<<<<< HEAD
-=======
   cancelBtn: {
     backgroundColor: LIGHT_GREY,
   },
->>>>>>> bcknd
   submitBtnText: {
     fontSize: 14,
     fontWeight: '600',
@@ -1357,14 +1170,11 @@ const styles = StyleSheet.create({
     color: LIGHT_GREY,
     fontWeight: '500',
   },
-<<<<<<< HEAD
-=======
   datePickerClear: {
     fontSize: 16,
     color: RED,
     fontWeight: '600',
   },
->>>>>>> bcknd
   datePickerConfirm: {
     fontSize: 16,
     color: BLUE,
@@ -1373,8 +1183,6 @@ const styles = StyleSheet.create({
   datePickerIOS: {
     width: '100%',
   },
-<<<<<<< HEAD
-=======
   datePickerConfirmBtn: {
     backgroundColor: BLUE,
     borderRadius: 8,
@@ -1387,7 +1195,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
->>>>>>> bcknd
   
   // Input Text Styles
   inputText: {
@@ -1400,10 +1207,6 @@ const styles = StyleSheet.create({
   inputTextPlaceholder: {
     color: LIGHT_GREY,
   },
-<<<<<<< HEAD
-});
-=======
-  
   // Shift Picker Styles
   pickerModalContent: {
     backgroundColor: '#fff',
@@ -1455,4 +1258,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
->>>>>>> bcknd

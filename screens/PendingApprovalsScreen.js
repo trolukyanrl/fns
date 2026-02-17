@@ -10,10 +10,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
->>>>>>> bcknd
 
 const BLUE = '#2563EB';
 const DARK = '#1F2937';
@@ -203,11 +200,6 @@ const REJECTED_APPROVALS = [
 ];
 
 export default function PendingApprovalsScreen({ navigation }) {
-<<<<<<< HEAD
-  const [activeTab, setActiveTab] = useState('Home');
-  const [searchText, setSearchText] = useState('');
-  const [filterStatus, setFilterStatus] = useState('pending'); // Add filter state
-=======
   const { tasks } = useTaskContext();
   const [activeTab, setActiveTab] = useState('Home');
   const [searchText, setSearchText] = useState('');
@@ -229,7 +221,6 @@ export default function PendingApprovalsScreen({ navigation }) {
   const pendingApprovals = getPendingApprovals();
   const approvedApprovals = getApprovedApprovals();
   const rejectedApprovals = getRejectedApprovals();
->>>>>>> bcknd
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -268,84 +259,6 @@ export default function PendingApprovalsScreen({ navigation }) {
     }
   };
 
-<<<<<<< HEAD
-  const ApprovalCard = ({ approval }) => (
-    <View style={styles.approvalCard}>
-      <View style={styles.approvalHeader}>
-        <View style={styles.approvalInfo}>
-          <Text style={styles.approvalId}>{approval.id}</Text>
-          <Text style={styles.approvalAsset}>{approval.assetId}</Text>
-        </View>
-        <View style={[styles.statusBadge, getStatusBadgeStyle(approval.status)]}>
-          <Text style={[styles.statusText, getStatusTextStyle(approval.status)]}>{approval.status}</Text>
-        </View>
-      </View>
-
-      <View style={styles.inspectorInfo}>
-        <Text style={styles.inspectorName}>{approval.inspector}</Text>
-        <Text style={styles.inspectorDept}>{approval.department}</Text>
-      </View>
-
-      <View style={styles.submissionInfo}>
-        <View style={styles.detailRow}>
-          <Ionicons name="calendar-outline" size={14} color={GREY} />
-          <Text style={styles.detailText}>{approval.submittedDate}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Ionicons name="location-outline" size={14} color={GREY} />
-          <Text style={styles.detailText}>{approval.location}</Text>
-        </View>
-      </View>
-
-      <View style={styles.inspectionSummary}>
-        <Text style={styles.summaryTitle}>Inspection Summary</Text>
-        
-        <View style={styles.summaryRow}>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Pressure</Text>
-            <Text style={styles.summaryValue}>{approval.inspectionData.cylinder1Pressure}/{approval.inspectionData.cylinder2Pressure} BAR</Text>
-          </View>
-          <View style={styles.summaryItem}>
-            <Text style={styles.summaryLabel}>Flow Rate</Text>
-            <Text style={styles.summaryValue}>{approval.inspectionData.flowRate} L/MIN</Text>
-          </View>
-        </View>
-
-        <View style={styles.checklistSummary}>
-          <Text style={styles.checklistTitle}>Checklist Status</Text>
-          <View style={styles.checklistRow}>
-            <View style={styles.checklistItem}>
-              <Ionicons name="checkmark-circle" size={16} color={GREEN} />
-              <Text style={styles.checklistText}>OK: 6</Text>
-            </View>
-            <View style={styles.checklistItem}>
-              <Ionicons name="close-circle" size={16} color={RED} />
-              <Text style={styles.checklistText}>NOT OK: 2</Text>
-            </View>
-            <View style={styles.checklistItem}>
-              <Ionicons name="help-circle" size={16} color={LIGHT_GREY} />
-              <Text style={styles.checklistText}>N/A: 1</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.remarkSection}>
-          <Text style={styles.remarkLabel}>Remarks</Text>
-          <Text style={styles.remarkText}>{approval.inspectionData.generalRemark}</Text>
-        </View>
-      </View>
-
-      {approval.status === 'Pending' && (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.reviewButton} onPress={() => handleReview(approval)}>
-            <Ionicons name="eye-outline" size={18} color={WHITE} />
-            <Text style={styles.reviewButtonText}>Review</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-=======
   const ApprovalCard = ({ approval }) => {
     // Map task data to approval format
     const equipment = approval.baSets?.[0] || approval.safetyKits?.[0];
@@ -458,7 +371,6 @@ export default function PendingApprovalsScreen({ navigation }) {
       </View>
     );
   };
->>>>>>> bcknd
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -476,27 +388,6 @@ export default function PendingApprovalsScreen({ navigation }) {
         {/* Stats */}
         <View style={styles.statsContainer}>
           <TouchableOpacity 
-<<<<<<< HEAD
-            style={[styles.statCard, filterStatus === 'pending' && styles.statCardActive]} 
-            onPress={() => setFilterStatus('pending')}
-          >
-            <Ionicons name="document-text-outline" size={24} color={filterStatus === 'pending' ? "#DC2626" : GREY} />
-            <Text style={[styles.statLabel, filterStatus === 'pending' && styles.statLabelActive]}>Pending</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.statCard, filterStatus === 'approved' && styles.statCardActive]} 
-            onPress={() => setFilterStatus('approved')}
-          >
-            <Ionicons name="checkmark-circle-outline" size={24} color={filterStatus === 'approved' ? "#22C55E" : GREY} />
-            <Text style={[styles.statLabel, filterStatus === 'approved' && styles.statLabelActive]}>Approved</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.statCard, filterStatus === 'rejected' && styles.statCardActive]} 
-            onPress={() => setFilterStatus('rejected')}
-          >
-            <Ionicons name="close-circle-outline" size={24} color={filterStatus === 'rejected' ? "#EF4444" : GREY} />
-            <Text style={[styles.statLabel, filterStatus === 'rejected' && styles.statLabelActive]}>Rejected</Text>
-=======
             style={[styles.statCard, filterStatus === 'Pending' && styles.statCardActive]} 
             onPress={() => setFilterStatus('Pending')}
           >
@@ -516,7 +407,6 @@ export default function PendingApprovalsScreen({ navigation }) {
           >
             <Ionicons name="close-circle-outline" size={24} color={filterStatus === 'Rejected' ? "#EF4444" : GREY} />
             <Text style={[styles.statLabel, filterStatus === 'Rejected' && styles.statLabelActive]}>Rejected</Text>
->>>>>>> bcknd
           </TouchableOpacity>
         </View>
 
@@ -545,44 +435,16 @@ export default function PendingApprovalsScreen({ navigation }) {
           let filteredApprovals = [];
           
           // Get the appropriate data based on filter status
-<<<<<<< HEAD
-          if (filterStatus === 'pending') {
-            filteredApprovals = PENDING_APPROVALS;
-          } else if (filterStatus === 'approved') {
-            filteredApprovals = APPROVED_APPROVALS;
-          } else if (filterStatus === 'rejected') {
-            filteredApprovals = REJECTED_APPROVALS;
-=======
           if (filterStatus === 'Pending') {
             filteredApprovals = pendingApprovals;
           } else if (filterStatus === 'Approved') {
             filteredApprovals = approvedApprovals;
           } else if (filterStatus === 'Rejected') {
             filteredApprovals = rejectedApprovals;
->>>>>>> bcknd
           }
 
           // Filter by search text
           const searchLower = searchText.toLowerCase();
-<<<<<<< HEAD
-          const searchFilteredApprovals = filteredApprovals.filter(approval =>
-            approval.id.toLowerCase().includes(searchLower) ||
-            approval.assetId.toLowerCase().includes(searchLower) ||
-            approval.inspector.toLowerCase().includes(searchLower) ||
-            approval.department.toLowerCase().includes(searchLower) ||
-            approval.location.toLowerCase().includes(searchLower) ||
-            approval.inspectionData.generalRemark.toLowerCase().includes(searchLower) ||
-            (approval.approvedBy && approval.approvedBy.toLowerCase().includes(searchLower)) ||
-            (approval.rejectedBy && approval.rejectedBy.toLowerCase().includes(searchLower)) ||
-            (approval.approvalNote && approval.approvalNote.toLowerCase().includes(searchLower)) ||
-            (approval.rejectionReason && approval.rejectionReason.toLowerCase().includes(searchLower)) ||
-            (approval.rejectionNote && approval.rejectionNote.toLowerCase().includes(searchLower))
-          );
-
-          return searchFilteredApprovals.length > 0 ? (
-            searchFilteredApprovals.map((approval) => (
-              <ApprovalCard key={approval.id} approval={approval} />
-=======
           const searchFilteredApprovals = filteredApprovals.filter(task => {
             const equipment = task.baSets?.[0] || task.safetyKits?.[0];
             const assetId = equipment?.id || 'Unknown';
@@ -601,7 +463,6 @@ export default function PendingApprovalsScreen({ navigation }) {
           return searchFilteredApprovals.length > 0 ? (
             searchFilteredApprovals.map((task) => (
               <ApprovalCard key={task.id} approval={task} />
->>>>>>> bcknd
             ))
           ) : (
             <View style={styles.emptyState}>

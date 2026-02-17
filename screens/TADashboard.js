@@ -7,32 +7,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useAuth } from '../AuthContext';
 import { useTaskContext } from '../TaskContext';
->>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
 const LIGHT_GREY = '#666666';
 
-<<<<<<< HEAD
-const TASKS = [
-  { id: 'BA-SET-042', title: 'Zone A-3 Inspection', time: 'Today, 10:00 AM', location: 'Zone A-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-015', title: 'Safety Kit Check - B Wing', time: 'Today, 2:30 PM', location: 'Zone B-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-045', title: 'Equipment Check - C Zone', time: 'Today, 4:00 PM', location: 'Zone C-2', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-018', title: 'Cylinder Inspection', time: 'Yesterday, 3:00 PM', location: 'Zone A-1', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'SK-020', title: 'Emergency Kit Inspection', time: 'Today, 11:00 AM', location: 'Zone D-3', status: 'Pending', progress: 0, assignedBy: 'SIC' },
-  { id: 'BA-SET-048', title: 'Fire Extinguisher Inspection', time: 'Yesterday, 5:00 PM', location: 'Zone D-2', status: 'Pending for Approval', progress: 100 },
-  { id: 'SK-022', title: 'Emergency Exit Check', time: '2 days ago', location: 'Zone C-1', status: 'Pending for Approval', progress: 100 },
-  { id: 'BA-SET-035', title: 'Valve Test - A Wing', time: '2 days ago', location: 'Zone A-5', status: 'Completed', progress: 100 },
-  { id: 'SK-010', title: 'Pressure Check', time: '3 days ago', location: 'Zone B-3', status: 'Completed', progress: 100 },
-];
-
-export default function TADashboard({ navigation }) {
-  const [activeTab, setActiveTab] = useState('Home');
-=======
 export default function TADashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
   const { user } = useAuth();
@@ -51,7 +32,6 @@ export default function TADashboard({ navigation }) {
   const completedTasks = userTasks.filter(task => task.status === 'Completed' || task.status === 'Approved');
   const pendingApprovalTasks = userTasks.filter(task => task.status === 'Pending for Approval');
   const rejectedTasks = userTasks.filter(task => task.status === 'Rejected');
->>>>>>> bcknd
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -59,16 +39,12 @@ export default function TADashboard({ navigation }) {
     if (tab === 'Tasks') navigation.navigate('Tasks');
   };
 
-<<<<<<< HEAD
-=======
   const handleLogout = () => {
     navigation.reset({
       index: 0,
       routes: [{ name: 'Login' }],
     });
   };
-
->>>>>>> bcknd
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -78,15 +54,6 @@ export default function TADashboard({ navigation }) {
             <Ionicons name="shield-checkmark" size={24} color="#fff" />
           </View>
           <View>
-<<<<<<< HEAD
-            <Text style={styles.headerTitle}>Welcome back, Rajesh</Text>
-            <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.bellButton}>
-          <Ionicons name="notifications-outline" size={24} color={DARK_GREY} />
-        </TouchableOpacity>
-=======
             <Text style={styles.headerTitle}>Welcome back, {user?.name || user?.username || 'User'}</Text>
             <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
           </View>
@@ -99,7 +66,6 @@ export default function TADashboard({ navigation }) {
             <Ionicons name="log-out-outline" size={22} color={DARK_GREY} style={styles.logoutIcon} />
           </TouchableOpacity>
         </View>
->>>>>>> bcknd
       </View>
 
       <ScrollView
@@ -110,19 +76,11 @@ export default function TADashboard({ navigation }) {
         {/* Stats Cards */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statPending]}>
-<<<<<<< HEAD
-            <Text style={styles.statNumber}>8</Text>
-            <Text style={styles.statLabel}>Pending</Text>
-          </View>
-          <View style={[styles.statCard, styles.statCompleted]}>
-            <Text style={styles.statNumber}>24</Text>
-=======
             <Text style={styles.statNumber}>{pendingTasks.length}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
           <View style={[styles.statCard, styles.statCompleted]}>
             <Text style={styles.statNumber}>{completedTasks.length}</Text>
->>>>>>> bcknd
             <Text style={styles.statLabel}>Completed</Text>
           </View>
         </View>
@@ -130,19 +88,11 @@ export default function TADashboard({ navigation }) {
         {/* Approval Status Cards */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, styles.statReview]}>
-<<<<<<< HEAD
-            <Text style={styles.statNumber}>3</Text>
-            <Text style={styles.statLabel}>Pending for Approval</Text>
-          </View>
-          <View style={[styles.statCard, styles.statRejected]}>
-            <Text style={styles.statNumber}>2</Text>
-=======
             <Text style={styles.statNumber}>{pendingApprovalTasks.length}</Text>
             <Text style={styles.statLabel}>Pending for Approval</Text>
           </View>
           <View style={[styles.statCard, styles.statRejected]}>
             <Text style={styles.statNumber}>{rejectedTasks.length}</Text>
->>>>>>> bcknd
             <Text style={styles.statLabel}>Rejected</Text>
           </View>
         </View>
@@ -172,63 +122,6 @@ export default function TADashboard({ navigation }) {
           </TouchableOpacity>
         </View>
 
-<<<<<<< HEAD
-        {TASKS.filter(task => task.status === 'Pending').map((task) => (
-          <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
-            <View style={styles.taskHeader}>
-              <Text style={styles.taskId}>{task.id}</Text>
-              <View style={[
-                styles.statusBadge,
-                task.status === 'Pending' && styles.statusPending,
-                task.status === 'Pending for Approval' && styles.statusApproval,
-                task.status === 'Completed' && styles.statusCompleted,
-                task.status === 'Rejected' && styles.statusRejected,
-              ]}>
-                <Text style={[
-                  styles.statusText,
-                  task.status === 'Pending' && styles.statusTextPending,
-                  task.status === 'Pending for Approval' && styles.statusTextApproval,
-                  task.status === 'Completed' && styles.statusTextCompleted,
-                  task.status === 'Rejected' && styles.statusTextRejected,
-                ]}>
-                  {task.status}
-                </Text>
-              </View>
-            </View>
-            
-            {/* Assignment Details for Pending Tasks */}
-            {task.status === 'Pending' ? (
-              <>
-                <Text style={styles.taskTitle}>{task.id.startsWith('SK-') ? 'Safety Kit Inspection' : 'BA Set Inspection'}</Text>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>Assigned to: Rajesh Kumar</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>Due: 15 Feb 2024</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name={task.id.startsWith('SK-') ? "construct" : "cube-outline"} size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.id.startsWith('SK-') ? 'Safety Kit' : 'BA Set'}: {task.id}</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.location}</Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={styles.taskTitle}>{task.title}</Text>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.time}</Text>
-                </View>
-                <View style={styles.taskDetails}>
-                  <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                  <Text style={styles.taskDetailText}>{task.location}</Text>
-                </View>
-=======
         {pendingTasks.length === 0 ? (
           <View style={styles.noTasksContainer}>
             <Ionicons name="checkmark-done-outline" size={40} color={LIGHT_GREY} />
@@ -296,25 +189,20 @@ export default function TADashboard({ navigation }) {
                     <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
                     <Text style={styles.taskDetailText}>{displayLocation}</Text>
                   </View>
->>>>>>> bcknd
+                </>
+              )}
                 {task.progress > 0 && (
                   <View style={styles.progressBar}>
                     <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
                   </View>
                 )}
                 {task.progress > 0 && <Text style={styles.progressText}>{task.progress}%</Text>}
-              </>
-            )}
-<<<<<<< HEAD
-          </TouchableOpacity>
-        ))}
-=======
+              
             </TouchableOpacity>
           );
         })}
           </>
         )}
->>>>>>> bcknd
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -352,16 +240,6 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '700', color: DARK_GREY },
   headerSubtitle: { fontSize: 12, color: LIGHT_GREY, marginTop: 2 },
   bellButton: { padding: 8 },
-<<<<<<< HEAD
-  scrollView: { flex: 1 },
-  scrollContent: { padding: 20, paddingBottom: 100 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statCard: { flex: 1, padding: 16, borderRadius: 12 },
-  statPending: { backgroundColor: '#E3F2FD' },
-  statCompleted: { backgroundColor: '#E8F5E9' },
-  statReview: { backgroundColor: '#FFF8E1' },
-  statRejected: { backgroundColor: '#FFE8E8' },
-=======
   headerRight: { flexDirection: 'row', alignItems: 'center' },
   logoutIcon: { marginLeft: 12 },
   scrollView: { flex: 1 },
@@ -372,7 +250,6 @@ const styles = StyleSheet.create({
   statCompleted: { backgroundColor: '#6bef9d' },
   statReview: { backgroundColor: '#ede770' },
   statRejected: { backgroundColor: '#e97c7c' },
->>>>>>> bcknd
   statNumber: { fontSize: 24, fontWeight: '700', color: DARK_GREY },
   statLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK_GREY, marginBottom: 12 },
@@ -406,9 +283,6 @@ const styles = StyleSheet.create({
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   navLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
   navLabelActive: { color: BLUE, fontWeight: '600' },
-<<<<<<< HEAD
-=======
   noTasksContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
   noTasksText: { fontSize: 16, color: LIGHT_GREY, marginTop: 12, fontWeight: '500' },
->>>>>>> bcknd
 });

@@ -1,36 +1,10 @@
-<<<<<<< HEAD
-import React, { createContext, useState, useContext } from 'react';
-=======
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { tasksAPI } from './services/api';
->>>>>>> bcknd
 
 const TaskContext = createContext();
 
 export const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
-<<<<<<< HEAD
-
-  const addTask = (task) => {
-    const newTask = {
-      id: Date.now().toString(),
-      ...task,
-      createdAt: new Date().toLocaleDateString(),
-    };
-    setTasks([newTask, ...tasks]);
-  };
-
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-  };
-
-  const updateTask = (taskId, updatedTask) => {
-    setTasks(tasks.map(task => task.id === taskId ? { ...task, ...updatedTask } : task));
-  };
-
-  return (
-    <TaskContext.Provider value={{ tasks, addTask, deleteTask, updateTask }}>
-=======
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -122,7 +96,6 @@ export const TaskProvider = ({ children }) => {
 
   return (
     <TaskContext.Provider value={{ tasks, loading, error, addTask, deleteTask, updateTask, refreshTasks: fetchTasks }}>
->>>>>>> bcknd
       {children}
     </TaskContext.Provider>
   );

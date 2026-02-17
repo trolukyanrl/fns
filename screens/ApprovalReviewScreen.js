@@ -11,10 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-<<<<<<< HEAD
-=======
 import { useTaskContext } from '../TaskContext';
->>>>>>> bcknd
 
 const BLUE = '#2563EB';
 const DARK = '#1F2937';
@@ -31,8 +28,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const { approval } = route.params;
-<<<<<<< HEAD
-=======
   const { updateTask } = useTaskContext();
 
   // Map task to approval format if needed
@@ -66,7 +61,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
   };
 
   const approvalData = getApprovalData();
->>>>>>> bcknd
 
   const handleNavigation = (tab) => {
     setActiveTab(tab);
@@ -78,22 +72,13 @@ export default function ApprovalReviewScreen({ navigation, route }) {
   const handleApprove = () => {
     Alert.alert(
       'Approve Inspection',
-<<<<<<< HEAD
-      `Are you sure you want to approve the inspection for ${approval.assetId}?`,
-=======
       `Are you sure you want to approve the inspection for ${approvalData.assetId}?`,
->>>>>>> bcknd
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Approve',
           style: 'default',
           onPress: () => {
-<<<<<<< HEAD
-            Alert.alert(
-              'Inspection Approved',
-              `Inspection for ${approval.assetId} has been approved successfully.`,
-=======
             // Update task status to 'Approved'
             if (approvalData.taskId) {
               updateTask(approvalData.taskId, {
@@ -105,7 +90,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
             Alert.alert(
               'Inspection Approved',
               `Inspection for ${approvalData.assetId} has been approved successfully.`,
->>>>>>> bcknd
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
           }
@@ -126,23 +110,13 @@ export default function ApprovalReviewScreen({ navigation, route }) {
     
     Alert.alert(
       'Reject Inspection',
-<<<<<<< HEAD
-      `Are you sure you want to reject the inspection for ${approval.assetId}?\n\nReason: ${rejectReason}`,
-=======
       `Are you sure you want to reject the inspection for ${approvalData.assetId}?\n\nReason: ${rejectReason}`,
->>>>>>> bcknd
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Reject',
           style: 'destructive',
           onPress: () => {
-<<<<<<< HEAD
-            Alert.alert(
-              'Inspection Rejected',
-              `Inspection for ${approval.assetId} has been rejected with reason: ${rejectReason}`,
-              [{ text: 'OK', onPress: () => navigation.goBack() }]
-=======
             // Update task status to 'Rejected'
             if (approvalData.taskId) {
               updateTask(approvalData.taskId, {
@@ -161,7 +135,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
                 setRejectReason('');
                 navigation.goBack();
               } }]
->>>>>>> bcknd
             );
           }
         }
@@ -187,14 +160,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
     }
   };
 
-<<<<<<< HEAD
-  const ChecklistItem = ({ label, status }) => (
-    <View style={styles.checklistItem}>
-      <Ionicons name={getChecklistItemIcon(status)} size={20} color={getChecklistItemColor(status)} />
-      <Text style={styles.checklistLabel}>{label}</Text>
-      <View style={[styles.statusDot, { backgroundColor: getChecklistItemColor(status) }]} />
-      <Text style={[styles.statusText, { color: getChecklistItemColor(status) }]}>{status}</Text>
-=======
   const ChecklistItem = ({ label, status, remarks }) => (
     <View>
       <View style={styles.checklistItem}>
@@ -209,7 +174,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
           <Text style={styles.remarksContent}>{remarks}</Text>
         </View>
       )}
->>>>>>> bcknd
     </View>
   );
 
@@ -231,65 +195,37 @@ export default function ApprovalReviewScreen({ navigation, route }) {
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Approval ID:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.id}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.id}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Asset ID:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.assetId}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.assetId}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Task ID:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.taskId}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.taskId}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Inspector:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.inspector}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.inspector}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Department:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.department}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.department}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Submitted:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.submittedDate}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.submittedDate}</Text>
->>>>>>> bcknd
           </View>
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Location:</Text>
-<<<<<<< HEAD
-            <Text style={styles.detailValue}>{approval.location}</Text>
-=======
             <Text style={styles.detailValue}>{approvalData.location}</Text>
->>>>>>> bcknd
           </View>
         </View>
 
@@ -297,44 +233,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Inspection Data</Text>
           
-<<<<<<< HEAD
-          <View style={styles.dataRow}>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Cylinder 1 Pressure</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.cylinder1Pressure} BAR</Text>
-            </View>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Cylinder 2 Pressure</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.cylinder2Pressure} BAR</Text>
-            </View>
-          </View>
-          
-          <View style={styles.dataRow}>
-            <View style={styles.dataItem}>
-              <Text style={styles.dataLabel}>Flow Rate</Text>
-              <Text style={styles.dataValue}>{approval.inspectionData.flowRate} L/MIN</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Inspection Checklist */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inspection Checklist</Text>
-          
-          <ChecklistItem label="Face Mask Condition" status={approval.inspectionData.faceMaskCondition} />
-          <ChecklistItem label="Harness Straps" status={approval.inspectionData.harnessStraps} />
-          <ChecklistItem label="Cylinder Valves" status={approval.inspectionData.cylinderValves} />
-          <ChecklistItem label="Pressure Gauge" status={approval.inspectionData.pressureGauge} />
-          <ChecklistItem label="Demand Valve" status={approval.inspectionData.demandValve} />
-          <ChecklistItem label="Warning Whistle" status={approval.inspectionData.warningWhistle} />
-        </View>
-
-        {/* Remarks */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Remarks</Text>
-          <View style={styles.remarkBox}>
-            <Text style={styles.remarkText}>{approval.inspectionData.generalRemark}</Text>
-=======
           {approvalData.isSKTask ? (
             <>
               <View style={styles.dataRow}>
@@ -441,7 +339,6 @@ export default function ApprovalReviewScreen({ navigation, route }) {
           <Text style={styles.sectionTitle}>General Remarks</Text>
           <View style={styles.remarkBox}>
             <Text style={styles.remarkText}>{approvalData.inspectionData.generalRemark || 'No remarks provided.'}</Text>
->>>>>>> bcknd
           </View>
         </View>
 
@@ -541,51 +438,85 @@ const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingTop: 40, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
   headerTitle: { fontSize: 20, fontWeight: '700', color: DARK },
-  section: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK, marginBottom: 12 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  detailLabel: { fontSize: 14, color: GREY, flex: 1 },
-  detailValue: { fontSize: 14, fontWeight: '600', color: DARK, flex: 2 },
-  dataRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-  dataItem: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 8, padding: 12 },
+  section: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 2 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: DARK, marginBottom: 16, borderBottomWidth: 1, borderBottomColor: '#F3F4F6', paddingBottom: 8 },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  detailLabel: { fontSize: 14, color: GREY },
+  detailValue: { fontSize: 14, fontWeight: '500', color: DARK },
+  dataRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
+  dataItem: { flex: 1 },
   dataLabel: { fontSize: 12, color: GREY, marginBottom: 4 },
-  dataValue: { fontSize: 16, fontWeight: '700', color: DARK },
-  checklistItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
-  checklistLabel: { fontSize: 14, color: DARK, flex: 1 },
-  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 6 },
-  statusText: { fontSize: 12, fontWeight: '600', minWidth: 50 },
-<<<<<<< HEAD
-=======
-  remarksBox: { backgroundColor: '#FFF3CD', borderLeftWidth: 4, borderLeftColor: ORANGE, marginLeft: 40, marginRight: 0, marginTop: 8, marginBottom: 12, padding: 12, borderRadius: 4 },
-  remarksLabel: { fontSize: 12, fontWeight: '600', color: ORANGE, marginBottom: 4 },
-  remarksContent: { fontSize: 13, color: DARK, lineHeight: 18 },
->>>>>>> bcknd
-  remarkBox: { backgroundColor: '#F9FAFB', borderRadius: 8, padding: 12 },
+  dataValue: { fontSize: 16, fontWeight: '600', color: BLUE },
+  checklistItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
+  checklistLabel: { flex: 1, fontSize: 14, color: DARK, marginLeft: 12 },
+  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  statusText: { fontSize: 12, fontWeight: '600' },
+  remarksBox: { marginTop: 8, padding: 12, backgroundColor: '#FEF2F2', borderRadius: 8, marginLeft: 32 },
+  remarksLabel: { fontSize: 12, fontWeight: '600', color: RED, marginBottom: 4 },
+  remarksContent: { fontSize: 13, color: '#7F1D1D' },
+  remarkBox: { backgroundColor: '#F9FAFB', padding: 12, borderRadius: 8, minHeight: 60 },
   remarkText: { fontSize: 14, color: DARK, lineHeight: 20 },
-  actionContainer: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  rejectButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FEE2E2', borderRadius: 8, paddingVertical: 14, borderWidth: 1, borderColor: '#FCA5A5' },
-  rejectButtonText: { fontSize: 16, fontWeight: '700', color: RED, marginLeft: 8 },
-  approveButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: GREEN, borderRadius: 8, paddingVertical: 14 },
-  approveButtonText: { fontSize: 16, fontWeight: '700', color: WHITE, marginLeft: 8 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: WHITE, paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8' },
-  navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navLabel: { fontSize: 12, color: GREY, marginTop: 4 },
-  navLabelActive: { color: BLUE, fontWeight: '600' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContainer: { backgroundColor: WHITE, borderRadius: 12, padding: 20, width: '90%', maxHeight: '60%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', color: DARK, marginBottom: 8, textAlign: 'center' },
-  modalSubtitle: { fontSize: 14, color: GREY, marginBottom: 16, textAlign: 'center' },
-  reasonInput: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, padding: 12, fontSize: 14, color: DARK, minHeight: 100, textAlignVertical: 'top' },
-  modalButtons: { flexDirection: 'row', gap: 12, marginTop: 16 },
-  cancelButton: { flex: 1, backgroundColor: '#F3F4F6', borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
-  cancelButtonText: { fontSize: 16, fontWeight: '600', color: GREY },
-  submitButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: RED, borderRadius: 8, paddingVertical: 12 },
-  submitButtonText: { fontSize: 16, fontWeight: '700', color: WHITE, marginLeft: 8 },
-<<<<<<< HEAD
-=======
-  materialsTable: { marginTop: 12, borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 8, overflow: 'hidden' },
-  materialRow: { padding: 12, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', backgroundColor: '#F9FAFB' },
-  materialText: { fontSize: 13, color: DARK, linHeight: 18, marginBottom: 4 },
-  materialRemark: { fontSize: 12, color: ORANGE, fontWeight: '600', marginTop: 4, fontStyle: 'italic' },
->>>>>>> bcknd
+  actionContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+  rejectButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FEF2F2', paddingVertical: 16, borderRadius: 12, marginRight: 8, borderWidth: 1, borderColor: '#FECACA' },
+  rejectButtonText: { color: RED, fontWeight: '600', fontSize: 16, marginLeft: 8 },
+  approveButton: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: GREEN, paddingVertical: 16, borderRadius: 12, marginLeft: 8 },
+  approveButtonText: { color: WHITE, fontWeight: '600', fontSize: 16, marginLeft: 8 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalContainer: { backgroundColor: WHITE, borderRadius: 16, padding: 24, width: '100%', maxWidth: 400 },
+  modalTitle: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 8 },
+  modalSubtitle: { fontSize: 14, color: GREY, marginBottom: 16 },
+  reasonInput: { backgroundColor: '#F9FAFB', borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 12, padding: 12, fontSize: 16, color: DARK, marginBottom: 24, height: 120 },
+  modalButtons: { flexDirection: 'row', justifyContent: 'flex-end' },
+  cancelButton: { paddingHorizontal: 20, paddingVertical: 12, marginRight: 12 },
+  cancelButtonText: { fontSize: 16, color: GREY, fontWeight: '600' },
+  submitButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: BLUE, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 8 },
+  submitButtonText: { fontSize: 16, color: WHITE, fontWeight: '600', marginLeft: 8 },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: WHITE,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    paddingBottom: 24, // For safe area
+  },
+  navItem: {
+    alignItems: 'center',
+  },
+  navLabel: {
+    fontSize: 10,
+    color: GREY,
+    marginTop: 4,
+  },
+  navLabelActive: {
+    color: BLUE,
+    fontWeight: '600',
+  },
+  materialsTable: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6',
+    paddingTop: 16,
+  },
+  materialRow: {
+    backgroundColor: '#F9FAFB',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  materialText: {
+    fontSize: 13,
+    color: DARK,
+    marginBottom: 4,
+  },
+  materialRemark: {
+    fontSize: 13,
+    color: GREY,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
 });

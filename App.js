@@ -3,10 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TaskProvider } from './TaskContext';
-<<<<<<< HEAD
-=======
 import { AuthProvider } from './AuthContext';
->>>>>>> bcknd
 
 // Screens
 import LoginScreen from './screens/LoginScreen';
@@ -20,11 +17,8 @@ import QRScannerScreen from './screens/QRScannerScreen';
 import LocationQRScannerScreen from './screens/LocationQRScannerScreen';
 import InspectionFormScreen from './screens/InspectionFormScreen';
 import SKInspectionScreen from './screens/SKInspectionScreen';
-<<<<<<< HEAD
-=======
 import MappingScreen from './screens/MappingScreen';
 import VerifyScreen from './screens/VerifyScreen';
->>>>>>> bcknd
 import PendingApprovalsScreen from './screens/PendingApprovalsScreen';
 import ApprovalReviewScreen from './screens/ApprovalReviewScreen';
 import ApprovalStatusScreen from './screens/ApprovalStatusScreen';
@@ -34,14 +28,6 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-<<<<<<< HEAD
-    <TaskProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{ headerShown: false }}
-        >
-=======
     <AuthProvider>
       <TaskProvider>
         <NavigationContainer>
@@ -49,7 +35,6 @@ export default function App() {
             initialRouteName="Login"
             screenOptions={{ headerShown: false }}
           >
->>>>>>> bcknd
           {/* Login */}
           <Stack.Screen name="Login" component={LoginScreen} />
 
@@ -66,30 +51,19 @@ export default function App() {
           <Stack.Screen name="LocationQRScanner" component={LocationQRScannerScreen} />
           <Stack.Screen name="InspectionForm" component={InspectionFormScreen} />
           <Stack.Screen name="SKInspection" component={SKInspectionScreen} />
-<<<<<<< HEAD
-=======
           <Stack.Screen name="Mapping" component={MappingScreen} />
           <Stack.Screen name="Verify" component={VerifyScreen} />
->>>>>>> bcknd
 
           {/* SIC Screens */}
           <Stack.Screen name="PendingApprovals" component={PendingApprovalsScreen} />
           <Stack.Screen name="ApprovalStatus" component={ApprovalStatusScreen} />
           <Stack.Screen name="ApprovalReview" component={ApprovalReviewScreen} />
           <Stack.Screen name="OverdueTasks" component={OverdueTasksScreen} />
-<<<<<<< HEAD
-        </Stack.Navigator>
-
-        <StatusBar style="dark" />
-      </NavigationContainer>
-    </TaskProvider>
-=======
           </Stack.Navigator>
 
           <StatusBar style="dark" />
         </NavigationContainer>
       </TaskProvider>
     </AuthProvider>
->>>>>>> bcknd
   );
 }
