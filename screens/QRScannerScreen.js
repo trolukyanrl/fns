@@ -54,10 +54,90 @@ export default function QRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
+<<<<<<< HEAD
     // Determine task type from route params or scanned data
     const isSKTask = route.params?.skSetId ? true : (data.startsWith('SK-') ? true : false);
     const taskId = route.params?.skSetId || route.params?.baSetId || data;
     
+=======
+    // Extract expected equipment ID from route params
+    const expectedEquipmentId = route.params?.expectedEquipmentId;
+    
+    // If we have an expected equipment ID, validate it
+    if (expectedEquipmentId) {
+      const scannedId = data.trim();
+      const expected = expectedEquipmentId.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedId.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the scanned data contains the expected ID
+      if (scannedId.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract equipment ID from patterns like "EQUIPMENT:BA-2024-001" or "BA-2024-001"
+      const idMatch = scannedId.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      const expectedIdMatch = expected.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      
+      if (idMatch && expectedIdMatch && 
+          idMatch[1].toUpperCase() === expectedIdMatch[1].toUpperCase()) {
+        // Equipment ID matches, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'BA Set ID Mismatch',
+        `Scanned: "${scannedId}"\nExpected: "${expected}"\n\nThe scanned equipment ID does not match the assigned equipment. Please scan the correct QR code.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => setScanned(false),
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected equipment ID validation needed, proceed directly
+    proceedWithValidation(data);
+  };
+
+  const proceedWithValidation = (data) => {
+    // Determine task type from route params or scanned data
+    // For SK tasks, check if it's explicitly marked as SK or has specific patterns
+    const isSKTask = route.params?.skSetId ? true : 
+                    (data.startsWith('SK-') || data.includes('SafetyKit') || 
+                     data.includes('SK_') || route.params?.taskType === 'SK');
+    const isBATask = route.params?.baSetId ? true : 
+                    (data.startsWith('BA-SET-') || data.includes('BASet') || 
+                     data.includes('BA_') || route.params?.taskType === 'BA-SET');
+    const taskId = route.params?.skSetId || route.params?.baSetId || data;
+    
+    // Check if this is a mapping flow (no specific task parameters provided)
+    const isMappingFlow = !route.params?.skSetId && !route.params?.baSetId;
+    
+    // Check if this is a verification flow
+    const isVerifyFlow = route.params?.taskType === 'VERIFY';
+    
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
+    
+    // Get task ID and task type from route params if available
+    const passedTaskId = route.params?.taskId;
+    const passedTaskType = route.params?.taskType;
+    
+>>>>>>> bcknd
     Alert.alert(
       'QR Code Scanned',
       `Code: ${data}`,
@@ -70,6 +150,7 @@ export default function QRScannerScreen({ navigation, route }) {
         {
           text: 'Proceed',
           onPress: () => {
+<<<<<<< HEAD
             if (isSKTask) {
               navigation.navigate('LocationQRScanner', { 
                 skSetId: taskId,
@@ -79,6 +160,43 @@ export default function QRScannerScreen({ navigation, route }) {
               navigation.navigate('LocationQRScanner', { 
                 baSetId: taskId,
                 taskType: 'BA_SET'
+=======
+            if (isVerifyFlow) {
+              // For verification flow, navigate to LocationQRScanner with scanned data
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'VERIFY',
+                expectedZone: expectedZone,
+              });
+            } else if (isMappingFlow) {
+              // For mapping flow, navigate to LocationQRScanner with scanned data
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'MAPPING',
+                expectedZone: expectedZone,
+              });
+            } else if (isSKTask) {
+              navigation.navigate('LocationQRScanner', { 
+                skSetId: taskId,
+                taskType: 'SK',
+                expectedZone: expectedZone,
+                taskId: passedTaskId,
+              });
+            } else if (isBATask) {
+              navigation.navigate('LocationQRScanner', { 
+                baSetId: taskId,
+                taskType: 'BA-SET',
+                expectedZone: expectedZone,
+                taskId: passedTaskId,
+              });
+            } else {
+              // Default case for unknown task types
+              navigation.navigate('LocationQRScanner', { 
+                scannedData: data,
+                taskType: 'UNKNOWN',
+                expectedZone: expectedZone,
+                taskId: passedTaskId,
+>>>>>>> bcknd
               });
             }
           },
@@ -94,6 +212,7 @@ export default function QRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter an equipment ID');
       return;
     }
+<<<<<<< HEAD
     setShowManualModal(false);
     setManualCode('');
     
@@ -111,6 +230,73 @@ export default function QRScannerScreen({ navigation, route }) {
         taskType: 'BA_SET'
       });
     }
+=======
+    
+    const data = manualCode.trim();
+    
+    // Extract expected equipment ID from route params
+    const expectedEquipmentId = route.params?.expectedEquipmentId;
+    
+    // If we have an expected equipment ID, validate it
+    if (expectedEquipmentId) {
+      const scannedId = data;
+      const expected = expectedEquipmentId.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedId.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the entered data contains the expected ID
+      if (scannedId.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract equipment ID from patterns like "EQUIPMENT:BA-2024-001" or "BA-2024-001"
+      const idMatch = scannedId.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      const expectedIdMatch = expected.match(/(BA-\d{4}-\d{3}|SK-\d+)/i);
+      
+      if (idMatch && expectedIdMatch && 
+          idMatch[1].toUpperCase() === expectedIdMatch[1].toUpperCase()) {
+        // Equipment ID matches, proceed
+        setShowManualModal(false);
+        setManualCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'BA Set ID Mismatch',
+        `Entered: "${scannedId}"\nExpected: "${expected}"\n\nThe entered equipment ID does not match the assigned equipment. Please enter the correct ID.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => {
+              // Keep the modal open and the text for retry
+              setManualCode(data);
+            },
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected equipment ID validation needed, proceed directly
+    setShowManualModal(false);
+    setManualCode('');
+    proceedWithValidation(data);
+>>>>>>> bcknd
   };
 
   if (!isCameraSupported) {

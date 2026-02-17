@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -14,6 +18,11 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
+<<<<<<< HEAD
+=======
+import api, { itemsAPI } from '../services/api';
+import axios from 'axios';
+>>>>>>> bcknd
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -35,6 +44,7 @@ const ZONES = [
   { id: '3', name: 'Zone C' },
 ];
 
+<<<<<<< HEAD
 const INSPECTORS = [
   { id: '1', name: 'Amit R.', department: 'Safety' },
   { id: '2', name: 'Sarah K.', department: 'Operations' },
@@ -168,13 +178,98 @@ const SAFETY_KITS = [
   },
 ];
 
+=======
+>>>>>>> bcknd
 export default function SICAssignTask({ navigation, route }) {
   const { addTask, updateTask } = useTaskContext();
   const editingTask = route?.params?.taskToEdit;
   const isEditMode = !!editingTask;
   
+<<<<<<< HEAD
   const findInspectorById = (name, dept) => {
     return INSPECTORS.find(insp => insp.name === name && insp.department === dept);
+=======
+  // State for inspectors (TA users)
+  const [inspectors, setInspectors] = useState([]);
+  const [loadingInspectors, setLoadingInspectors] = useState(true);
+  
+  // State for BA-Sets and Safety Kits
+  const [baSets, setBASets] = useState([]);
+  const [safetyKits, setSafetyKits] = useState([]);
+  const [loadingItems, setLoadingItems] = useState(true);
+  
+  // Fetch inspectors with role "TA" from API
+  useEffect(() => {
+    fetchInspectors();
+    fetchBASets();
+    fetchSafetyKits();
+  }, []);
+  
+  const fetchInspectors = async () => {
+    try {
+      setLoadingInspectors(true);
+      const response = await api.get('/users');
+      
+      // Filter users with role "ta" (case-insensitive)
+      const taUsers = response.data.filter(user => 
+        user.role && user.role.toLowerCase() === 'ta'
+      );
+      
+      // Map API users to inspector format
+      const mappedInspectors = taUsers.map((user, index) => ({
+        id: user.id || String(index + 1),
+        name: user.name || user.username,
+        department: user.role || 'Task Assignor',
+        username: user.username,
+      }));
+      
+      setInspectors(mappedInspectors);
+      console.log('Fetched TA users:', mappedInspectors);
+    } catch (error) {
+      console.error('Error fetching inspectors:', error);
+      // Fallback to empty array
+      setInspectors([]);
+      Alert.alert('Error', 'Failed to load inspectors. Please try again.');
+    } finally {
+      setLoadingInspectors(false);
+    }
+  };
+  
+  const fetchBASets = async () => {
+    try {
+      setLoadingItems(true);
+      const response = await itemsAPI.getBASets();
+      setBASets(response.data || []);
+      console.log('Fetched BA-Sets:', response.data);
+    } catch (error) {
+      console.error('Error fetching BA-Sets:', error.message);
+      console.error('Status:', error.response?.status);
+      console.error('URL:', error.config?.url);
+      setBASets([]);
+      Alert.alert(
+        'BA-Sets Not Found',
+        `Please verify the collection name in MockAPI. Error: ${error.response?.status || error.message}`
+      );
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+  
+  const fetchSafetyKits = async () => {
+    try {
+      // Use the separate Safety Kits API endpoint
+      const response = await itemsAPI.getSafetyKits();
+      setSafetyKits(response.data || []);
+      console.log('Fetched Safety-Kits:', response.data);
+    } catch (error) {
+      console.error('Error fetching Safety-Kits:', error.message);
+      setSafetyKits([]);
+    }
+  };
+  
+  const findInspectorById = (name, dept) => {
+    return inspectors.find(insp => insp.name === name && insp.department === dept);
+>>>>>>> bcknd
   };
 
   const [taskDescription, setTaskDescription] = useState(editingTask?.description || '');
@@ -195,6 +290,7 @@ export default function SICAssignTask({ navigation, route }) {
   // Filter based on selected task type
   const getFilteredItems = () => {
     if (selectedTaskType.name === 'BA-SET') {
+<<<<<<< HEAD
       return BA_SETS.filter(baSet => {
         const query = searchQuery.toLowerCase();
         return (
@@ -212,12 +308,35 @@ export default function SICAssignTask({ navigation, route }) {
           sk.name.toLowerCase().includes(query) ||
           sk.zone.toLowerCase().includes(query) ||
           sk.kitType.toLowerCase().includes(query)
+=======
+      return baSets.filter(baSet => {
+        const query = searchQuery.toLowerCase();
+        return (
+          (baSet.id && baSet.id.toLowerCase().includes(query)) ||
+          (baSet.name && baSet.name.toLowerCase().includes(query)) ||
+          (baSet.zone && baSet.zone.toLowerCase().includes(query)) ||
+          (baSet.cylinderNo && baSet.cylinderNo.toLowerCase().includes(query))
+        );
+      });
+    } else {
+      return safetyKits.filter(sk => {
+        const query = searchQuery.toLowerCase();
+        return (
+          (sk.id && sk.id.toLowerCase().includes(query)) ||
+          (sk.name && sk.name.toLowerCase().includes(query)) ||
+          (sk.zone && sk.zone.toLowerCase().includes(query)) ||
+          (sk.kitType && sk.kitType.toLowerCase().includes(query))
+>>>>>>> bcknd
         );
       });
     }
   };
 
+<<<<<<< HEAD
   const handleAssignTask = () => {
+=======
+  const handleAssignTask = async () => {
+>>>>>>> bcknd
     const selectedItems = selectedTaskType.name === 'BA-SET' ? selectedBASets : selectedSKs;
     
     if (!taskDescription.trim() || !selectedInspector || !dueDate.trim() || selectedItems.length === 0) {
@@ -225,6 +344,7 @@ export default function SICAssignTask({ navigation, route }) {
       return;
     }
 
+<<<<<<< HEAD
     // Create task object
     const taskData = {
       description: taskDescription,
@@ -265,6 +385,100 @@ export default function SICAssignTask({ navigation, route }) {
           navigation.replace('SICTasks');
         }}]
       );
+=======
+    try {
+      if (isEditMode) {
+        // Update existing task
+        const taskData = {
+          description: taskDescription,
+          assignedTo: selectedInspector.username,
+          assignedToName: selectedInspector.name,
+          assignedToDept: selectedInspector.department,
+          dueDate: dueDate,
+          taskType: selectedTaskType.name,
+          status: 'Pending',
+        };
+
+        if (selectedTaskType.name === 'BA-SET') {
+          taskData.baSets = selectedBASets.map(id => baSets.find(bs => bs.id === id)).filter(Boolean);
+        } else {
+          taskData.safetyKits = selectedSKs.map(id => safetyKits.find(sk => sk.id === id)).filter(Boolean);
+        }
+
+        await updateTask(editingTask.id, taskData);
+        Alert.alert(
+          'Task Updated',
+          `Task for ${selectedInspector.name} has been updated successfully.`,
+          [{ text: 'OK', onPress: () => navigation.replace('SICTasks') }]
+        );
+      } else {
+        // Create a separate task for each selected asset to ensure unique task IDs
+        let createdCount = 0;
+        
+        for (let i = 0; i < selectedItems.length; i++) {
+          const selectedItemId = selectedItems[i];
+          
+          // Create task object for this specific asset
+          const taskData = {
+            description: taskDescription,
+            assignedTo: selectedInspector.username,
+            assignedToName: selectedInspector.name,
+            assignedToDept: selectedInspector.department,
+            dueDate: dueDate,
+            taskType: selectedTaskType.name,
+            status: 'Pending',
+          };
+
+          if (selectedTaskType.name === 'BA-SET') {
+            const baSet = baSets.find(bs => bs.id === selectedItemId);
+            if (baSet) {
+              // Transform BA-Set to use distinct field names
+              taskData.baSets = [{
+                ...baSet,
+                assetId: baSet.id, // Keep original asset ID
+                // taskId will be added by the API response
+              }];
+            } else {
+              taskData.baSets = [];
+            }
+          } else {
+            const safetyKit = safetyKits.find(sk => sk.id === selectedItemId);
+            if (safetyKit) {
+              // Transform Safety Kit to use distinct field names
+              taskData.safetyKits = [{
+                ...safetyKit,
+                assetId: safetyKit.id, // Keep original asset ID
+                // taskId will be added by the API response
+              }];
+            } else {
+              taskData.safetyKits = [];
+            }
+          }
+
+          // Create task
+          await addTask(taskData);
+          createdCount++;
+        }
+
+        // Reset form
+        setTaskDescription('');
+        setSelectedInspector(null);
+        setDueDate('');
+        setSelectedBASets([]);
+        setSelectedSKs([]);
+
+        Alert.alert(
+          'Tasks Assigned',
+          `${createdCount} task(s) have been assigned to ${selectedInspector.name} with due date ${dueDate}. Each asset has been assigned a unique task ID.`,
+          [{ text: 'OK', onPress: () => {
+              navigation.replace('SICTasks');
+            }}]
+        );
+      }
+    } catch (error) {
+      console.error('Task assignment error:', error);
+      Alert.alert('Error', 'Failed to save task. Please check your connection and try again.');
+>>>>>>> bcknd
     }
   };
 
@@ -602,6 +816,7 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
           
           {/* Items List */}
+<<<<<<< HEAD
           <FlatList
             data={getFilteredItems()}
             renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
@@ -611,6 +826,27 @@ export default function SICAssignTask({ navigation, route }) {
             nestedScrollEnabled={false}
             style={styles.baSetList}
           />
+=======
+          {loadingItems ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Loading {selectedTaskType.name === 'BA-SET' ? 'BA Sets' : 'Safety Kits'}...</Text>
+            </View>
+          ) : getFilteredItems().length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>No {selectedTaskType.name === 'BA-SET' ? 'BA Sets' : 'Safety Kits'} available</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={getFilteredItems()}
+              renderItem={({ item }) => selectedTaskType.name === 'BA-SET' ? renderBASetCard(item) : renderSKCard(item)}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={false}
+              style={styles.baSetList}
+            />
+          )}
+>>>>>>> bcknd
         </View>
       </ScrollView>
 
@@ -688,12 +924,27 @@ export default function SICAssignTask({ navigation, route }) {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Inspector</Text>
+<<<<<<< HEAD
             <FlatList
               data={INSPECTORS}
               renderItem={renderInspector}
               keyExtractor={(item) => item.id}
               showsVerticalScrollIndicator={false}
             />
+=======
+            {loadingInspectors ? (
+              <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20 }]}>Loading inspectors...</Text>
+            ) : inspectors.length === 0 ? (
+              <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20, color: GREY }]}>No inspectors available</Text>
+            ) : (
+              <FlatList
+                data={inspectors}
+                renderItem={renderInspector}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+>>>>>>> bcknd
           </View>
         </TouchableOpacity>
       </Modal>
@@ -934,4 +1185,9 @@ const styles = StyleSheet.create({
   yearOptionTextSelected: { color: BLUE, fontWeight: '700' },
   yearPickerConfirmButton: { backgroundColor: BLUE, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16 },
   yearPickerConfirmText: { fontSize: 16, fontWeight: '700', color: WHITE },
+<<<<<<< HEAD
+=======
+  loadingContainer: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center' },
+  loadingText: { fontSize: 16, color: GREY, fontWeight: '500' },
+>>>>>>> bcknd
 });

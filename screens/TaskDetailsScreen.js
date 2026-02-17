@@ -20,6 +20,7 @@ const RED = '#E53935';
 export default function TaskDetailsScreen({ navigation, route }) {
   const { task } = route.params;
 
+<<<<<<< HEAD
   // Mock assignment data for pending tasks
   const assignmentData = {
     assignee: 'Rajesh Kumar',
@@ -52,6 +53,64 @@ export default function TaskDetailsScreen({ navigation, route }) {
       ? 'Safety kit inspection completed successfully. All items present and in good condition.' 
       : 'Face mask shows signs of wear and tear. Warning whistle not functioning properly. Pressure gauge not applicable for this model. Cylinder 2 pressure is lower than optimal. Flow rate below standard. Equipment requires maintenance before next use.',
     isLocationCaptured: true,
+=======
+  // Get first BA-Set or Safety Kit for details
+  const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
+
+  // Check if task is in "Pending for Approval" status and has inspection data
+  const isPendingApproval = task.status === 'Pending for Approval';
+  const submittedInspectionData = task.inspectionData || {};
+
+  // Use real inspection data from submission or default values
+  const inspectionData = isPendingApproval ? {
+    taskId: task.id,
+    assetId: item?.id || task.id,
+    location: item?.zone || 'Location TBA',
+    cylinderNumbers: item?.cylinderNo || 'N/A',
+    lastHydrotest: item?.lastInspection || 'N/A',
+    nextHydrotest: item?.nextHydrotest || 'N/A',
+    cylinder1Pressure: submittedInspectionData.cylinder1Pressure || 'N/A',
+    cylinder2Pressure: submittedInspectionData.cylinder2Pressure || 'N/A',
+    flowRate: submittedInspectionData.flowRate || 'N/A',
+    faceMaskCondition: submittedInspectionData.faceMaskCondition || 'Pending',
+    harnessStraps: submittedInspectionData.harnessStraps || 'Pending',
+    cylinderValves: submittedInspectionData.cylinderValves || 'Pending',
+    pressureGauge: submittedInspectionData.pressureGauge || 'Pending',
+    demandValve: submittedInspectionData.demandValve || 'Pending',
+    warningWhistle: submittedInspectionData.warningWhistle || 'Pending',
+    gpsLocation: '40.7128° N, 74.0060° W',
+    generalRemark: submittedInspectionData.generalRemark || `Inspect ${item?.name || task.taskType}. Task status: ${task.status}. Complete inspection and provide details.`,
+    isLocationCaptured: false,
+  } : {
+    taskId: task.id,
+    assetId: item?.id || task.id,
+    location: item?.zone || 'Location TBA',
+    cylinderNumbers: item?.cylinderNo || 'N/A',
+    lastHydrotest: item?.lastInspection || 'N/A',
+    nextHydrotest: item?.nextHydrotest || 'N/A',
+    cylinder1Pressure: item?.pressure || 'N/A',
+    cylinder2Pressure: 'N/A',
+    flowRate: 'N/A',
+    faceMaskCondition: 'Pending',
+    harnessStraps: 'Pending',
+    cylinderValves: 'Pending',
+    pressureGauge: 'Pending',
+    demandValve: 'Pending',
+    warningWhistle: 'Pending',
+    gpsLocation: '40.7128° N, 74.0060° W',
+    generalRemark: `Inspect ${item?.name || task.taskType}. Task status: ${task.status}. Complete inspection and provide details.`,
+    isLocationCaptured: false,
+  };
+
+  // Use real task assignment data
+  const assignmentData = {
+    assignee: task.assignedToName || task.assignedTo,
+    dueDate: task.dueDate,
+    taskDescription: task.description,
+    baSetDetails: item ? `${item.id} - ${item.zone}` : 'No item assigned',
+    assignedBy: 'SIC',
+    priority: 'High',
+>>>>>>> bcknd
   };
 
   const getStatusColor = (status) => {
@@ -62,6 +121,13 @@ export default function TaskDetailsScreen({ navigation, route }) {
         return '#7B1FA2';
       case 'Completed':
         return GREEN;
+<<<<<<< HEAD
+=======
+      case 'Approved':
+        return GREEN;
+      case 'Rejected':
+        return RED;
+>>>>>>> bcknd
       default:
         return LIGHT_GREY;
     }
@@ -75,6 +141,13 @@ export default function TaskDetailsScreen({ navigation, route }) {
         return '#7B1FA2';
       case 'Completed':
         return '#2E7D32';
+<<<<<<< HEAD
+=======
+      case 'Approved':
+        return '#2E7D32';
+      case 'Rejected':
+        return '#C62828';
+>>>>>>> bcknd
       default:
         return LIGHT_GREY;
     }
@@ -94,6 +167,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
   };
 
   const handleStartInspection = () => {
+<<<<<<< HEAD
     if (task.id.startsWith('SK-')) {
       navigation.navigate('QRScanner', {
         skSetId: task.id,
@@ -103,17 +177,57 @@ export default function TaskDetailsScreen({ navigation, route }) {
       navigation.navigate('QRScanner', {
         baSetId: task.id,
         location: task.location,
+=======
+    const equipmentId = item?.id || task.id;
+    const zoneName = item?.zone || 'Location TBA';
+    
+    if (task.taskType === 'SK') {
+      navigation.navigate('QRScanner', {
+        skSetId: equipmentId,
+        expectedEquipmentId: equipmentId,
+        expectedZone: zoneName,
+        location: zoneName,
+        taskId: task.id,
+        taskType: 'SK',
+      });
+    } else {
+      navigation.navigate('QRScanner', {
+        baSetId: equipmentId,
+        expectedEquipmentId: equipmentId,
+        expectedZone: zoneName,
+        location: zoneName,
+        taskId: task.id,
+        taskType: 'BA-SET',
+>>>>>>> bcknd
       });
     }
   };
 
   const handleEditInspection = () => {
+<<<<<<< HEAD
     navigation.navigate('InspectionForm', {
       baSetId: task.id,
       location: task.location,
       // Pass existing data for editing
       inspectionData,
     });
+=======
+    if (task.taskType === 'SK') {
+      navigation.navigate('SKInspection', {
+        skSetId: item?.id || task.id,
+        location: item?.zone || 'Location TBA',
+        // Pass full existing data for editing
+        inspectionData: task.inspectionData,
+      });
+    } else {
+      navigation.navigate('InspectionForm', {
+        baSetId: item?.id || task.id,
+        location: item?.zone || 'Location TBA',
+        // Pass existing data for editing
+        inspectionData,
+      });
+    }
+>>>>>>> bcknd
   };
 
   const TaskDetailRow = ({ label, value, icon }) => (
@@ -158,12 +272,23 @@ export default function TaskDetailsScreen({ navigation, route }) {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+<<<<<<< HEAD
         {/* Assignment Details Section for Pending Tasks */}
         {task.status === 'Pending' ? (
           <>
             {/* Task Assignment Overview */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Task Assignment</Text>
+=======
+        {/* Assignment Details Section for Pending Tasks or Pending for Approval Tasks */}
+        {(task.status === 'Pending' || task.status === 'Pending for Approval' || task.status === 'Approved' || task.status === 'Rejected') ? (
+          <>
+            {/* Task Assignment Overview */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>
+                {task.status === 'Pending for Approval' ? 'Inspection Submitted' : task.status === 'Approved' ? 'Inspection Approved' : task.status === 'Rejected' ? 'Inspection Rejected' : 'Task Assignment'}
+              </Text>
+>>>>>>> bcknd
               
               <View style={styles.assignmentOverview}>
                 <View style={styles.taskIdContainer}>
@@ -181,6 +306,7 @@ export default function TaskDetailsScreen({ navigation, route }) {
                 </View>
               </View>
 
+<<<<<<< HEAD
               <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
               <TaskDetailRow label="Due Date" value={assignmentData.dueDate} icon="calendar-outline" />
               <TaskDetailRow label="Priority" value={assignmentData.priority} icon="alert-circle" />
@@ -207,6 +333,79 @@ export default function TaskDetailsScreen({ navigation, route }) {
                 <View style={styles.baSetInfo}>
                   <Text style={styles.baSetTitle}>{task.id.startsWith('SK-') ? `Safety Kit: ${task.id}` : `BA Set: ${task.id}`}</Text>
                   <Text style={styles.baSetLocation}>{task.location}</Text>
+=======
+              {task.status === 'Pending for Approval' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
+              ) : task.status === 'Approved' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Approved At" value={task.approvedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
+              ) : task.status === 'Rejected' ? (
+                <>
+                  <TaskDetailRow label="Inspected By" value={task.inspectedBy || 'Unknown'} icon="person-circle" />
+                  <TaskDetailRow label="Submitted At" value={task.submittedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Rejected At" value={task.rejectedAt || 'N/A'} icon="calendar-outline" />
+                  <TaskDetailRow label="Equipment Type" value={task.taskType || 'Unknown'} icon="construct" />
+                  <TaskDetailRow label="Equipment ID" value={item?.id || task.id} icon="barcode-outline" />
+                  <TaskDetailRow label="Location" value={item?.zone || 'Location TBA'} icon="location-outline" />
+                </>
+              ) : (
+                <>
+                  <TaskDetailRow label="Assigned To" value={assignmentData.assignee} icon="person-circle" />
+                  <TaskDetailRow label="Due Date" value={assignmentData.dueDate} icon="calendar-outline" />
+                  <TaskDetailRow label="Priority" value={assignmentData.priority} icon="alert-circle" />
+                  <TaskDetailRow label="Assigned By" value={assignmentData.assignedBy} icon="shield-checkmark" />
+                </>
+              )}
+            </View>
+
+            {/* Task Description Section (only for Pending) */}
+            {task.status === 'Pending' && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Task Description</Text>
+                
+                <View style={styles.descriptionCard}>
+                  <Text style={styles.descriptionText}>
+                    {assignmentData.taskDescription}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Rejection Reason Section (only for Rejected) */}
+            {task.status === 'Rejected' && (
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>Rejection Reason</Text>
+                
+                <View style={[styles.descriptionCard, { borderLeftWidth: 4, borderLeftColor: RED }]}>
+                  <Text style={[styles.descriptionText, { color: RED }]}>
+                    {task.rejectionReason || 'No reason provided'}
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {/* Equipment Details Section */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>{task.taskType === 'SK' ? 'Safety Kit Details' : 'BA Set Details'}</Text>
+              
+              <View style={styles.baSetCard}>
+                <Ionicons name={task.taskType === 'SK' ? "construct" : "cube"} size={24} color={BLUE} />
+                <View style={styles.baSetInfo}>
+                  <Text style={styles.baSetTitle}>{item?.id || task.id}</Text>
+                  <Text style={styles.baSetLocation}>{item?.zone || 'Location TBA'}</Text>
+>>>>>>> bcknd
                 </View>
               </View>
             </View>
@@ -221,7 +420,11 @@ export default function TaskDetailsScreen({ navigation, route }) {
               <View style={styles.taskOverview}>
                 <View style={styles.taskIdContainer}>
                   <Text style={styles.taskIdLabel}>Task ID</Text>
+<<<<<<< HEAD
                   <Text style={styles.taskId}>{inspectionData.taskId}</Text>
+=======
+                  <Text style={styles.taskId}>{task.id}</Text>
+>>>>>>> bcknd
                 </View>
                 
                 <View style={[
@@ -346,9 +549,32 @@ export default function TaskDetailsScreen({ navigation, route }) {
             <Text style={styles.startBtnText}>Start Inspection</Text>
           </TouchableOpacity>
         ) : task.status === 'Pending for Approval' ? (
+<<<<<<< HEAD
           <TouchableOpacity style={styles.editBtn} onPress={handleEditInspection}>
             <Ionicons name="create" size={18} color="#fff" />
             <Text style={styles.editBtnText}>Edit Inspection</Text>
+=======
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.viewBtn, { flex: 1 }]} onPress={() => Alert.alert('Pending Review', 'Your inspection has been submitted and is awaiting approval from the SIC.')}>
+              <Ionicons name="information-circle" size={18} color="#fff" />
+              <Text style={styles.viewBtnText}>Awaiting Approval</Text>
+            </TouchableOpacity>
+            <View style={{ width: 12 }} />
+            <TouchableOpacity style={[styles.editBtn, { flex: 1 }]} onPress={handleEditInspection}>
+              <Ionicons name="create" size={18} color="#fff" />
+              <Text style={styles.editBtnText}>Edit & Resubmit</Text>
+            </TouchableOpacity>
+          </View>
+        ) : task.status === 'Approved' ? (
+          <TouchableOpacity style={[styles.viewBtn, { backgroundColor: GREEN }]} onPress={() => Alert.alert('Approved', 'Your inspection has been approved by the SIC.')}>
+            <Ionicons name="checkmark-circle" size={18} color="#fff" />
+            <Text style={styles.viewBtnText}>Inspection Approved</Text>
+          </TouchableOpacity>
+        ) : task.status === 'Rejected' ? (
+          <TouchableOpacity style={[styles.viewBtn, { backgroundColor: RED }]} onPress={() => Alert.alert('Rejected', `Your inspection was rejected.\n\nReason: ${task.rejectionReason || 'No reason provided'}`)}>
+            <Ionicons name="close-circle" size={18} color="#fff" />
+            <Text style={styles.viewBtnText}>View Reason</Text>
+>>>>>>> bcknd
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.viewBtn} onPress={() => Alert.alert('Info', 'Inspection completed')}>
@@ -627,6 +853,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#E8E8E8',
   },
+<<<<<<< HEAD
+=======
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+>>>>>>> bcknd
   startBtn: {
     backgroundColor: BLUE,
     flexDirection: 'row',

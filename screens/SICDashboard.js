@@ -8,6 +8,10 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+<<<<<<< HEAD
+=======
+import { useTaskContext } from '../TaskContext';
+>>>>>>> bcknd
 
 const BLUE = '#2563EB';
 const LIGHT_BLUE = '#EFF6FF';
@@ -18,6 +22,13 @@ const GREEN = '#22C55E';
 
 export default function SICDashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
+<<<<<<< HEAD
+=======
+  const { tasks } = useTaskContext();
+
+  // Calculate pending approvals count
+  const pendingApprovalsCount = tasks.filter(task => task.status === 'Pending for Approval').length;
+>>>>>>> bcknd
 
   const handleLogout = () => {
     navigation.reset({
@@ -77,20 +88,51 @@ export default function SICDashboard({ navigation }) {
           </TouchableOpacity>
         </View>
 
+<<<<<<< HEAD
 
         {/* Pending Approvals */}
         <View style={styles.statsRow}>
           <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2', borderColor: '#DC2626', borderWidth: 1 }]} onPress={() => navigation.navigate('PendingApprovals')}>
+=======
+        {/* Pending Approvals */}
+        <View style={styles.statsRow}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2' }]} onPress={() => navigation.navigate('PendingApprovals')}>
+            {pendingApprovalsCount > 0 && (
+              <View style={styles.countBadge}>
+                <Text style={styles.countBadgeText}>{pendingApprovalsCount}</Text>
+              </View>
+            )}
+>>>>>>> bcknd
             <Ionicons name="document-text-outline" size={24} color="#DC2626" />
             <Text style={styles.statLabel}>Pending Approvals</Text>
           </TouchableOpacity>
 
+<<<<<<< HEAD
           <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF', borderColor: '#7C3AED', borderWidth: 1 }]} onPress={() => navigation.navigate('OverdueTasks')}>
+=======
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF' }]} onPress={() => navigation.navigate('OverdueTasks')}>
+>>>>>>> bcknd
             <Ionicons name="time-outline" size={24} color="#7C3AED" />
             <Text style={styles.statLabel}>Overdue Tasks</Text>
           </TouchableOpacity>
         </View>
 
+<<<<<<< HEAD
+=======
+        {/* Mapping and Verify */}
+        <View style={styles.statsRow}>
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#E0F2FE' }]} onPress={() => navigation.navigate('QRScanner')}>
+            <Ionicons name="map-outline" size={24} color="#0284C7" />
+            <Text style={styles.statLabel}>Mapping</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#DCFCE7' }]} onPress={() => navigation.navigate('QRScanner', { taskType: 'VERIFY' })}>
+            <Ionicons name="checkmark-done-outline" size={24} color="#16A34A" />
+            <Text style={styles.statLabel}>Verify</Text>
+          </TouchableOpacity>
+        </View>
+
+>>>>>>> bcknd
       </ScrollView>
 
       {/* Bottom Navigation */}
@@ -127,8 +169,13 @@ const styles = StyleSheet.create({
   fixedHeader: { 
     backgroundColor: '#F9FAFB', 
     paddingHorizontal: 20, 
+<<<<<<< HEAD
     paddingTop: 52, 
     paddingBottom: 16,
+=======
+    paddingTop: 50, 
+    paddingBottom: 6,
+>>>>>>> bcknd
     borderBottomWidth: 1,
     borderBottomColor: '#E5E7EB',
   },
@@ -148,9 +195,33 @@ const styles = StyleSheet.create({
   logoutIcon: { marginLeft: 'auto' },
   pageTitle: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 20 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
+<<<<<<< HEAD
   statCard: { flex: 1, borderRadius: 16, padding: 16 },
   statNumber: { fontSize: 24, fontWeight: '800', color: DARK, marginTop: 8 },
   statLabel: { fontSize: 13, color: GREY },
+=======
+  statCard: { flex: 1, borderRadius: 16, padding: 16, position: 'relative' },
+  statNumber: { fontSize: 24, fontWeight: '800', color: DARK, marginTop: 8 },
+  statLabel: { fontSize: 13, color: GREY },
+  countBadge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#DC2626',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  countBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+>>>>>>> bcknd
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK },
   link: { fontSize: 13, fontWeight: '600', color: BLUE },

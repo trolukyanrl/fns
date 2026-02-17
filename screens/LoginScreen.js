@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
+=======
+import React, { useState, useEffect } from 'react';
+>>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -9,8 +13,15 @@ import {
   Platform,
   ScrollView,
   Alert,
+<<<<<<< HEAD
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+=======
+  ActivityIndicator,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../AuthContext';
+>>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -19,14 +30,18 @@ const BORDER_GREY = '#CCCCCC';
 const BG_GREY = '#E8E8E8';
 const GREEN = '#34A853';
 
+<<<<<<< HEAD
 // Dummy credentials
 const SIC_CREDENTIALS = { username: 'sic@123', password: 'sic@123' };
 const TA_CREDENTIALS = { username: 'ta@123', password: 'ta@123' };
 
+=======
+>>>>>>> bcknd
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+<<<<<<< HEAD
 
   const handleLogin = () => {
     const trimmedUsername = username.trim();
@@ -38,6 +53,48 @@ export default function LoginScreen({ navigation }) {
       navigation.replace('TADashboard');
     } else {
       Alert.alert('Invalid Credentials', 'Please enter a valid username and password.');
+=======
+  const { login, loading, error, clearError } = useAuth();
+
+  // Clear error when user starts typing
+  useEffect(() => {
+    if (error && (username || password)) {
+      clearError();
+    }
+  }, [username, password]);
+
+  // Handle authentication errors
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Login Failed', error);
+    }
+  }, [error]);
+
+  const handleLogin = async () => {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
+      Alert.alert('Missing Information', 'Please enter both username and password.');
+      return;
+    }
+
+    const result = await login(trimmedUsername, trimmedPassword);
+    
+    console.log('Login result:', result);
+    
+    if (result.success) {
+      console.log('Navigation starting for role:', result.user.role);
+      // Navigate based on user role
+      if (result.user.role === 'SIC') {
+        console.log('Navigating to SICDashboard');
+        navigation.replace('SICDashboard');
+      } else if (result.user.role === 'TA') {
+        console.log('Navigating to TADashboard');
+        navigation.replace('TADashboard');
+      }
+      console.log('Navigation completed');
+>>>>>>> bcknd
     }
   };
 
@@ -106,9 +163,26 @@ export default function LoginScreen({ navigation }) {
           </View>
 
           {/* Sign In Button */}
+<<<<<<< HEAD
           <TouchableOpacity style={styles.button} onPress={handleLogin} activeOpacity={0.8}>
             <Text style={styles.buttonText}>Sign In</Text>
             <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
+=======
+          <TouchableOpacity 
+            style={[styles.button, loading && styles.buttonDisabled]} 
+            onPress={handleLogin} 
+            activeOpacity={0.8}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <>
+                <Text style={styles.buttonText}>Sign In</Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
+              </>
+            )}
+>>>>>>> bcknd
           </TouchableOpacity>
         </View>
 
@@ -217,6 +291,13 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     marginTop: 8,
   },
+<<<<<<< HEAD
+=======
+  buttonDisabled: {
+    backgroundColor: '#A0C3FF',
+    opacity: 0.7,
+  },
+>>>>>>> bcknd
   buttonText: {
     fontSize: 16,
     fontWeight: '700',

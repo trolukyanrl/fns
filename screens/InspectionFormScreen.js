@@ -15,6 +15,11 @@ import {
   Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+<<<<<<< HEAD
+=======
+import { useTaskContext } from '../TaskContext';
+import { useAuth } from '../AuthContext';
+>>>>>>> bcknd
 
 const BLUE = '#4285F4';
 const DARK_GREY = '#333333';
@@ -105,10 +110,20 @@ const ReviewModal = ({ visible, onClose, reviewText, setReviewText, onSave }) =>
 );
 
 export default function InspectionFormScreen({ navigation, route }) {
+<<<<<<< HEAD
   const { baSetId, location } = route?.params || {};
   const scrollViewRef = useRef(null);
   const remarksInputRef = useRef(null);
 
+=======
+  const { baSetId, location, inspectionData } = route?.params || {};
+  const { tasks, updateTask } = useTaskContext();
+  const { user } = useAuth();
+  const scrollViewRef = useRef(null);
+  const remarksInputRef = useRef(null);
+
+
+>>>>>>> bcknd
   // Form state
   const [cylinder1Pressure, setCylinder1Pressure] = useState('300');
   const [cylinder2Pressure, setCylinder2Pressure] = useState('300');
@@ -132,9 +147,90 @@ export default function InspectionFormScreen({ navigation, route }) {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewField, setCurrentReviewField] = useState(null);
 
+<<<<<<< HEAD
 
   const handleSaveDraft = () => {
     Alert.alert('Success', 'Inspection draft saved successfully!');
+=======
+  // Get current task using useMemo for reliable task ID fetching
+  const currentTask = useMemo(() => {
+    if (!tasks || tasks.length === 0) return null;
+
+    // 1. Try finding by taskId from route params (passed from QR scanner flow)
+    const passedTaskId = route?.params?.taskId;
+    if (passedTaskId) {
+      const taskById = tasks.find(t => t.id === passedTaskId);
+      if (taskById) return taskById;
+    }
+
+    // 2. Try finding by taskId from inspectionData (for edits)
+    if (inspectionData && inspectionData.taskId) {
+      const taskByIdFromInspection = tasks.find(t => t.id === inspectionData.taskId);
+      if (taskByIdFromInspection) return taskByIdFromInspection;
+    }
+
+    // 3. Fallback: Search by baSetId
+    if (baSetId) {
+      const taskByBaSetId = tasks.find(taskItem => {
+        // Safe check for baSets array
+        const baSets = Array.isArray(taskItem.baSets) ? taskItem.baSets : [];
+        const equipment = baSets.find(bs => bs.id === baSetId);
+        
+        // Also check safetyKits
+        const safetyKits = Array.isArray(taskItem.safetyKits) ? taskItem.safetyKits : [];
+        const kit = safetyKits.find(sk => sk.id === baSetId);
+        
+        return equipment || kit || taskItem.id === baSetId;
+      });
+      if (taskByBaSetId) return taskByBaSetId;
+    }
+
+    return null;
+  }, [tasks, baSetId, inspectionData, route?.params?.taskId]);
+
+  // Pre-fill form if editing existing inspection
+  useEffect(() => {
+    if (inspectionData) {
+      setCylinder1Pressure(inspectionData.cylinder1Pressure || '300');
+      setCylinder2Pressure(inspectionData.cylinder2Pressure || '300');
+      setFlowRate(inspectionData.flowRate || '40');
+      setGeneralRemark(inspectionData.generalRemark || '');
+      
+      setFaceMaskCondition(inspectionData.faceMaskCondition || null);
+      setHarnessStraps(inspectionData.harnessStraps || null);
+      setCylinderValves(inspectionData.cylinderValves || null);
+      setPressureGauge(inspectionData.pressureGauge || null);
+      setDemandValve(inspectionData.demandValve || null);
+      setWarningWhistle(inspectionData.warningWhistle || null);
+
+      // Restore reviews if they exist (assuming they are part of inspectionData)
+      if (inspectionData.faceMaskReview) setFaceMaskReview(inspectionData.faceMaskReview);
+      if (inspectionData.harnessReview) setHarnessReview(inspectionData.harnessReview);
+      if (inspectionData.cylinderValvesReview) setCylinderValvesReview(inspectionData.cylinderValvesReview);
+      if (inspectionData.pressureGaugeReview) setPressureGaugeReview(inspectionData.pressureGaugeReview);
+      if (inspectionData.demandValveReview) setDemandValveReview(inspectionData.demandValveReview);
+      if (inspectionData.warningWhistleReview) setWarningWhistleReview(inspectionData.warningWhistleReview);
+    }
+  }, [inspectionData]);
+
+  const handleCancel = () => {
+    Alert.alert(
+      'Cancel Inspection',
+      'Are you sure you want to cancel? All unsaved data will be lost.',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+      { cancelable: true }
+    );
+>>>>>>> bcknd
   };
 
   const handleSaveReview = () => {
@@ -181,6 +277,7 @@ export default function InspectionFormScreen({ navigation, route }) {
       return;
     }
 
+<<<<<<< HEAD
 
     // Submit the form
     setTimeout(() => {
@@ -189,6 +286,88 @@ export default function InspectionFormScreen({ navigation, route }) {
         routes: [{ name: 'TADashboard' }],
       });
     }, 500);
+=======
+    // Find the task
+    let currentTask;
+    const params = route.params || {};
+
+    // 1. Try finding by taskId from route params (most reliable)
+    if (params.taskId) {
+      currentTask = tasks.find(t => t.id === params.taskId);
+    }
+
+    // 2. Try finding by taskId from inspectionData (for edits)
+    if (!currentTask && params.inspectionData && params.inspectionData.taskId) {
+      currentTask = tasks.find(t => t.id === params.inspectionData.taskId);
+    }
+
+    // 3. Fallback: Search by baSetId (only if no taskId is available)
+    if (!currentTask && params.baSetId && !params.taskId) {
+      currentTask = tasks.find(task => {
+        // Safe check for baSets array
+        const baSets = Array.isArray(task.baSets) ? task.baSets : [];
+        const equipment = baSets.find(bs => bs.id === params.baSetId);
+        
+        // Also check safetyKits
+        const safetyKits = Array.isArray(task.safetyKits) ? task.safetyKits : [];
+        const kit = safetyKits.find(sk => sk.id === params.baSetId);
+        
+        return equipment || kit || task.id === params.baSetId;
+      });
+    }
+
+    if (!currentTask) {
+      Alert.alert('Error', 'Task not found. Please try again.');
+      return;
+    }
+
+    // Collect inspection data
+    const inspectionData = {
+      scannedLocation: location,
+      cylinder1Pressure,
+      cylinder2Pressure,
+      flowRate,
+      faceMaskCondition,
+      faceMaskReview,
+      harnessStraps,
+      harnessReview,
+      cylinderValves,
+      cylinderValvesReview,
+      pressureGauge,
+      pressureGaugeReview,
+      demandValve,
+      demandValveReview,
+      warningWhistle,
+      warningWhistleReview,
+      generalRemark,
+    };
+
+    // Update task status to "Pending for Approval"
+    const updatedTask = {
+      ...currentTask,
+      status: 'Pending for Approval',
+      inspectionData,
+      submittedAt: new Date().toLocaleString(),
+      inspectedBy: user?.username || 'Unknown',
+    };
+
+    updateTask(currentTask.id, updatedTask);
+
+    Alert.alert('Success', 'Inspection submitted successfully!', [
+      {
+        text: 'OK',
+        onPress: () => {
+          // Navigate back to TADashboard
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'TADashboard' }],
+            });
+          }, 500);
+        },
+      },
+    ]);
+>>>>>>> bcknd
   };
 
   const ChecklistItem = ({ label, description, value, reviewValue, onOk, onNotOk, onNA, onClearReview }) => (
@@ -280,10 +459,17 @@ export default function InspectionFormScreen({ navigation, route }) {
               <View style={styles.detailRow}>
                 <View style={styles.detailLeft}>
                   <Text style={styles.detailLabel}>Task ID</Text>
+<<<<<<< HEAD
                   <Text style={styles.detailValue}>#INS-2024-0847</Text>
                 </View>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusText}>Pending</Text>
+=======
+                  <Text style={styles.detailValue}>{currentTask?.id || 'N/A'}</Text>
+                </View>
+                <View style={styles.statusBadge}>
+                  <Text style={styles.statusText}>{currentTask?.status || 'Pending'}</Text>
+>>>>>>> bcknd
                 </View>
               </View>
 
@@ -298,9 +484,21 @@ export default function InspectionFormScreen({ navigation, route }) {
                 </View>
               </View>
 
+<<<<<<< HEAD
               <View>
                 <Text style={styles.detailLabel}>Cylinder Numbers</Text>
                 <Text style={styles.detailValue}>CYL-8847, CYL-8848</Text>
+=======
+              <View style={styles.detailRow}>
+                <View style={styles.detailLeft}>
+                  <Text style={styles.detailLabel}>Cylinder Numbers</Text>
+                  <Text style={styles.detailValue}>CYL-8847, CYL-8848</Text>
+                </View>
+                <View style={styles.detailRight}>
+                  <Text style={styles.detailLabel}>Due Date</Text>
+                  <Text style={styles.detailValue}>{currentTask?.dueDate || 'N/A'}</Text>
+                </View>
+>>>>>>> bcknd
               </View>
 
               <View style={styles.detailRow}>
@@ -490,9 +688,15 @@ export default function InspectionFormScreen({ navigation, route }) {
 
         {/* Bottom Action Buttons */}
         <View style={styles.bottomActions}>
+<<<<<<< HEAD
           <TouchableOpacity style={styles.saveDraftBtn} onPress={handleSaveDraft}>
             <Ionicons name="archive-outline" size={18} color={LIGHT_GREY} />
             <Text style={styles.saveDraftBtnText}>Save Draft</Text>
+=======
+          <TouchableOpacity style={[styles.submitBtn, styles.cancelBtn]} onPress={handleCancel}>
+            <Ionicons name="close-circle" size={18} color="#fff" />
+            <Text style={styles.submitBtnText}>Cancel</Text>
+>>>>>>> bcknd
           </TouchableOpacity>
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
             <Ionicons name="send" size={18} color="#fff" />
@@ -694,6 +898,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: LIGHT_GREY,
   },
+<<<<<<< HEAD
+=======
+  cancelBtn: {
+    backgroundColor: RED,
+  },
+>>>>>>> bcknd
   submitBtn: {
     flex: 1,
     flexDirection: 'row',

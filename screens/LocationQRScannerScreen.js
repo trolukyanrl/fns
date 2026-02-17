@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState, useEffect, useRef } from 'react';
+=======
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+>>>>>>> bcknd
 import {
   StyleSheet,
   Text,
@@ -13,6 +17,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+<<<<<<< HEAD
+=======
+import { useTaskContext } from '../TaskContext';
+>>>>>>> bcknd
 
 let CameraView = null;
 let useCameraPermissions = null;
@@ -31,6 +39,10 @@ const LIGHT_GREY = '#666666';
 const GREEN = '#4CAF50';
 
 export default function LocationQRScannerScreen({ navigation, route }) {
+<<<<<<< HEAD
+=======
+  const { tasks } = useTaskContext();
+>>>>>>> bcknd
   const [hasPermission, requestPermission] = useCameraPermissions ? useCameraPermissions() : [{ granted: false }, null];
   const [scanned, setScanned] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -43,6 +55,70 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   const skSetId = route?.params?.skSetId || 'Unknown';
   const taskType = route?.params?.taskType || '';
 
+<<<<<<< HEAD
+=======
+  // Check for existing pending tasks for the same asset
+  const checkForPendingTasks = useCallback(() => {
+    if (!baSetId || !skSetId || !tasks) return null;
+
+    // Determine which asset ID to check
+    const currentAssetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+
+    // Find tasks with the same asset ID that are in "Pending for Approval" status
+    // BUT exclude the current task being started (if it exists)
+    const pendingTasks = tasks.filter(task => {
+      // Check if this task has the same asset ID
+      const hasSameAsset = (Array.isArray(task.baSets) && task.baSets.some(bs => bs.id === currentAssetId)) || 
+                          (Array.isArray(task.safetyKits) && task.safetyKits.some(sk => sk.id === currentAssetId));
+      
+      // Check if task is in pending for approval status
+      const isPendingForApproval = task.status === 'Pending for Approval';
+      
+      // Get the current task ID from route params (if available)
+      const currentTaskId = route?.params?.taskId;
+      
+      // Exclude the current task being started from the validation
+      const isCurrentTask = currentTaskId && task.id === currentTaskId;
+      
+      // Only block if there's a different task with same asset ID that is pending approval
+      return hasSameAsset && isPendingForApproval && !isCurrentTask;
+    });
+
+    return pendingTasks.length > 0 ? pendingTasks[0] : null;
+  }, [baSetId, skSetId, tasks]);
+
+  // Check for pending tasks when component mounts
+  useEffect(() => {
+    // Only validate if this is a NEW inspection (not editing existing)
+    // If route params contain inspectionData, this is an edit, so skip validation
+    const hasInspectionData = route?.params?.inspectionData;
+    if (hasInspectionData) {
+      return; // Skip validation for edits
+    }
+
+    const pendingTask = checkForPendingTasks();
+    if (pendingTask) {
+      Alert.alert(
+        'Inspection Blocked',
+        `This asset (${skSetId !== 'Unknown' ? skSetId : baSetId}) is currently under inspection and pending approval. Please wait until the previous inspection is approved or rejected by SIC before starting a new inspection.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate back to TADashboard
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'TADashboard' }],
+              });
+            }
+          }
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [checkForPendingTasks, navigation, baSetId, skSetId, route?.params?.inspectionData]);
+
+>>>>>>> bcknd
   useEffect(() => {
     (async () => {
       if (!isCameraSupported) return;
@@ -58,8 +134,90 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   };
 
   const showScanResult = (data) => {
+<<<<<<< HEAD
     // Determine which set ID to use
     const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+=======
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
+    
+    // If we have an expected zone, validate it
+    if (expectedZone && expectedZone !== 'Location TBA') {
+      const scannedZone = data.trim();
+      const expected = expectedZone.trim();
+      const expectedBlock = route.params?.expectedBlock;
+      
+      const showMismatch = () => {
+        Alert.alert(
+          'Location Mismatch',
+          `Scanned: "${scannedZone}"\nExpected: "${expected}"${expectedBlock ? ` (Block ${expectedBlock})` : ''}\n\nThe scanned location does not match the assigned location. Please scan the correct QR code.`,
+          [
+            {
+              text: 'Try Again',
+              onPress: () => setScanned(false),
+              style: 'default',
+            },
+          ],
+          { cancelable: false }
+        );
+      };
+
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedZone.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Component-based validation (Zone & Block)
+      // Replaces previous partial match strategies with stricter component parsing
+      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z0-9]+)/i);
+      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z0-9]+)/i);
+      
+      if (zoneLetterMatch && expectedZoneLetterMatch) {
+        // Check Zone
+        if (zoneLetterMatch[1].toUpperCase() !== expectedZoneLetterMatch[1].toUpperCase()) {
+          showMismatch();
+          return;
+        }
+        
+        // Check Block
+        const scannedBlockMatch = scannedZone.match(/Block\s*([A-Z0-9]+)/i);
+        let expectedBlockValue = expectedBlock;
+        
+        // If not provided in params, try extracting from expected string
+        if (!expectedBlockValue) {
+           const expectedBlockMatch = expected.match(/Block\s*([A-Z0-9]+)/i);
+           if (expectedBlockMatch) expectedBlockValue = expectedBlockMatch[1];
+        }
+        
+        if (scannedBlockMatch && expectedBlockValue) {
+            if (scannedBlockMatch[1].toUpperCase() !== String(expectedBlockValue).toUpperCase()) {
+                // Block mismatch
+                showMismatch();
+                return;
+            }
+        }
+        
+        // Zone matches, and Block matches (or checks were skipped due to missing data)
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found
+      showMismatch();
+      return;
+    }
+    
+    // No expected zone validation needed, proceed directly
+    proceedWithValidation(data);
+  };
+
+  const proceedWithValidation = (data) => {
+    // Determine which set ID to use
+    const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+    const passedTaskId = route.params?.taskId;
+>>>>>>> bcknd
     
     Alert.alert(
       'Location QR Code Scanned',
@@ -74,10 +232,21 @@ export default function LocationQRScannerScreen({ navigation, route }) {
           text: 'Proceed',
           onPress: () => {
             // Use taskType parameter for reliable navigation
+<<<<<<< HEAD
             if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
               navigation.replace('SKInspection', { skSetId: currentSetId, location: data });
             } else {
               navigation.replace('InspectionForm', { baSetId: currentSetId, location: data });
+=======
+            if (taskType === 'VERIFY') {
+              navigation.replace('Verify', { scannedData: route.params?.scannedData, location: data, taskType: 'VERIFY' });
+            } else if (taskType === 'MAPPING') {
+              navigation.replace('Mapping', { scannedData: route.params?.scannedData, location: data, taskType: 'MAPPING' });
+            } else if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
+              navigation.replace('SKInspection', { skSetId: currentSetId, location: data, taskId: passedTaskId });
+            } else {
+              navigation.replace('InspectionForm', { baSetId: currentSetId, location: data, taskId: passedTaskId });
+>>>>>>> bcknd
             }
           },
           style: 'default',
@@ -92,6 +261,7 @@ export default function LocationQRScannerScreen({ navigation, route }) {
       Alert.alert('Error', 'Please enter a location code');
       return;
     }
+<<<<<<< HEAD
     setShowManualModal(false);
     setManualLocationCode('');
     
@@ -104,6 +274,73 @@ export default function LocationQRScannerScreen({ navigation, route }) {
     } else {
       navigation.replace('InspectionForm', { baSetId: currentSetId, location: manualLocationCode });
     }
+=======
+    
+    const data = manualLocationCode.trim();
+    
+    // Extract expected zone from route params
+    const expectedZone = route.params?.expectedZone;
+    
+    // If we have an expected zone, validate it
+    if (expectedZone && expectedZone !== 'Location TBA') {
+      const scannedZone = data;
+      const expected = expectedZone.trim();
+      
+      // Strategy 1: Exact match (case-insensitive)
+      if (scannedZone.toLowerCase() === expected.toLowerCase()) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 2: Partial match - check if the entered data contains the expected zone
+      if (scannedZone.toLowerCase().includes(expected.toLowerCase())) {
+        // Match found, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // Strategy 3: Extract zone letter/name from patterns like "LOCATION:Zone A" or "Zone A"
+      const zoneLetterMatch = scannedZone.match(/Zone\s*([A-Z])/i);
+      const expectedZoneLetterMatch = expected.match(/Zone\s*([A-Z])/i);
+      
+      if (zoneLetterMatch && expectedZoneLetterMatch && 
+          zoneLetterMatch[1].toUpperCase() === expectedZoneLetterMatch[1].toUpperCase()) {
+        // Zone letter matches, proceed
+        setShowManualModal(false);
+        setManualLocationCode('');
+        proceedWithValidation(data);
+        return;
+      }
+      
+      // No match found - show error alert
+      Alert.alert(
+        'Location Mismatch',
+        `Entered: "${scannedZone}"\nExpected: "${expected}"\n\nThe entered location does not match the assigned location. Please enter the correct location.`,
+        [
+          {
+            text: 'Try Again',
+            onPress: () => {
+              // Keep the modal open and the text for retry
+              setManualLocationCode(data);
+            },
+            style: 'default',
+          },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
+    
+    // No expected zone validation needed, proceed directly
+    setShowManualModal(false);
+    setManualLocationCode('');
+    proceedWithValidation(data);
+>>>>>>> bcknd
   };
 
   if (!isCameraSupported) {
