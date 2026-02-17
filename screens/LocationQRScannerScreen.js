@@ -136,6 +136,7 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   const proceedWithValidation = (data) => {
     // Determine which set ID to use
     const currentSetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+    const passedTaskId = route.params?.taskId;
     
     Alert.alert(
       'Location QR Code Scanned',
@@ -155,9 +156,9 @@ export default function LocationQRScannerScreen({ navigation, route }) {
             } else if (taskType === 'MAPPING') {
               navigation.replace('Mapping', { scannedData: route.params?.scannedData, location: data, taskType: 'MAPPING' });
             } else if (taskType === 'SK' || currentSetId.startsWith('SK-')) {
-              navigation.replace('SKInspection', { skSetId: currentSetId, location: data });
+              navigation.replace('SKInspection', { skSetId: currentSetId, location: data, taskId: passedTaskId });
             } else {
-              navigation.replace('InspectionForm', { baSetId: currentSetId, location: data });
+              navigation.replace('InspectionForm', { baSetId: currentSetId, location: data, taskId: passedTaskId });
             }
           },
           style: 'default',

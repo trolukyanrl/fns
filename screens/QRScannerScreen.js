@@ -115,7 +115,7 @@ export default function QRScannerScreen({ navigation, route }) {
                      data.includes('SK_') || route.params?.taskType === 'SK');
     const isBATask = route.params?.baSetId ? true : 
                     (data.startsWith('BA-SET-') || data.includes('BASet') || 
-                     data.includes('BA_') || route.params?.taskType === 'BA_SET');
+                     data.includes('BA_') || route.params?.taskType === 'BA-SET');
     const taskId = route.params?.skSetId || route.params?.baSetId || data;
     
     // Check if this is a mapping flow (no specific task parameters provided)
@@ -126,6 +126,10 @@ export default function QRScannerScreen({ navigation, route }) {
     
     // Extract expected zone from route params
     const expectedZone = route.params?.expectedZone;
+    
+    // Get task ID and task type from route params if available
+    const passedTaskId = route.params?.taskId;
+    const passedTaskType = route.params?.taskType;
     
     Alert.alert(
       'QR Code Scanned',
@@ -158,12 +162,14 @@ export default function QRScannerScreen({ navigation, route }) {
                 skSetId: taskId,
                 taskType: 'SK',
                 expectedZone: expectedZone,
+                taskId: passedTaskId,
               });
             } else if (isBATask) {
               navigation.navigate('LocationQRScanner', { 
                 baSetId: taskId,
-                taskType: 'BA_SET',
+                taskType: 'BA-SET',
                 expectedZone: expectedZone,
+                taskId: passedTaskId,
               });
             } else {
               // Default case for unknown task types
@@ -171,6 +177,7 @@ export default function QRScannerScreen({ navigation, route }) {
                 scannedData: data,
                 taskType: 'UNKNOWN',
                 expectedZone: expectedZone,
+                taskId: passedTaskId,
               });
             }
           },

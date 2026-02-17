@@ -136,6 +136,42 @@ export default function InspectionFormScreen({ navigation, route }) {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentReviewField, setCurrentReviewField] = useState(null);
 
+  // Get current task using useMemo for reliable task ID fetching
+  const currentTask = useMemo(() => {
+    if (!tasks || tasks.length === 0) return null;
+
+    // 1. Try finding by taskId from route params (passed from QR scanner flow)
+    const passedTaskId = route?.params?.taskId;
+    if (passedTaskId) {
+      const taskById = tasks.find(t => t.id === passedTaskId);
+      if (taskById) return taskById;
+    }
+
+    // 2. Try finding by taskId from inspectionData (for edits)
+    if (inspectionData && inspectionData.taskId) {
+      const taskByIdFromInspection = tasks.find(t => t.id === inspectionData.taskId);
+      if (taskByIdFromInspection) return taskByIdFromInspection;
+    }
+
+    // 3. Fallback: Search by baSetId
+    if (baSetId) {
+      const taskByBaSetId = tasks.find(taskItem => {
+        // Safe check for baSets array
+        const baSets = Array.isArray(taskItem.baSets) ? taskItem.baSets : [];
+        const equipment = baSets.find(bs => bs.id === baSetId);
+        
+        // Also check safetyKits
+        const safetyKits = Array.isArray(taskItem.safetyKits) ? taskItem.safetyKits : [];
+        const kit = safetyKits.find(sk => sk.id === baSetId);
+        
+        return equipment || kit || taskItem.id === baSetId;
+      });
+      if (taskByBaSetId) return taskByBaSetId;
+    }
+
+    return null;
+  }, [tasks, baSetId, inspectionData, route?.params?.taskId]);
+
   // Pre-fill form if editing existing inspection
   useEffect(() => {
     if (inspectionData) {
@@ -161,9 +197,23 @@ export default function InspectionFormScreen({ navigation, route }) {
     }
   }, [inspectionData]);
 
-
-  const handleSaveDraft = () => {
-    Alert.alert('Success', 'Inspection draft saved successfully!');
+  const handleCancel = () => {
+    Alert.alert(
+      'Cancel Inspection',
+      'Are you sure you want to cancel? All unsaved data will be lost.',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes, Cancel',
+          style: 'destructive',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleSaveReview = () => {
@@ -376,10 +426,10 @@ export default function InspectionFormScreen({ navigation, route }) {
               <View style={styles.detailRow}>
                 <View style={styles.detailLeft}>
                   <Text style={styles.detailLabel}>Task ID</Text>
-                  <Text style={styles.detailValue}>#INS-2024-0847</Text>
+                  <Text style={styles.detailValue}>{currentTask?.id || 'N/A'}</Text>
                 </View>
                 <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Pending</Text>
+                  <Text style={styles.statusText}>{currentTask?.status || 'Pending'}</Text>
                 </View>
               </View>
 
@@ -394,9 +444,15 @@ export default function InspectionFormScreen({ navigation, route }) {
                 </View>
               </View>
 
-              <View>
-                <Text style={styles.detailLabel}>Cylinder Numbers</Text>
-                <Text style={styles.detailValue}>CYL-8847, CYL-8848</Text>
+              <View style={styles.detailRow}>
+                <View style={styles.detailLeft}>
+                  <Text style={styles.detailLabel}>Cylinder Numbers</Text>
+                  <Text style={styles.detailValue}>CYL-8847, CYL-8848</Text>
+                </View>
+                <View style={styles.detailRight}>
+                  <Text style={styles.detailLabel}>Due Date</Text>
+                  <Text style={styles.detailValue}>{currentTask?.dueDate || 'N/A'}</Text>
+                </View>
               </View>
 
               <View style={styles.detailRow}>
@@ -586,9 +642,9 @@ export default function InspectionFormScreen({ navigation, route }) {
 
         {/* Bottom Action Buttons */}
         <View style={styles.bottomActions}>
-          <TouchableOpacity style={styles.saveDraftBtn} onPress={handleSaveDraft}>
-            <Ionicons name="archive-outline" size={18} color={LIGHT_GREY} />
-            <Text style={styles.saveDraftBtnText}>Save Draft</Text>
+          <TouchableOpacity style={[styles.submitBtn, styles.cancelBtn]} onPress={handleCancel}>
+            <Ionicons name="close-circle" size={18} color="#fff" />
+            <Text style={styles.submitBtnText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
             <Ionicons name="send" size={18} color="#fff" />
@@ -789,6 +845,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: LIGHT_GREY,
+  },
+  cancelBtn: {
+    backgroundColor: RED,
   },
   submitBtn: {
     flex: 1,

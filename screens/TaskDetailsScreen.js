@@ -135,6 +135,8 @@ export default function TaskDetailsScreen({ navigation, route }) {
         expectedEquipmentId: equipmentId,
         expectedZone: zoneName,
         location: zoneName,
+        taskId: task.id,
+        taskType: 'SK',
       });
     } else {
       navigation.navigate('QRScanner', {
@@ -142,6 +144,8 @@ export default function TaskDetailsScreen({ navigation, route }) {
         expectedEquipmentId: equipmentId,
         expectedZone: zoneName,
         location: zoneName,
+        taskId: task.id,
+        taskType: 'BA-SET',
       });
     }
   };

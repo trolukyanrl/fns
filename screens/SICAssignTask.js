@@ -172,26 +172,25 @@ export default function SICAssignTask({ navigation, route }) {
       return;
     }
 
-    // Create task object
-    const taskData = {
-      description: taskDescription,
-      assignedTo: selectedInspector.username, // Use username for consistent filtering
-      assignedToName: selectedInspector.name, // Also store name for display
-      assignedToDept: selectedInspector.department,
-      dueDate: dueDate,
-      taskType: selectedTaskType.name,
-      status: 'Pending',
-    };
-
-    if (selectedTaskType.name === 'BA-SET') {
-      taskData.baSets = selectedBASets.map(id => baSets.find(bs => bs.id === id)).filter(Boolean);
-    } else {
-      taskData.safetyKits = selectedSKs.map(id => safetyKits.find(sk => sk.id === id)).filter(Boolean);
-    }
-
     try {
       if (isEditMode) {
         // Update existing task
+        const taskData = {
+          description: taskDescription,
+          assignedTo: selectedInspector.username,
+          assignedToName: selectedInspector.name,
+          assignedToDept: selectedInspector.department,
+          dueDate: dueDate,
+          taskType: selectedTaskType.name,
+          status: 'Pending',
+        };
+
+        if (selectedTaskType.name === 'BA-SET') {
+          taskData.baSets = selectedBASets.map(id => baSets.find(bs => bs.id === id)).filter(Boolean);
+        } else {
+          taskData.safetyKits = selectedSKs.map(id => safetyKits.find(sk => sk.id === id)).filter(Boolean);
+        }
+
         await updateTask(editingTask.id, taskData);
         Alert.alert(
           'Task Updated',
@@ -199,17 +198,46 @@ export default function SICAssignTask({ navigation, route }) {
           [{ text: 'OK', onPress: () => navigation.replace('SICTasks') }]
         );
       } else {
-        // Add new task
-        await addTask(taskData);
+        // Create a separate task for each selected asset to ensure unique task IDs
+        let createdCount = 0;
+        
+        for (let i = 0; i < selectedItems.length; i++) {
+          const selectedItemId = selectedItems[i];
+          
+          // Create task object for this specific asset
+          const taskData = {
+            description: taskDescription,
+            assignedTo: selectedInspector.username,
+            assignedToName: selectedInspector.name,
+            assignedToDept: selectedInspector.department,
+            dueDate: dueDate,
+            taskType: selectedTaskType.name,
+            status: 'Pending',
+          };
+
+          if (selectedTaskType.name === 'BA-SET') {
+            const baSet = baSets.find(bs => bs.id === selectedItemId);
+            taskData.baSets = baSet ? [baSet] : [];
+          } else {
+            const safetyKit = safetyKits.find(sk => sk.id === selectedItemId);
+            taskData.safetyKits = safetyKit ? [safetyKit] : [];
+          }
+
+          // Create task
+          await addTask(taskData);
+          createdCount++;
+        }
+
         // Reset form
         setTaskDescription('');
         setSelectedInspector(null);
         setDueDate('');
         setSelectedBASets([]);
         setSelectedSKs([]);
+
         Alert.alert(
-          'Task Assigned',
-          `Task has been assigned to ${selectedInspector.name} with due date ${dueDate}.`,
+          'Tasks Assigned',
+          `${createdCount} task(s) have been assigned to ${selectedInspector.name} with due date ${dueDate}. Each asset has been assigned a unique task ID.`,
           [{ text: 'OK', onPress: () => {
               navigation.replace('SICTasks');
             }}]

@@ -114,15 +114,29 @@ export default function SKInspectionScreen({ navigation, route }) {
   const { tasks, updateTask } = useTaskContext();
   const { user } = useAuth();
 
-  // Find the task based on skSetId
+  // Find the task based on skSetId or taskId
   const currentTask = useMemo(() => {
-    return tasks.find(task => {
-      // Check if this task contains the scanned safety kit
-      const hasSafetyKit = Array.isArray(task.safetyKits) && task.safetyKits.some(sk => sk.id === skSetId);
-      // Or if the task ID matches (though skSetId is likely the equipment ID)
-      return hasSafetyKit || task.id === skSetId;
-    });
-  }, [tasks, skSetId]);
+    if (!tasks || tasks.length === 0) return null;
+
+    // 1. Try finding by taskId from route params (passed from QR scanner flow)
+    const passedTaskId = route?.params?.taskId;
+    if (passedTaskId) {
+      const taskById = tasks.find(task => task.id === passedTaskId);
+      if (taskById) return taskById;
+    }
+
+    // 2. Fallback: Search by skSetId
+    if (skSetId) {
+      return tasks.find(task => {
+        // Check if this task contains the scanned safety kit
+        const hasSafetyKit = Array.isArray(task.safetyKits) && task.safetyKits.some(sk => sk.id === skSetId);
+        // Or if the task ID matches (though skSetId is likely the equipment ID)
+        return hasSafetyKit || task.id === skSetId;
+      });
+    }
+
+    return null;
+  }, [tasks, skSetId, route?.params?.taskId]);
   
   // ...existing code...
   // New state for form fields
@@ -351,7 +365,7 @@ export default function SKInspectionScreen({ navigation, route }) {
           <View style={styles.detailRow}>
             <View style={styles.detailLeft}>
               <Text style={styles.detailLabel}>Due Date</Text>
-              <Text style={styles.detailValue}>15 Feb 2024</Text>
+              <Text style={styles.detailValue}>{currentTask?.dueDate || 'N/A'}</Text>
             </View>
             <View style={styles.detailRight}>
               <Text style={styles.detailLabel}>Date</Text>
