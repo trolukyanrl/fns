@@ -114,6 +114,7 @@ export default function SKInspectionScreen({ navigation, route }) {
   const { tasks, updateTask } = useTaskContext();
   const { user } = useAuth();
 
+
   // Find the task based on skSetId or taskId
   const currentTask = useMemo(() => {
     if (!tasks || tasks.length === 0) return null;
@@ -252,11 +253,27 @@ export default function SKInspectionScreen({ navigation, route }) {
           text: 'Yes, Submit',
           style: 'default',
           onPress: () => {
-            // Find the task that has this equipment (skSetId)
-            const currentTask = tasks.find(task => {
-              const equipment = Array.isArray(task.safetyKits) && task.safetyKits.find(sk => sk.id === skSetId);
-              return equipment || task.id === skSetId;
-            });
+    // Find the task that has this equipment (skSetId)
+    let currentTask;
+    const params = route.params || {};
+
+    // 1. Try finding by taskId from route params (most reliable)
+    if (params.taskId) {
+      currentTask = tasks.find(t => t.id === params.taskId);
+    }
+
+    // 2. Try finding by taskId from inspectionData (for edits)
+    if (!currentTask && params.inspectionData && params.inspectionData.taskId) {
+      currentTask = tasks.find(t => t.id === params.inspectionData.taskId);
+    }
+
+    // 3. Fallback: Search by skSetId (only if no taskId is available)
+    if (!currentTask && params.skSetId && !params.taskId) {
+      currentTask = tasks.find(task => {
+        const equipment = Array.isArray(task.safetyKits) && task.safetyKits.find(sk => sk.id === params.skSetId);
+        return equipment || task.id === params.skSetId;
+      });
+    }
 
             if (!currentTask) {
               Alert.alert('Error', 'Task not found. Please try again.');

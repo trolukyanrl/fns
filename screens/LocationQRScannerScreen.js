@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTaskContext } from '../TaskContext';
 
 let CameraView = null;
 let useCameraPermissions = null;
@@ -31,6 +32,7 @@ const LIGHT_GREY = '#666666';
 const GREEN = '#4CAF50';
 
 export default function LocationQRScannerScreen({ navigation, route }) {
+  const { tasks } = useTaskContext();
   const [hasPermission, requestPermission] = useCameraPermissions ? useCameraPermissions() : [{ granted: false }, null];
   const [scanned, setScanned] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -42,6 +44,67 @@ export default function LocationQRScannerScreen({ navigation, route }) {
   const baSetId = route?.params?.baSetId || 'Unknown';
   const skSetId = route?.params?.skSetId || 'Unknown';
   const taskType = route?.params?.taskType || '';
+
+  // Check for existing pending tasks for the same asset
+  const checkForPendingTasks = useCallback(() => {
+    if (!baSetId || !skSetId || !tasks) return null;
+
+    // Determine which asset ID to check
+    const currentAssetId = skSetId !== 'Unknown' ? skSetId : baSetId;
+
+    // Find tasks with the same asset ID that are in "Pending for Approval" status
+    // BUT exclude the current task being started (if it exists)
+    const pendingTasks = tasks.filter(task => {
+      // Check if this task has the same asset ID
+      const hasSameAsset = (Array.isArray(task.baSets) && task.baSets.some(bs => bs.id === currentAssetId)) || 
+                          (Array.isArray(task.safetyKits) && task.safetyKits.some(sk => sk.id === currentAssetId));
+      
+      // Check if task is in pending for approval status
+      const isPendingForApproval = task.status === 'Pending for Approval';
+      
+      // Get the current task ID from route params (if available)
+      const currentTaskId = route?.params?.taskId;
+      
+      // Exclude the current task being started from the validation
+      const isCurrentTask = currentTaskId && task.id === currentTaskId;
+      
+      // Only block if there's a different task with same asset ID that is pending approval
+      return hasSameAsset && isPendingForApproval && !isCurrentTask;
+    });
+
+    return pendingTasks.length > 0 ? pendingTasks[0] : null;
+  }, [baSetId, skSetId, tasks]);
+
+  // Check for pending tasks when component mounts
+  useEffect(() => {
+    // Only validate if this is a NEW inspection (not editing existing)
+    // If route params contain inspectionData, this is an edit, so skip validation
+    const hasInspectionData = route?.params?.inspectionData;
+    if (hasInspectionData) {
+      return; // Skip validation for edits
+    }
+
+    const pendingTask = checkForPendingTasks();
+    if (pendingTask) {
+      Alert.alert(
+        'Inspection Blocked',
+        `This asset (${skSetId !== 'Unknown' ? skSetId : baSetId}) is currently under inspection and pending approval. Please wait until the previous inspection is approved or rejected by SIC before starting a new inspection.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Navigate back to TADashboard
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'TADashboard' }],
+              });
+            }
+          }
+        ],
+        { cancelable: false }
+      );
+    }
+  }, [checkForPendingTasks, navigation, baSetId, skSetId, route?.params?.inspectionData]);
 
   useEffect(() => {
     (async () => {

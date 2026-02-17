@@ -113,6 +113,7 @@ export default function InspectionFormScreen({ navigation, route }) {
   const scrollViewRef = useRef(null);
   const remarksInputRef = useRef(null);
 
+
   // Form state
   const [cylinder1Pressure, setCylinder1Pressure] = useState('300');
   const [cylinder2Pressure, setCylinder2Pressure] = useState('300');
@@ -264,13 +265,18 @@ export default function InspectionFormScreen({ navigation, route }) {
     let currentTask;
     const params = route.params || {};
 
-    // 1. Try finding by taskId from inspectionData (most reliable for edits)
-    if (params.inspectionData && params.inspectionData.taskId) {
+    // 1. Try finding by taskId from route params (most reliable)
+    if (params.taskId) {
+      currentTask = tasks.find(t => t.id === params.taskId);
+    }
+
+    // 2. Try finding by taskId from inspectionData (for edits)
+    if (!currentTask && params.inspectionData && params.inspectionData.taskId) {
       currentTask = tasks.find(t => t.id === params.inspectionData.taskId);
     }
 
-    // 2. Fallback: Search by baSetId
-    if (!currentTask && params.baSetId) {
+    // 3. Fallback: Search by baSetId (only if no taskId is available)
+    if (!currentTask && params.baSetId && !params.taskId) {
       currentTask = tasks.find(task => {
         // Safe check for baSets array
         const baSets = Array.isArray(task.baSets) ? task.baSets : [];

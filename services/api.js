@@ -185,7 +185,45 @@ export const itemsAPI = {
 // Tasks API methods - using Safety Kits project
 export const tasksAPI = {
   getTasks: async () => await skApi.get('/tasks'),
-  createTask: async (taskData) => await skApi.post('/tasks', taskData),
+  createTask: async (taskData) => {
+    // Transform the task data to use distinct field names
+    const transformedData = {
+      ...taskData,
+      // Keep the original structure but we'll handle the ID mapping in the response
+    };
+    
+    const response = await skApi.post('/tasks', transformedData);
+    
+    // Transform the response to use distinct field names
+    if (response.data) {
+      // The API will return the task with an 'id' field (task ID: 1, 2, 3...)
+      // We need to ensure asset IDs remain as BA-001, SK-001, etc.
+      
+      // For BA-Sets, ensure each asset has both taskAssetId and assetId
+      if (response.data.baSets && Array.isArray(response.data.baSets)) {
+        response.data.baSets = response.data.baSets.map(asset => ({
+          ...asset,
+          // Keep the original asset ID as assetId
+          assetId: asset.id,
+          // The task ID will be the main task's id field
+          taskId: response.data.id
+        }));
+      }
+      
+      // For Safety Kits, ensure each asset has both taskAssetId and assetId
+      if (response.data.safetyKits && Array.isArray(response.data.safetyKits)) {
+        response.data.safetyKits = response.data.safetyKits.map(asset => ({
+          ...asset,
+          // Keep the original asset ID as assetId
+          assetId: asset.id,
+          // The task ID will be the main task's id field
+          taskId: response.data.id
+        }));
+      }
+    }
+    
+    return response;
+  },
   updateTask: async (taskId, taskData) => await skApi.put(`/tasks/${taskId}`, taskData),
   deleteTask: async (taskId) => await skApi.delete(`/tasks/${taskId}`)
 };

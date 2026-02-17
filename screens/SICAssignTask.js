@@ -217,10 +217,28 @@ export default function SICAssignTask({ navigation, route }) {
 
           if (selectedTaskType.name === 'BA-SET') {
             const baSet = baSets.find(bs => bs.id === selectedItemId);
-            taskData.baSets = baSet ? [baSet] : [];
+            if (baSet) {
+              // Transform BA-Set to use distinct field names
+              taskData.baSets = [{
+                ...baSet,
+                assetId: baSet.id, // Keep original asset ID
+                // taskId will be added by the API response
+              }];
+            } else {
+              taskData.baSets = [];
+            }
           } else {
             const safetyKit = safetyKits.find(sk => sk.id === selectedItemId);
-            taskData.safetyKits = safetyKit ? [safetyKit] : [];
+            if (safetyKit) {
+              // Transform Safety Kit to use distinct field names
+              taskData.safetyKits = [{
+                ...safetyKit,
+                assetId: safetyKit.id, // Keep original asset ID
+                // taskId will be added by the API response
+              }];
+            } else {
+              taskData.safetyKits = [];
+            }
           }
 
           // Create task

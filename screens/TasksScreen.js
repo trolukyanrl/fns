@@ -57,7 +57,9 @@ export default function TasksScreen({ navigation }) {
   const TaskCard = ({ task }) => {
     // Get first BA-Set or Safety Kit for location and ID display
     const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
-    const displayId = item?.id || task.id;
+    
+    // Use assetId if available (distinct field name), otherwise fall back to original id
+    const displayId = item?.assetId || item?.id || task.id;
     const displayLocation = item?.zone || 'Location TBA';
 
     return (
@@ -66,7 +68,14 @@ export default function TasksScreen({ navigation }) {
         onPress={() => navigation.navigate('TaskDetails', { task })}
       >
         <View style={styles.taskHeader}>
-          <Text style={styles.taskId}>{displayId}</Text>
+          <View style={styles.taskIdContainer}>
+            <Text style={styles.taskIdLabel}>Task ID:</Text>
+            <Text style={styles.taskId}>{task.id}</Text>
+          </View>
+          <View style={styles.assetIdContainer}>
+            <Text style={styles.assetIdLabel}>Asset ID:</Text>
+            <Text style={styles.assetId}>{displayId}</Text>
+          </View>
           <View style={[
             styles.statusBadge,
             task.status === 'Pending' && styles.statusPending,
@@ -209,9 +218,10 @@ export default function TasksScreen({ navigation }) {
             tasksToShow = tasksToShow.filter(task => {
               const item = task.baSets?.[0] || task.safetyKits?.[0];
               return (
-                task.id.toLowerCase().includes(searchLower) ||
+                task.id.toString().toLowerCase().includes(searchLower) ||
                 task.description.toLowerCase().includes(searchLower) ||
                 (item?.zone && item.zone.toLowerCase().includes(searchLower)) ||
+                (item?.assetId && item.assetId.toLowerCase().includes(searchLower)) ||
                 (item?.id && item.id.toLowerCase().includes(searchLower))
               );
             });
@@ -382,11 +392,36 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
     marginBottom: 10 
   },
+  taskIdContainer: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  taskIdLabel: {
+    fontSize: 10,
+    color: LIGHT_GREY,
+    marginBottom: 2,
+  },
   taskId: { 
     fontSize: 11, 
     fontWeight: '700', 
     color: BLUE,
     letterSpacing: 0.5
+  },
+  assetIdContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  assetIdLabel: {
+    fontSize: 10,
+    color: LIGHT_GREY,
+    marginBottom: 2,
+    textAlign: 'right',
+  },
+  assetId: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: PURPLE,
+    letterSpacing: 0.5,
   },
   
   statusBadge: { 

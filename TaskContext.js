@@ -33,8 +33,29 @@ export const TaskProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await tasksAPI.createTask(taskData);
-      setTasks([response.data, ...tasks]);
-      return response.data;
+      
+      // The API response should now have the transformed data with distinct field names
+      const transformedTask = response.data;
+      
+      // Ensure the task is properly formatted with distinct field names
+      if (transformedTask.baSets && Array.isArray(transformedTask.baSets)) {
+        transformedTask.baSets = transformedTask.baSets.map(asset => ({
+          ...asset,
+          assetId: asset.assetId || asset.id, // Keep assetId
+          taskId: transformedTask.id, // Add taskId reference
+        }));
+      }
+      
+      if (transformedTask.safetyKits && Array.isArray(transformedTask.safetyKits)) {
+        transformedTask.safetyKits = transformedTask.safetyKits.map(asset => ({
+          ...asset,
+          assetId: asset.assetId || asset.id, // Keep assetId
+          taskId: transformedTask.id, // Add taskId reference
+        }));
+      }
+      
+      setTasks([transformedTask, ...tasks]);
+      return transformedTask;
     } catch (err) {
       console.error('Error adding task:', err);
       setError('Failed to add task');
