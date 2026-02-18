@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
@@ -19,7 +20,11 @@ const GREEN = '#22C55E';
 
 export default function SICDashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
-  const { tasks } = useTaskContext();
+  const { tasks, refreshTasks, loading } = useTaskContext();
+
+  const onRefresh = useCallback(() => {
+    refreshTasks();
+  }, [refreshTasks]);
 
   // Calculate pending approvals count
   const pendingApprovalsCount = tasks.filter(task => task.status === 'Pending for Approval').length;
@@ -68,6 +73,9 @@ export default function SICDashboard({ navigation }) {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
       >
         {/* Stats */}
         <View style={styles.statsRow}>

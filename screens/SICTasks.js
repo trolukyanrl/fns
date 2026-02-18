@@ -73,12 +73,6 @@ export default function SICTasks({ navigation }) {
           </View>
           <TouchableOpacity 
             style={styles.actionIcon}
-            onPress={() => navigation.navigate('SICAssignTask', { taskToEdit: item })}
-          >
-            <Ionicons name="create-outline" size={18} color={BLUE} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.actionIcon}
             onPress={() => {
               // Show confirmation alert before deleting
               Alert.alert(
@@ -244,7 +238,7 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 16, fontWeight: '700', color: DARK, marginBottom: 4 },
   cardSubtitle: { fontSize: 12, color: GREY },
   tasksList: { paddingBottom: 20 },
-  taskCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2 },
+  taskCard: { backgroundColor: WHITE, borderRadius: 12, padding: 16, marginBottom: 16, elevation: 2,borderColor: '#1a031f54',borderWidth: 1  },
   taskHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
   taskHeaderLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
   statusIndicator: { width: 12, height: 12, borderRadius: 6, marginRight: 12 },

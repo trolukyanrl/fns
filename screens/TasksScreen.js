@@ -67,15 +67,7 @@ export default function TasksScreen({ navigation }) {
         style={styles.taskCard}
         onPress={() => navigation.navigate('TaskDetails', { task })}
       >
-        <View style={styles.taskHeader}>
-          <View style={styles.taskIdContainer}>
-            <Text style={styles.taskIdLabel}>Task ID:</Text>
-            <Text style={styles.taskId}>{task.id}</Text>
-          </View>
-          <View style={styles.assetIdContainer}>
-            <Text style={styles.assetIdLabel}>Asset ID:</Text>
-            <Text style={styles.assetId}>{displayId}</Text>
-          </View>
+        <View style={styles.statusRow}>
           <View style={[
             styles.statusBadge,
             task.status === 'Pending' && styles.statusPending,
@@ -92,6 +84,16 @@ export default function TasksScreen({ navigation }) {
             ]}>
               {task.status}
             </Text>
+          </View>
+        </View>
+        <View style={styles.taskHeader}>
+          <View style={styles.taskIdContainer}>
+            <Text style={styles.taskIdLabel}>Task ID:</Text>
+            <Text style={styles.taskId}>{task.id}</Text>
+          </View>
+          <View style={styles.assetIdContainer}>
+            <Text style={styles.assetIdLabel}>Asset ID:</Text>
+            <Text style={styles.assetId}>{displayId}</Text>
           </View>
         </View>
         <Text style={styles.taskTitle}>{task.description}</Text>
@@ -385,12 +387,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8E8E8',
     marginHorizontal: 4,
+    borderColor: '#1a031f54',
+    borderWidth: 1
   },
   taskHeader: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: 10 
+    alignItems: 'flex-start', 
+    marginBottom: 8 
   },
   taskIdContainer: {
     flex: 1,
@@ -409,13 +413,13 @@ const styles = StyleSheet.create({
   },
   assetIdContainer: {
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
+    marginLeft: 12,
   },
   assetIdLabel: {
     fontSize: 10,
     color: LIGHT_GREY,
     marginBottom: 2,
-    textAlign: 'right',
   },
   assetId: {
     fontSize: 11,
@@ -425,26 +429,16 @@ const styles = StyleSheet.create({
   },
   
   statusBadge: { 
-    paddingHorizontal: 10, 
-    paddingVertical: 4, 
-    borderRadius: 6,
-    borderWidth: 1,
+    paddingHorizontal:0, 
+    paddingVertical: 4,
   },
   statusPending: { 
-    backgroundColor: '#FFF8E1',
-    borderColor: '#FFE0B2'
   },
   statusApproval: { 
-    backgroundColor: '#F3E5F5',
-    borderColor: '#E1BEE7'
   },
   statusCompleted: { 
-    backgroundColor: '#E8F5E9',
-    borderColor: '#C8E6C9'
   },
   statusRejected: { 
-    backgroundColor: '#FFEBEE',
-    borderColor: '#FFCDD2'
   },
   
   statusText: { 

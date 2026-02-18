@@ -137,6 +137,7 @@ export default function SICAssignTask({ navigation, route }) {
   const [selectedDate, setSelectedDate] = useState(null);
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [inspectorSearchQuery, setInspectorSearchQuery] = useState('');
   
 
   // Filter based on selected task type
@@ -162,6 +163,22 @@ export default function SICAssignTask({ navigation, route }) {
         );
       });
     }
+  };
+
+  // Filter inspectors based on search query
+  const getFilteredInspectors = () => {
+    if (!inspectorSearchQuery.trim()) {
+      return inspectors;
+    }
+    
+    const query = inspectorSearchQuery.toLowerCase();
+    return inspectors.filter(inspector => {
+      return (
+        (inspector.name && inspector.name.toLowerCase().includes(query)) ||
+        (inspector.department && inspector.department.toLowerCase().includes(query)) ||
+        (inspector.username && inspector.username.toLowerCase().includes(query))
+      );
+    });
   };
 
   const handleAssignTask = async () => {
@@ -697,13 +714,28 @@ export default function SICAssignTask({ navigation, route }) {
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Inspector</Text>
+            
+            {/* Inspector Search Bar */}
+            {inspectors.length > 0 && (
+              <View style={styles.inspectorSearchContainer}>
+                <Ionicons name="search" size={20} color={LIGHT_GREY} style={styles.searchIcon} />
+                <TextInput
+                  style={styles.inspectorSearchInput}
+                  placeholder="Search inspectors by name, department, or username..."
+                  placeholderTextColor={LIGHT_GREY}
+                  value={inspectorSearchQuery}
+                  onChangeText={setInspectorSearchQuery}
+                />
+              </View>
+            )}
+            
             {loadingInspectors ? (
               <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20 }]}>Loading inspectors...</Text>
             ) : inspectors.length === 0 ? (
               <Text style={[styles.modalTitle, { fontSize: 14, marginTop: 20, color: GREY }]}>No inspectors available</Text>
             ) : (
               <FlatList
-                data={inspectors}
+                data={getFilteredInspectors()}
                 renderItem={renderInspector}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
@@ -894,6 +926,8 @@ const styles = StyleSheet.create({
   searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16 },
   searchIcon: { marginRight: 12 },
   searchInput: { flex: 1, fontSize: 16, color: DARK },
+  inspectorSearchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, marginBottom: 16 },
+  inspectorSearchInput: { flex: 1, fontSize: 16, color: DARK },
   baSetList: { flex: 1 },
   baSetCard: { 
     backgroundColor: WHITE, 

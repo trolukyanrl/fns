@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
@@ -17,7 +18,11 @@ const LIGHT_GREY = '#666666';
 export default function TADashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
   const { user } = useAuth();
-  const { tasks } = useTaskContext();
+  const { tasks, refreshTasks, loading } = useTaskContext();
+
+  const onRefresh = useCallback(() => {
+    refreshTasks();
+  }, [refreshTasks]);
 
   // Filter tasks to show only those assigned to the current user
   const userTasks = tasks.filter(task => {
@@ -73,6 +78,9 @@ export default function TADashboard({ navigation }) {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+        }
       >
         {/* Stats Cards */}
         <View style={styles.statsRow}>
@@ -260,7 +268,7 @@ const styles = StyleSheet.create({
   quickActionSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.9)' },
   tasksHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   viewAllLink: { fontSize: 14, fontWeight: '600', color: BLUE },
-  taskCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  taskCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,borderColor: '#1a031f54',borderWidth: 1 },
   taskHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   taskId: { fontSize: 12, fontWeight: '600', color: LIGHT_GREY },
   statusBadge: { backgroundColor: '#FFF8E1', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
