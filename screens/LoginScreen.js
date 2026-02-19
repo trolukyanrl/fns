@@ -10,6 +10,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
@@ -20,6 +21,11 @@ const LIGHT_GREY = '#999999';
 const BORDER_GREY = '#CCCCCC';
 const BG_GREY = '#E8E8E8';
 const GREEN = '#34A853';
+
+const RED_ACCENT = '#D32F2F';
+
+const BG_COLOR = '#FFF5F5'; // Very light red/orange tint
+const SHADOW_COLOR = '#FF8A80'; // Light red shadow
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -73,6 +79,13 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <View style={styles.backgroundPattern}>
+        <Ionicons name="flame" size={120} color="rgba(211, 47, 47, 0.05)" style={[styles.bgIcon, { top: 50, left: -20 }]} />
+        <Ionicons name="shield-checkmark" size={150} color="rgba(211, 47, 47, 0.05)" style={[styles.bgIcon, { bottom: 100, right: -30 }]} />
+        <Ionicons name="construct" size={80} color="rgba(211, 47, 47, 0.05)" style={[styles.bgIcon, { top: 150, right: 40 }]} />
+        <Ionicons name="medical" size={100} color="rgba(211, 47, 47, 0.05)" style={[styles.bgIcon, { bottom: 50, left: 30 }]} />
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -82,10 +95,15 @@ export default function LoginScreen({ navigation }) {
           {/* Logo and Title */}
           <View style={styles.logoSection}>
             <View style={styles.logoIcon}>
-              <Ionicons name="shield-checkmark" size={40} color="#fff" />
+              <Image 
+                source={require('../assets/icon.png')} 
+                style={{ width: 400, height: 40, resizeMode: 'contain' }} 
+              />
             </View>
-            <Text style={styles.title}>FNS Safety</Text>
-            <Text style={styles.subtitle}>BA Set Manager</Text>
+            <Text style={styles.title}>
+              <Ionicons name="flame" size={28} color={RED_ACCENT} /> Fire & Safety
+            </Text>
+            <Text style={styles.subtitle}>Asset Manager</Text>
           </View>
 
           {/* Username Field */}
@@ -166,7 +184,16 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: BG_GREY,
+    backgroundColor: BG_COLOR,
+    position: 'relative',
+  },
+  backgroundPattern: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 0,
+    overflow: 'hidden',
+  },
+  bgIcon: {
+    position: 'absolute',
   },
   scrollContent: {
     flexGrow: 1,
@@ -175,6 +202,7 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 1,
   },
   card: {
     backgroundColor: '#fff',
@@ -182,11 +210,13 @@ const styles = StyleSheet.create({
     padding: 32,
     width: '100%',
     maxWidth: 400,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: SHADOW_COLOR,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderTopWidth: 6,
+    borderTopColor: RED_ACCENT,
   },
   logoSection: {
     alignItems: 'center',
@@ -196,7 +226,7 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 12,
-    backgroundColor: BLUE,
+    // backgroundColor: BLUE, // Removed background color
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -250,13 +280,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: BLUE,
+    backgroundColor: RED_ACCENT,
     borderRadius: 12,
     paddingVertical: 16,
     marginTop: 8,
+    shadowColor: RED_ACCENT,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonDisabled: {
-    backgroundColor: '#A0C3FF',
+    backgroundColor: '#EF9A9A',
     opacity: 0.7,
   },
   buttonText: {
@@ -273,8 +308,9 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: DARK_GREY,
+    color: RED_ACCENT,
     marginBottom: 8,
+    fontWeight: '600',
   },
   secureRow: {
     flexDirection: 'row',
