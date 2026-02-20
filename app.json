@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app",
-    "slug": "app",
+    "name": "Fire Safety Asset Manager",
+    "slug": "fire-safety-asset-manager",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/favicon.png",
@@ -32,7 +32,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1a330ffb-cb49-44f0-b139-bed798f36c1d"
+        "projectId": "582f7a03-0994-450e-a574-b0ba7369993d"
       }
     },
     "plugins": [

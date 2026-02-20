@@ -12,19 +12,22 @@ import {
   FlatList,
   Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
 import api, { itemsAPI } from '../services/api';
 import axios from 'axios';
 
-const BLUE = '#2563EB';
-const LIGHT_BLUE = '#EFF6FF';
+const RED_ACCENT = '#D32F2F';
+const RED_LIGHT = '#FEE2E2';
+const BG_COLOR = '#FFF5F5';
+const BLUE = RED_ACCENT; // Alias for backward compatibility during refactor
+const LIGHT_BLUE = RED_LIGHT; // Alias
 const DARK = '#1F2937';
 const GREY = '#6B7280';
 const LIGHT_GREY = '#9CA3AF';
 const WHITE = '#FFFFFF';
-const GREEN = '#22C55E';
-const RED = '#EF4444';
+const GREEN = '#2E7D32';
 
 const TASK_TYPES = [
   { id: '1', name: 'BA-SET', icon: 'shield-checkmark' },
@@ -134,8 +137,17 @@ export default function SICAssignTask({ navigation, route }) {
   const [selectedBASets, setSelectedBASets] = useState(editingTask ? (editingTask.baSets?.map(bs => bs.id) || []) : []);
   const [selectedSKs, setSelectedSKs] = useState(editingTask ? (editingTask.safetyKits?.map(sk => sk.id) || []) : []);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [showYearPicker, setShowYearPicker] = useState(false);
+  
+  // Initialize date object for DateTimePicker
+  const getInitialDate = () => {
+    if (editingTask?.dueDate) {
+      const [day, month, year] = editingTask.dueDate.split('/').map(Number);
+      return new Date(year, month - 1, day);
+    }
+    return new Date();
+  };
+  
+  const [date, setDate] = useState(getInitialDate());
   const [searchQuery, setSearchQuery] = useState('');
   const [inspectorSearchQuery, setInspectorSearchQuery] = useState('');
   
@@ -365,56 +377,17 @@ export default function SICAssignTask({ navigation, route }) {
     }
   };
 
-  const handleDateSelect = (day) => {
-    const formattedDate = `${String(day).padStart(2, '0')}/${String(selectedDate?.month || new Date().getMonth() + 1).padStart(2, '0')}/${selectedDate?.year || new Date().getFullYear()}`;
-    setDueDate(formattedDate);
-    setShowDatePicker(false);
-  };
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(Platform.OS === 'ios');
+    setDate(currentDate);
 
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month, 0).getDate();
-  };
-
-  const getCurrentMonthDays = () => {
-    const now = new Date();
-    const month = selectedDate?.month || now.getMonth() + 1;
-    const year = selectedDate?.year || now.getFullYear();
-    const daysInMonth = getDaysInMonth(month, year);
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  };
-
-  const handleMonthChange = (direction) => {
-    const now = new Date();
-    let month = selectedDate?.month || now.getMonth() + 1;
-    let year = selectedDate?.year || now.getFullYear();
-
-    if (direction === 'next') {
-      month += 1;
-      if (month > 12) {
-        month = 1;
-        year += 1;
-      }
-    } else {
-      month -= 1;
-      if (month < 1) {
-        month = 12;
-        year -= 1;
-      }
+    if (event.type === 'set' || Platform.OS === 'ios') {
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const year = currentDate.getFullYear();
+      setDueDate(`${day}/${month}/${year}`);
     }
-
-    setSelectedDate({ month, year });
-  };
-
-  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  const currentMonth = selectedDate?.month || new Date().getMonth() + 1;
-  const currentYear = selectedDate?.year || new Date().getFullYear();
-
-  const getYearsRange = () => {
-    const years = [];
-    for (let i = currentYear - 5; i <= currentYear + 10; i++) {
-      years.push(i);
-    }
-    return years;
   };
 
   const renderBASetCard = (baSet) => (
@@ -434,7 +407,7 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
         </View>
         {selectedBASets.includes(baSet.id) && (
-          <Ionicons name="checkmark-circle" size={20} color="#93C5FD" />
+          <Ionicons name="checkmark-circle" size={20} color={RED_ACCENT} />
         )}
       </View>
 
@@ -485,7 +458,7 @@ export default function SICAssignTask({ navigation, route }) {
           </View>
         </View>
         {selectedSKs.includes(sk.id) && (
-          <Ionicons name="checkmark-circle" size={20} color="#93C5FD" />
+          <Ionicons name="checkmark-circle" size={20} color={RED_ACCENT} />
         )}
       </View>
 
@@ -521,6 +494,11 @@ export default function SICAssignTask({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <View style={styles.backgroundPattern}>
+        <Ionicons name="flame" size={300} color="rgba(211, 47, 47, 0.05)" style={styles.bgIcon1} />
+        <Ionicons name="shield" size={200} color="rgba(211, 47, 47, 0.05)" style={styles.bgIcon2} />
+      </View>
+
       {/* Fixed Header - Outside ScrollView */}
       <View style={styles.fixedHeader}>
         <View style={styles.header}>
@@ -599,9 +577,9 @@ export default function SICAssignTask({ navigation, route }) {
               style={styles.taskTypeSelector}
               onPress={() => setShowTypeModal(true)}
             >
-              <Ionicons name={selectedTaskType.icon} size={18} color={BLUE} style={styles.inputIcon} />
+              <Ionicons name={selectedTaskType.icon} size={18} color={RED_ACCENT} style={styles.inputIcon} />
               <Text style={styles.taskTypeText}>{selectedTaskType.name}</Text>
-              <Ionicons name="chevron-down" size={16} color={BLUE} />
+              <Ionicons name="chevron-down" size={16} color={RED_ACCENT} />
             </TouchableOpacity>
           </View>
 
@@ -745,126 +723,40 @@ export default function SICAssignTask({ navigation, route }) {
         </TouchableOpacity>
       </Modal>
 
-      {/* Date Picker Modal */}
-      <Modal
-        visible={showDatePicker}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowDatePicker(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowDatePicker(false)}
-        >
-          <View style={styles.datePickerModal}>
-            <View style={styles.datePickerHeader}>
-              <Text style={styles.datePickerTitle}>Select Date</Text>
-              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                <Ionicons name="close" size={24} color={DARK} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Month/Year Navigation */}
-            <View style={styles.monthYearNav}>
-              <TouchableOpacity onPress={() => handleMonthChange('prev')}>
-                <Ionicons name="chevron-back" size={24} color={BLUE} />
-              </TouchableOpacity>
-              <View style={styles.monthYearSelector}>
-                <Text style={styles.monthYearText}>{monthNames[currentMonth - 1]}</Text>
-                <TouchableOpacity onPress={() => setShowYearPicker(true)} style={styles.yearButton}>
-                  <Text style={styles.yearButtonText}>{currentYear}</Text>
-                  <Ionicons name="chevron-down" size={16} color={BLUE} />
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity onPress={() => handleMonthChange('next')}>
-                <Ionicons name="chevron-forward" size={24} color={BLUE} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Day Grid */}
-            <View style={styles.dayGrid}>
-              {getCurrentMonthDays().map((day) => (
-                <TouchableOpacity
-                  key={day}
-                  style={[styles.dayButton, dueDate === `${String(day).padStart(2, '0')}/${String(currentMonth).padStart(2, '0')}/${currentYear}` && styles.dayButtonSelected]}
-                  onPress={() => {
-                    setSelectedDate({ month: currentMonth, year: currentYear });
-                    handleDateSelect(day);
-                  }}
-                >
-                  <Text style={[styles.dayText, dueDate === `${String(day).padStart(2, '0')}/${String(currentMonth).padStart(2, '0')}/${currentYear}` && styles.dayTextSelected]}>
-                    {day}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={styles.datePickerConfirmButton}
-              onPress={() => setShowDatePicker(false)}
-            >
-              <Text style={styles.datePickerConfirmText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Year Picker Modal */}
-      <Modal
-        visible={showYearPicker}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowYearPicker(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowYearPicker(false)}
-        >
-          <View style={styles.yearPickerModal}>
-            <Text style={styles.yearPickerTitle}>Select Year</Text>
-            <FlatList
-              data={getYearsRange()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.yearOption, item === currentYear && styles.yearOptionSelected]}
-                  onPress={() => {
-                    setSelectedDate({ ...selectedDate, year: item });
-                    setShowYearPicker(false);
-                  }}
-                >
-                  <Text style={[styles.yearOptionText, item === currentYear && styles.yearOptionTextSelected]}>
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.toString()}
-              showsVerticalScrollIndicator={true}
-              scrollEnabled={true}
-            />
-            <TouchableOpacity
-              style={styles.yearPickerConfirmButton}
-              onPress={() => setShowYearPicker(false)}
-            >
-              <Text style={styles.yearPickerConfirmText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      {/* Date Picker */}
+      {showDatePicker && (
+        <DateTimePicker
+          testID="dateTimePicker"
+          value={date}
+          mode="date"
+          is24Hour={true}
+          display="default"
+          onChange={onDateChange}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  safeArea: { flex: 1, backgroundColor: BG_COLOR },
+  backgroundPattern: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1,
+  },
+  bgIcon1: {
+    position: 'absolute', top: -50, right: -50, opacity: 0.1, transform: [{ rotate: '-15deg' }],
+  },
+  bgIcon2: {
+    position: 'absolute', bottom: 100, left: -50, opacity: 0.1, transform: [{ rotate: '15deg' }],
+  },
   fixedHeader: { 
-    backgroundColor: '#F9FAFB', 
+    backgroundColor: BG_COLOR, 
     paddingHorizontal: 20, 
     paddingTop: 48, 
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: RED_LIGHT,
+    elevation: 0,
   },
   container: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 20 },
   header: { flexDirection: 'row', alignItems: 'center' },
@@ -885,21 +777,21 @@ const styles = StyleSheet.create({
   dateWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14 },
   selectText: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
   dateText: { flex: 1, fontSize: 16, color: DARK, marginLeft: 12 },
-  assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: BLUE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, flex: 1, marginLeft: 8 },
+  assignButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: RED_ACCENT, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, flex: 1, marginLeft: 8, shadowColor: RED_ACCENT, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
   buttonIcon: { marginRight: 12 },
   assignButtonText: { fontSize: 16, fontWeight: '700', color: WHITE },
   buttonsContainer: { flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 16, paddingBottom: 24, backgroundColor: WHITE, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
-  cancelButton: { backgroundColor: WHITE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, borderWidth: 1, borderColor: BLUE, flex: 1, alignItems: 'center', justifyContent: 'center' },
-  cancelButtonText: { fontSize: 16, fontWeight: '700', color: BLUE, textAlign: 'center' },
+  cancelButton: { backgroundColor: WHITE, borderRadius: 12, paddingVertical: 16, paddingHorizontal: 24, borderWidth: 1, borderColor: RED_ACCENT, flex: 1, alignItems: 'center', justifyContent: 'center' },
+  cancelButtonText: { fontSize: 16, fontWeight: '700', color: RED_ACCENT, textAlign: 'center' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { backgroundColor: WHITE, borderRadius: 16, width: '80%', maxHeight: '60%', padding: 20 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: DARK, marginBottom: 16, textAlign: 'center' },
   typeItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, backgroundColor: '#F9FAFB', marginBottom: 8 },
-  typeItemSelected: { backgroundColor: LIGHT_BLUE, borderWidth: 1, borderColor: BLUE },
+  typeItemSelected: { backgroundColor: RED_LIGHT, borderWidth: 1, borderColor: RED_ACCENT },
   typeText: { marginLeft: 12, fontSize: 16, color: GREY },
-  typeTextSelected: { color: BLUE, fontWeight: '600' },
+  typeTextSelected: { color: RED_ACCENT, fontWeight: '600' },
   inspectorItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, paddingHorizontal: 16, borderRadius: 8, backgroundColor: '#F9FAFB', marginBottom: 8 },
-  inspectorItemSelected: { backgroundColor: LIGHT_BLUE, borderWidth: 1, borderColor: BLUE },
+  inspectorItemSelected: { backgroundColor: RED_LIGHT, borderWidth: 1, borderColor: RED_ACCENT },
   inspectorInfo: { flex: 1 },
   inspectorName: { fontSize: 16, fontWeight: '600', color: DARK },
   inspectorDept: { fontSize: 12, color: GREY, marginTop: 2 },
@@ -909,17 +801,17 @@ const styles = StyleSheet.create({
   taskTypeSelector: { 
     flexDirection: 'row', 
     alignItems: 'center', 
-    backgroundColor: LIGHT_BLUE, 
+    backgroundColor: RED_LIGHT, 
     borderRadius: 12, 
     paddingHorizontal: 16, 
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: BLUE,
+    borderColor: RED_ACCENT,
   },
   taskTypeText: { 
     flex: 1, 
     fontSize: 16, 
-    color: BLUE, 
+    color: RED_ACCENT, 
     fontWeight: '600',
     marginLeft: 12,
   },
@@ -931,58 +823,41 @@ const styles = StyleSheet.create({
   baSetList: { flex: 1 },
   baSetCard: { 
     backgroundColor: WHITE, 
+    borderLeftWidth: 4, 
+    borderLeftColor: 'transparent',
     borderWidth: 1, 
     borderColor: '#E5E7EB', 
     borderRadius: 12, 
     padding: 16, 
     marginBottom: 12,
-    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
   baSetCardSelected: { 
-    borderColor: BLUE, 
-    borderWidth: 2,
-    backgroundColor: '#F0F4FF',
+    borderLeftColor: RED_ACCENT,
+    borderColor: RED_ACCENT, 
+    borderWidth: 1,
+    backgroundColor: RED_LIGHT,
   },
   baSetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
   baSetTitleSection: { flex: 1 },
-  baSetId: { fontSize: 12, fontWeight: '600', color: GREY, marginBottom: 4 },
-  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, width: 'auto' },
-  statusText: { fontSize: 11, fontWeight: '600', color: GREEN, marginLeft: 4 },
-  checkmark: { width: 32, height: 32, borderRadius: 16, backgroundColor: BLUE, alignItems: 'center', justifyContent: 'center' },
+  baSetId: { fontSize: 12, fontWeight: '700', color: GREY, marginBottom: 4 },
+  statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, width: 'auto', backgroundColor: '#F0FDF4' },
+  statusText: { fontSize: 11, fontWeight: '700', color: GREEN, marginLeft: 4 },
   baSetName: { fontSize: 16, fontWeight: '700', color: DARK, marginBottom: 8 },
   baSetLocation: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   baSetLocationText: { fontSize: 12, color: GREY, marginLeft: 6 },
   baSetDetailsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   baSetDetail: { flex: 1 },
-  baSetDetailLabel: { fontSize: 11, fontWeight: '500', color: GREY, marginBottom: 2 },
+  baSetDetailLabel: { fontSize: 11, fontWeight: '600', color: GREY, marginBottom: 2 },
   baSetDetailValue: { fontSize: 14, fontWeight: '600', color: DARK },
   baSetFooterRow: { flexDirection: 'row', justifyContent: 'space-between' },
   baSetFooter: { flex: 1 },
-  baSetFooterLabel: { fontSize: 11, fontWeight: '500', color: GREY, marginBottom: 2 },
+  baSetFooterLabel: { fontSize: 11, fontWeight: '600', color: GREY, marginBottom: 2 },
   baSetFooterValue: { fontSize: 12, fontWeight: '600', color: DARK },
-  datePickerModal: { backgroundColor: WHITE, borderRadius: 20, width: '90%', padding: 24, elevation: 5 },
-  datePickerHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  datePickerTitle: { fontSize: 18, fontWeight: '700', color: DARK },
-  monthYearNav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingHorizontal: 8 },
-  monthYearSelector: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  monthYearText: { fontSize: 16, fontWeight: '600', color: DARK },
-  yearButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: LIGHT_BLUE, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: BLUE, gap: 4 },
-  yearButtonText: { fontSize: 16, fontWeight: '600', color: BLUE },
-  dayGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 24 },
-  dayButton: { width: '13%', aspectRatio: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 8, backgroundColor: '#F3F4F6', marginBottom: 8 },
-  dayButtonSelected: { backgroundColor: BLUE },
-  dayText: { fontSize: 14, fontWeight: '600', color: DARK },
-  dayTextSelected: { color: WHITE },
-  datePickerConfirmButton: { backgroundColor: BLUE, paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  datePickerConfirmText: { fontSize: 16, fontWeight: '700', color: WHITE },
-  yearPickerModal: { backgroundColor: WHITE, borderRadius: 20, width: '80%', maxHeight: '70%', padding: 24, elevation: 5 },
-  yearPickerTitle: { fontSize: 18, fontWeight: '700', color: DARK, marginBottom: 16, textAlign: 'center' },
-  yearOption: { paddingVertical: 16, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#E5E7EB', alignItems: 'center' },
-  yearOptionSelected: { backgroundColor: LIGHT_BLUE, borderLeftWidth: 4, borderLeftColor: BLUE },
-  yearOptionText: { fontSize: 16, fontWeight: '600', color: DARK },
-  yearOptionTextSelected: { color: BLUE, fontWeight: '700' },
-  yearPickerConfirmButton: { backgroundColor: BLUE, paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16 },
-  yearPickerConfirmText: { fontSize: 16, fontWeight: '700', color: WHITE },
   loadingContainer: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center' },
   loadingText: { fontSize: 16, color: GREY, fontWeight: '500' },
 });

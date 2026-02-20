@@ -11,12 +11,14 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useTaskContext } from '../TaskContext';
 
-const BLUE = '#2563EB';
-const LIGHT_BLUE = '#EFF6FF';
-const YELLOW = '#FEF9E7';
+const RED_ACCENT = '#D32F2F';
+const RED_LIGHT = '#FEE2E2';
+const BLUE_ACCENT = '#1976D2';
+const GREEN_ACCENT = '#388E3C';
+const YELLOW_ACCENT = '#FBC02D';
 const DARK = '#1F2937';
 const GREY = '#6B7280';
-const GREEN = '#22C55E';
+const BG_COLOR = '#FFF5F5';
 
 export default function SICDashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
@@ -47,11 +49,17 @@ export default function SICDashboard({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Background Pattern */}
+      <View style={styles.backgroundPattern}>
+        <Ionicons name="flame" size={120} color="rgba(211, 47, 47, 0.03)" style={[styles.bgIcon, { top: 100, left: -20 }]} />
+        <Ionicons name="shield-checkmark" size={150} color="rgba(211, 47, 47, 0.03)" style={[styles.bgIcon, { bottom: 150, right: -30 }]} />
+      </View>
+
       {/* Fixed Header - Outside ScrollView */}
       <View style={styles.fixedHeader}>
         <View style={styles.header}>
           <View style={styles.logo}>
-            <Ionicons name="shield-checkmark" size={26} color="#fff" />
+            <Ionicons name="shield-checkmark" size={24} color="#fff" />
           </View>
 
           <View>
@@ -59,13 +67,9 @@ export default function SICDashboard({ navigation }) {
             <Text style={styles.headerSubtitle}>SITE IN-CHARGE</Text>
           </View>
 
-          <Ionicons
-            name="log-out-outline"
-            size={22}
-            color={DARK}
-            style={styles.logoutIcon}
-            onPress={handleLogout}
-          />
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={20} color={RED_ACCENT} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -74,50 +78,104 @@ export default function SICDashboard({ navigation }) {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} colors={[RED_ACCENT]} />
         }
       >
-        {/* Stats */}
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeText}>Overview</Text>
+          <Text style={styles.dateText}>{new Date().toDateString()}</Text>
+        </View>
+
+        {/* Primary Actions */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+        </View>
+        
         <View style={styles.statsRow}>
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: LIGHT_BLUE }]} onPress={() => navigation.navigate('SICAssignTask')}>
-            <Ionicons name="add-circle-outline" size={24} color={BLUE} />
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderLeftWidth: 4, borderLeftColor: RED_ACCENT }]} 
+            onPress={() => navigation.navigate('SICAssignTask')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: RED_LIGHT }]}>
+              <Ionicons name="add" size={24} color={RED_ACCENT} />
+            </View>
             <Text style={styles.statLabel}>Assign Task</Text>
+            <Text style={styles.statDesc}>Create new inspection</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: YELLOW }]} onPress={() => navigation.navigate('SICTasks')}>
-            <Ionicons name="list-outline" size={24} color="#F59E0B" />
-            <Text style={styles.statLabel}>View Pending Tasks</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderLeftWidth: 4, borderLeftColor: YELLOW_ACCENT }]} 
+            onPress={() => navigation.navigate('SICTasks')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#FFF9C4' }]}>
+              <Ionicons name="list" size={24} color={YELLOW_ACCENT} />
+            </View>
+            <Text style={styles.statLabel}>Task List</Text>
+            <Text style={styles.statDesc}>View all tasks</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Pending Approvals */}
+        {/* Attention Required */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Attention Required</Text>
+        </View>
+
         <View style={styles.statsRow}>
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#FEE2E2' }]} onPress={() => navigation.navigate('PendingApprovals')}>
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff' }]} 
+            onPress={() => navigation.navigate('PendingApprovals')}
+          >
             {pendingApprovalsCount > 0 && (
-              <View style={styles.countBadge}>
-                <Text style={styles.countBadgeText}>{pendingApprovalsCount}</Text>
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationText}>{pendingApprovalsCount}</Text>
               </View>
             )}
-            <Ionicons name="document-text-outline" size={24} color="#DC2626" />
-            <Text style={styles.statLabel}>Pending Approvals</Text>
+            <View style={[styles.iconContainer, { backgroundColor: '#FFEBEE' }]}>
+              <Ionicons name="document-text" size={24} color={RED_ACCENT} />
+            </View>
+            <Text style={styles.statLabel}>Approvals</Text>
+            <Text style={styles.statDesc}>Pending Review</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#F3E8FF' }]} onPress={() => navigation.navigate('OverdueTasks')}>
-            <Ionicons name="time-outline" size={24} color="#7C3AED" />
-            <Text style={styles.statLabel}>Overdue Tasks</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff' }]} 
+            onPress={() => navigation.navigate('OverdueTasks')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#F3E5F5' }]}>
+              <Ionicons name="time" size={24} color="#7B1FA2" />
+            </View>
+            <Text style={styles.statLabel}>Overdue</Text>
+            <Text style={styles.statDesc}>Late Tasks</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Mapping and Verify */}
+        {/* Tools */}
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Tools</Text>
+        </View>
+
         <View style={styles.statsRow}>
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#E0F2FE' }]} onPress={() => navigation.navigate('QRScanner')}>
-            <Ionicons name="map-outline" size={24} color="#0284C7" />
-            <Text style={styles.statLabel}>Mapping</Text>
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff' }]} 
+            onPress={() => navigation.navigate('QRScanner')}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#E3F2FD' }]}>
+              <Ionicons name="qr-code" size={24} color={BLUE_ACCENT} />
+            </View>
+            <Text style={styles.statLabel}>Map Asset</Text>
+            <Text style={styles.statDesc}>Link QR Code</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.statCard, { backgroundColor: '#DCFCE7' }]} onPress={() => navigation.navigate('QRScanner', { taskType: 'VERIFY' })}>
-            <Ionicons name="checkmark-done-outline" size={24} color="#16A34A" />
+          <TouchableOpacity 
+            style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff' }]} 
+            onPress={() => navigation.navigate('QRScanner', { taskType: 'VERIFY' })}
+          >
+            <View style={[styles.iconContainer, { backgroundColor: '#E8F5E9' }]}>
+              <Ionicons name="checkmark-circle" size={24} color={GREEN_ACCENT} />
+            </View>
             <Text style={styles.statLabel}>Verify</Text>
+            <Text style={styles.statDesc}>Check Status</Text>
           </TouchableOpacity>
         </View>
 
@@ -132,13 +190,9 @@ export default function SICDashboard({ navigation }) {
             onPress={() => handleNavigation(tab)}
           >
             <Ionicons
-              name={
-                tab === 'Home'
-                  ? 'home'
-                  : 'checkbox-outline'
-              }
+              name={tab === 'Home' ? 'home' : 'list'}
               size={24}
-              color={activeTab === tab ? BLUE : GREY}
+              color={activeTab === tab ? RED_ACCENT : GREY}
             />
             <Text
               style={[styles.navLabel, activeTab === tab && styles.navLabelActive]}
@@ -153,65 +207,113 @@ export default function SICDashboard({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#F9FAFB' },
+  safeArea: { flex: 1, backgroundColor: BG_COLOR },
+  backgroundPattern: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: -1,
+    overflow: 'hidden',
+  },
+  bgIcon: {
+    position: 'absolute',
+  },
   fixedHeader: { 
-    backgroundColor: '#F9FAFB', 
+    backgroundColor: '#fff', 
     paddingHorizontal: 20, 
     paddingTop: 50, 
-    paddingBottom: 6,
+    paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#FFEBEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  container: { paddingHorizontal: 20, paddingTop: 28, paddingBottom: 100 },
+  container: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center' },
   logo: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: BLUE,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: RED_ACCENT,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  headerTitle: { fontSize: 16, fontWeight: '700', color: DARK },
-  headerSubtitle: { fontSize: 12, color: GREY },
-  logoutIcon: { marginLeft: 'auto' },
-  pageTitle: { fontSize: 20, fontWeight: '700', color: DARK, marginBottom: 20 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 28 },
-  statCard: { flex: 1, borderRadius: 16, padding: 16, position: 'relative' },
-  statNumber: { fontSize: 24, fontWeight: '800', color: DARK, marginTop: 8 },
-  statLabel: { fontSize: 13, color: GREY },
-  countBadge: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#DC2626',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
+  headerTitle: { fontSize: 18, fontWeight: '800', color: DARK },
+  headerSubtitle: { fontSize: 11, color: GREY, fontWeight: '600', letterSpacing: 0.5 },
+  logoutButton: { 
+    marginLeft: 'auto', 
+    padding: 8, 
+    backgroundColor: '#FFEBEE', 
+    borderRadius: 8 
+  },
+  welcomeSection: { marginBottom: 24 },
+  welcomeText: { fontSize: 24, fontWeight: '700', color: DARK },
+  dateText: { fontSize: 14, color: GREY, marginTop: 4 },
+  sectionTitleRow: { marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
+  statCard: { 
+    flex: 1, 
+    borderRadius: 16, 
+    padding: 16, 
+    position: 'relative',
+    minHeight: 110,
+    justifyContent: 'center',
+  },
+  cardShadow: {
+    shadowColor: '#D32F2F',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
+    marginBottom: 12,
   },
-  countBadgeText: {
+  statLabel: { fontSize: 15, fontWeight: '700', color: DARK },
+  statDesc: { fontSize: 11, color: GREY, marginTop: 2 },
+  notificationBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: RED_ACCENT,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  notificationText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '700',
   },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK },
-  link: { fontSize: 13, fontWeight: '600', color: BLUE },
-  approvalCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, marginBottom: 16, elevation: 2 },
-  badge: { alignSelf: 'flex-start', backgroundColor: '#E0E7FF', color: BLUE, fontSize: 11, fontWeight: '700', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, marginBottom: 8 },
-  approvalTitle: { fontSize: 15, fontWeight: '700', color: DARK, marginBottom: 4 },
-  submittedBy: { fontSize: 12, color: GREY, marginBottom: 12 },
-  actionRow: { flexDirection: 'row', alignItems: 'center' },
-  reviewButton: { flex: 1, backgroundColor: '#0F172A', paddingVertical: 14, borderRadius: 12, alignItems: 'center' },
-  reviewText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  approvedIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#ECFDF5', alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8' },
+  bottomNav: { 
+    position: 'absolute', 
+    bottom: 0, 
+    left: 0, 
+    right: 0, 
+    flexDirection: 'row', 
+    backgroundColor: '#fff', 
+    paddingVertical: 12, 
+    paddingHorizontal: 20, 
+    borderTopWidth: 1, 
+    borderTopColor: '#FFEBEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navLabel: { fontSize: 12, color: GREY, marginTop: 4 },
-  navLabelActive: { color: BLUE, fontWeight: '600' },
+  navLabel: { fontSize: 12, color: GREY, marginTop: 4, fontWeight: '500' },
+  navLabelActive: { color: RED_ACCENT, fontWeight: '700' },
 });

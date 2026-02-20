@@ -11,9 +11,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../AuthContext';
 import { useTaskContext } from '../TaskContext';
 
-const BLUE = '#4285F4';
-const DARK_GREY = '#333333';
-const LIGHT_GREY = '#666666';
+const RED_ACCENT = '#D32F2F';
+const RED_LIGHT = '#FEE2E2';
+const BLUE_ACCENT = '#1976D2';
+const DARK = '#1F2937';
+const GREY = '#6B7280';
+const GREEN = '#388E3C';
+const YELLOW = '#FBC02D';
+const BG_COLOR = '#FFF5F5';
 
 export default function TADashboard({ navigation }) {
   const [activeTab, setActiveTab] = useState('Home');
@@ -53,23 +58,29 @@ export default function TADashboard({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Background Pattern */}
+      <View style={styles.backgroundPattern}>
+        <Ionicons name="construct" size={150} color="rgba(211, 47, 47, 0.03)" style={[styles.bgIcon, { top: 50, right: -20 }]} />
+        <Ionicons name="clipboard" size={120} color="rgba(211, 47, 47, 0.03)" style={[styles.bgIcon, { bottom: 100, left: -30 }]} />
+      </View>
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.logoIcon}>
-            <Ionicons name="shield-checkmark" size={24} color="#fff" />
+            <Ionicons name="construct" size={24} color="#fff" />
           </View>
           <View>
-            <Text style={styles.headerTitle}>Welcome back, {user?.name || user?.username || 'User'}</Text>
-            <Text style={styles.headerSubtitle}>Ready for today's inspections?</Text>
+            <Text style={styles.headerTitle}>Welcome, {user?.name || 'Technician'}</Text>
+            <Text style={styles.headerSubtitle}>Ready for inspection?</Text>
           </View>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.bellButton}>
-            <Ionicons name="notifications-outline" size={24} color={DARK_GREY} />
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="notifications-outline" size={22} color={DARK} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={22} color={DARK_GREY} style={styles.logoutIcon} />
+          <TouchableOpacity onPress={handleLogout} style={[styles.iconButton, { backgroundColor: '#FFEBEE' }]}>
+            <Ionicons name="log-out-outline" size={22} color={RED_ACCENT} />
           </TouchableOpacity>
         </View>
       </View>
@@ -79,28 +90,42 @@ export default function TADashboard({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={onRefresh} />
+          <RefreshControl refreshing={loading} onRefresh={onRefresh} colors={[RED_ACCENT]} />
         }
       >
-        {/* Stats Cards */}
+        {/* Quick Stats - Row 1 */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, styles.statPending]}>
+          <View style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderTopWidth: 4, borderTopColor: YELLOW }]}>
+            <View style={[styles.statIcon, { backgroundColor: '#FFF9C4' }]}>
+              <Ionicons name="time" size={20} color="#F57F17" />
+            </View>
             <Text style={styles.statNumber}>{pendingTasks.length}</Text>
             <Text style={styles.statLabel}>Pending</Text>
           </View>
-          <View style={[styles.statCard, styles.statCompleted]}>
+
+          <View style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderTopWidth: 4, borderTopColor: GREEN }]}>
+            <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
+              <Ionicons name="checkmark-circle" size={20} color={GREEN} />
+            </View>
             <Text style={styles.statNumber}>{completedTasks.length}</Text>
             <Text style={styles.statLabel}>Completed</Text>
           </View>
         </View>
 
-        {/* Approval Status Cards */}
+        {/* Quick Stats - Row 2 */}
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, styles.statReview]}>
+          <View style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderTopWidth: 4, borderTopColor: BLUE_ACCENT }]}>
+            <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
+              <Ionicons name="document-text" size={20} color={BLUE_ACCENT} />
+            </View>
             <Text style={styles.statNumber}>{pendingApprovalTasks.length}</Text>
             <Text style={styles.statLabel}>Pending for Approval</Text>
           </View>
-          <View style={[styles.statCard, styles.statRejected]}>
+
+          <View style={[styles.statCard, styles.cardShadow, { backgroundColor: '#fff', borderTopWidth: 4, borderTopColor: RED_ACCENT }]}>
+            <View style={[styles.statIcon, { backgroundColor: '#FFEBEE' }]}>
+              <Ionicons name="alert-circle" size={20} color={RED_ACCENT} />
+            </View>
             <Text style={styles.statNumber}>{rejectedTasks.length}</Text>
             <Text style={styles.statLabel}>Rejected</Text>
           </View>
@@ -109,18 +134,20 @@ export default function TADashboard({ navigation }) {
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>Quick Actions</Text>
         <TouchableOpacity 
-          style={styles.quickActionCard} 
-          activeOpacity={0.8}
+          style={[styles.quickActionCard, styles.cardShadow]} 
+          activeOpacity={0.9}
           onPress={() => navigation.navigate('Tasks')}
         >
-          <View style={styles.quickActionIcon}>
-            <Ionicons name="grid-outline" size={28} color="#fff" />
-            <View style={styles.qrBadge}>
-              <Ionicons name="qr-code-outline" size={12} color="#fff" />
+          <View style={styles.actionContent}>
+            <View style={styles.actionIconContainer}>
+              <Ionicons name="qr-code" size={32} color="#fff" />
             </View>
+            <View style={styles.actionTextContainer}>
+              <Text style={styles.quickActionTitle}>Scan Equipment</Text>
+              <Text style={styles.quickActionSubtitle}>Start inspection via QR code</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#fff" style={{ opacity: 0.8 }} />
           </View>
-          <Text style={styles.quickActionTitle}>Scan QR Code</Text>
-          <Text style={styles.quickActionSubtitle}>Start inspection by scanning equipment</Text>
         </TouchableOpacity>
 
         {/* My Tasks */}
@@ -133,83 +160,46 @@ export default function TADashboard({ navigation }) {
 
         {pendingTasks.length === 0 ? (
           <View style={styles.noTasksContainer}>
-            <Ionicons name="checkmark-done-outline" size={40} color={LIGHT_GREY} />
-            <Text style={styles.noTasksText}>No pending tasks</Text>
+            <View style={styles.noTasksIcon}>
+              <Ionicons name="checkmark-done" size={40} color={GREEN} />
+            </View>
+            <Text style={styles.noTasksText}>All caught up!</Text>
+            <Text style={styles.noTasksSubtext}>No pending tasks assigned to you.</Text>
           </View>
         ) : (
-          <>
+          <View style={styles.taskList}>
             {userTasks.filter(task => task.status === 'Pending').map((task) => {
               const item = task.baSets && task.baSets[0] ? task.baSets[0] : (task.safetyKits && task.safetyKits[0] ? task.safetyKits[0] : null);
               const displayId = item?.id || task.id;
               const displayLocation = item?.zone || 'Location TBA';
 
-          return (
-            <TouchableOpacity key={task.id} style={styles.taskCard} onPress={() => navigation.navigate('TaskDetails', { task })}>
-              <View style={styles.taskHeader}>
-                <Text style={styles.taskId}>{displayId}</Text>
-                <View style={[
-                  styles.statusBadge,
-                  task.status === 'Pending' && styles.statusPending,
-                  task.status === 'Pending for Approval' && styles.statusApproval,
-                  (task.status === 'Completed' || task.status === 'Approved') && styles.statusCompleted,
-                  task.status === 'Rejected' && styles.statusRejected,
-                ]}>
-                  <Text style={[
-                    styles.statusText,
-                    task.status === 'Pending' && styles.statusTextPending,
-                    task.status === 'Pending for Approval' && styles.statusTextApproval,
-                    (task.status === 'Completed' || task.status === 'Approved') && styles.statusTextCompleted,
-                    task.status === 'Rejected' && styles.statusTextRejected,
-                  ]}>
-                    {task.status === 'Approved' ? 'Completed' : task.status}
-                  </Text>
-                </View>
-              </View>
-              
-              {/* Assignment Details for Pending Tasks */}
-              {task.status === 'Pending' ? (
-                <>
+              return (
+                <TouchableOpacity 
+                  key={task.id} 
+                  style={[styles.taskCard, styles.cardShadow]} 
+                  onPress={() => navigation.navigate('TaskDetails', { task })}
+                >
+                  <View style={styles.taskCardHeader}>
+                    <View style={styles.taskTypeTag}>
+                      <Ionicons name={task.taskType === 'SK' ? "construct" : "cube"} size={12} color={RED_ACCENT} />
+                      <Text style={styles.taskTypeText}>{task.taskType}</Text>
+                    </View>
+                    <Text style={styles.dueDateText}>Due: {task.dueDate}</Text>
+                  </View>
+
                   <Text style={styles.taskTitle}>{task.description}</Text>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name="person-circle-outline" size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>Assigned to: {task.assignedToName || task.assignedTo}</Text>
+                  
+                  <View style={styles.taskFooter}>
+                    <View style={styles.locationBadge}>
+                      <Ionicons name="location" size={12} color={GREY} />
+                      <Text style={styles.locationText}>{displayLocation}</Text>
+                    </View>
+                    <Ionicons name="chevron-forward-circle" size={24} color={RED_ACCENT} />
                   </View>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>Due: {task.dueDate}</Text>
-                  </View>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name={task.taskType === 'SK' ? "construct" : "cube-outline"} size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>{task.taskType}: {displayId}</Text>
-                  </View>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>{displayLocation}</Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <Text style={styles.taskTitle}>{task.description}</Text>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name="calendar-outline" size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>Due: {task.dueDate}</Text>
-                  </View>
-                  <View style={styles.taskDetails}>
-                    <Ionicons name="location-outline" size={14} color={LIGHT_GREY} />
-                    <Text style={styles.taskDetailText}>{displayLocation}</Text>
-                  </View>
-                {task.progress > 0 && (
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, { width: `${task.progress}%` }]} />
-                  </View>
-                )}
-                {task.progress > 0 && <Text style={styles.progressText}>{task.progress}%</Text>}
-              </>
-            )}
-            </TouchableOpacity>
-          );
-        })}
-          </>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         )}
       </ScrollView>
 
@@ -222,13 +212,9 @@ export default function TADashboard({ navigation }) {
             onPress={() => handleNavigation(tab)}
           >
             <Ionicons
-              name={
-                tab === 'Home'
-                  ? 'home'
-                  : 'checkbox-outline'
-              }
+              name={tab === 'Home' ? 'home' : 'list'}
               size={24}
-              color={activeTab === tab ? BLUE : LIGHT_GREY}
+              color={activeTab === tab ? RED_ACCENT : GREY}
             />
             <Text style={[styles.navLabel, activeTab === tab && styles.navLabelActive]}>
               {tab}
@@ -241,56 +227,140 @@ export default function TADashboard({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 48, paddingBottom: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#E8E8E8' },
+  container: { flex: 1, backgroundColor: BG_COLOR },
+  backgroundPattern: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: -1,
+    overflow: 'hidden',
+  },
+  bgIcon: {
+    position: 'absolute',
+  },
+  header: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingTop: 48, 
+    paddingBottom: 16, 
+    backgroundColor: '#fff', 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#FFEBEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   headerLeft: { flexDirection: 'row', alignItems: 'center' },
-  logoIcon: { width: 44, height: 44, borderRadius: 10, backgroundColor: BLUE, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  headerTitle: { fontSize: 18, fontWeight: '700', color: DARK_GREY },
-  headerSubtitle: { fontSize: 12, color: LIGHT_GREY, marginTop: 2 },
-  bellButton: { padding: 8 },
-  headerRight: { flexDirection: 'row', alignItems: 'center' },
-  logoutIcon: { marginLeft: 12 },
+  logoIcon: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 12, 
+    backgroundColor: RED_ACCENT, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginRight: 12 
+  },
+  headerTitle: { fontSize: 18, fontWeight: '800', color: DARK },
+  headerSubtitle: { fontSize: 12, color: GREY, marginTop: 2, fontWeight: '500' },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  iconButton: { 
+    padding: 8, 
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+  },
   scrollView: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 100 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statCard: { flex: 1, padding: 16, borderRadius: 18 },
-  statPending: { backgroundColor: '#88baf3' },
-  statCompleted: { backgroundColor: '#6bef9d' },
-  statReview: { backgroundColor: '#ede770' },
-  statRejected: { backgroundColor: '#e97c7c' },
-  statNumber: { fontSize: 24, fontWeight: '700', color: DARK_GREY },
-  statLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK_GREY, marginBottom: 12 },
-  quickActionCard: { backgroundColor: BLUE, borderRadius: 16, padding: 24, alignItems: 'center', marginBottom: 24 },
-  quickActionIcon: { width: 56, height: 56, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  qrBadge: { position: 'absolute', bottom: -4, right: -4, width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center' },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
+  statCard: { flex: 1, padding: 12, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  statIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  statNumber: { fontSize: 20, fontWeight: '800', color: DARK },
+  statLabel: { fontSize: 11, color: GREY, marginTop: 2, fontWeight: '600' },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: DARK, marginBottom: 12 },
+  quickActionCard: { 
+    backgroundColor: RED_ACCENT, 
+    borderRadius: 16, 
+    padding: 20, 
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  actionContent: { flexDirection: 'row', alignItems: 'center' },
+  actionIconContainer: { 
+    width: 50, 
+    height: 50, 
+    borderRadius: 12, 
+    backgroundColor: 'rgba(255,255,255,0.2)', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginRight: 16 
+  },
+  actionTextContainer: { flex: 1 },
   quickActionTitle: { fontSize: 18, fontWeight: '700', color: '#fff', marginBottom: 4 },
-  quickActionSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.9)' },
+  quickActionSubtitle: { fontSize: 13, color: 'rgba(255,255,255,0.9)' },
   tasksHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  viewAllLink: { fontSize: 14, fontWeight: '600', color: BLUE },
-  taskCard: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2,borderColor: '#1a031f54',borderWidth: 1 },
-  taskHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  taskId: { fontSize: 12, fontWeight: '600', color: LIGHT_GREY },
-  statusBadge: { backgroundColor: '#FFF8E1', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  statusText: { fontSize: 12, fontWeight: '600', color: '#F9A825' },
-  statusPending: { backgroundColor: '#FFF8E1', borderColor: '#FFE0B2' },
-  statusTextPending: { color: '#F57F17' },
-  statusApproval: { backgroundColor: '#F3E5F5', borderColor: '#E1BEE7' },
-  statusTextApproval: { color: '#7B1FA2' },
-  statusCompleted: { backgroundColor: '#E8F5E9', borderColor: '#C8E6C9' },
-  statusTextCompleted: { color: '#2E7D32' },
-  statusRejected: { backgroundColor: '#FFEBEE', borderColor: '#FFCDD2' },
-  statusTextRejected: { color: '#D32F2F' },
-  taskTitle: { fontSize: 16, fontWeight: '600', color: DARK_GREY, marginBottom: 12 },
-  taskDetails: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
-  taskDetailText: { fontSize: 14, color: LIGHT_GREY, marginLeft: 8 },
-  progressBar: { height: 4, backgroundColor: '#E8E8E8', borderRadius: 2, marginTop: 12, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: BLUE, borderRadius: 2 },
-  progressText: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
-  bottomNav: { position: 'absolute', bottom: 0, left: 0, right: 0, flexDirection: 'row', backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: '#E8E8E8' },
+  viewAllLink: { fontSize: 14, fontWeight: '600', color: RED_ACCENT },
+  taskList: { gap: 12 },
+  taskCard: { 
+    backgroundColor: '#fff', 
+    borderRadius: 16, 
+    padding: 16, 
+    borderLeftWidth: 4, 
+    borderLeftColor: YELLOW 
+  },
+  cardShadow: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  taskCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  taskTypeTag: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 4, 
+    backgroundColor: '#FFEBEE', 
+    paddingHorizontal: 8, 
+    paddingVertical: 4, 
+    borderRadius: 6 
+  },
+  taskTypeText: { fontSize: 11, fontWeight: '700', color: RED_ACCENT },
+  dueDateText: { fontSize: 11, color: GREY, fontWeight: '500' },
+  taskTitle: { fontSize: 15, fontWeight: '700', color: DARK, marginBottom: 12 },
+  taskFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  locationBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  locationText: { fontSize: 12, color: GREY },
+  bottomNav: { 
+    position: 'absolute', 
+    bottom: 0, 
+    left: 0, 
+    right: 0, 
+    flexDirection: 'row', 
+    backgroundColor: '#fff', 
+    paddingVertical: 12, 
+    paddingHorizontal: 20, 
+    borderTopWidth: 1, 
+    borderTopColor: '#FFEBEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   navItem: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  navLabel: { fontSize: 12, color: LIGHT_GREY, marginTop: 4 },
-  navLabelActive: { color: BLUE, fontWeight: '600' },
+  navLabel: { fontSize: 12, color: GREY, marginTop: 4, fontWeight: '500' },
+  navLabelActive: { color: RED_ACCENT, fontWeight: '700' },
   noTasksContainer: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
-  noTasksText: { fontSize: 16, color: LIGHT_GREY, marginTop: 12, fontWeight: '500' },
+  noTasksIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#E8F5E9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  noTasksText: { fontSize: 16, color: DARK, fontWeight: '700' },
+  noTasksSubtext: { fontSize: 13, color: GREY, marginTop: 4 },
 });
